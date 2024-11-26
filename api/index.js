@@ -5,6 +5,7 @@ import cors from 'cors';
 import connectDb from '../connectDb.js'; // Assuming you have a database connection utility
 import { error } from '../middlewares/error.middleware.js'; // Global error handling middleware
 import userRouter from '../routes/userRouter.js'; // Import userRouter
+import devKeyRouter from '../routes/devKeyRouter.js';
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/devkeys', devKeyRouter);
 
 // Global Error Handler Middleware
 app.use(error); // This will catch any errors from previous routes and middleware
