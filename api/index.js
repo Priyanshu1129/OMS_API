@@ -6,6 +6,7 @@ import connectDb from '../connectDb.js'; // Assuming you have a database connect
 import { error } from '../middlewares/error.middleware.js'; // Global error handling middleware
 import userRouter from '../routes/userRouter.js'; // Import userRouter
 import devKeyRouter from '../routes/devKeyRouter.js';
+import hotelRouter from "../routes/hotelRouter.js";
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/devkeys', devKeyRouter);
+app.use('/api/v1/hotels',hotelRouter)
 
 // Global Error Handler Middleware
 app.use(error); // This will catch any errors from previous routes and middleware
