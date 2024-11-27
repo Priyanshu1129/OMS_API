@@ -1,35 +1,8 @@
 import Hotel from '../models/hotelModel.js';
 
-// Create a hotel (only hotelOwner can create their own hotel)
-export const createHotel = async (req, res) => {
-  const { name, location, logo, description } = req.body;
-  const ownerId = req.user.id; // HotelOwner's ID is automatically set
-
-  try {
-    const newHotel = new Hotel({
-      name,
-      location,
-      ownerId, // This is automatically set to the current logged-in hotel owner
-      logo,
-      description,
-    });
-
-    const savedHotel = await newHotel.save();
-
-    res.status(201).json({
-      success: true,
-      message: 'Hotel created successfully',
-      hotel: savedHotel,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
-
-// Get hotel by ID (HotelOwner can only access their own hotel)
+// Get hotel by ID (HotelOwner can only access their own hotel, SuperAdmin can access any hotel)
 export const getHotelById = async (req, res) => {
-  const { hotelId } = req.params;
+  const hotelId = req.user.role === 'hotelowner' ? req.user.hotelId : req.params.hotelId;
 
   try {
     const hotel = await Hotel.findById(hotelId);
@@ -55,7 +28,7 @@ export const getHotelById = async (req, res) => {
 
 // Update hotel (SuperAdmin can update any hotel, HotelOwner can update only their own)
 export const updateHotel = async (req, res) => {
-  const { hotelId } = req.params;
+  const hotelId = req.user.role === 'hotelowner' ? req.user.hotelId : req.params.hotelId;
   const { name, location, logo, description } = req.body;
 
   try {
@@ -90,7 +63,7 @@ export const updateHotel = async (req, res) => {
 
 // Delete hotel (SuperAdmin can delete any hotel, HotelOwner can delete only their own)
 export const deleteHotel = async (req, res) => {
-  const { hotelId } = req.params;
+  const hotelId = req.user.role === 'hotelowner' ? req.user.hotelId : req.params.hotelId;
 
   try {
     const hotel = await Hotel.findById(hotelId);
@@ -123,7 +96,7 @@ export const getAllHotels = async (req, res) => {
   }
 
   try {
-    const hotels = await Hotel.find().populate('ownerId', 'name'); 
+    const hotels = await Hotel.find().populate('ownerId', 'name');
 
     res.status(200).json({
       success: true,
