@@ -22,8 +22,57 @@ const validateDevKey = async (devKey) => {
 };
 
 // User SignUp
+// export const signUp = async (req, res) => {
+//   const { email, password, role, devKey, name, hotelId } = req.body;
+
+//   try {
+//     // Check if user already exists
+//     const userExists = await User.findOne({ email });
+//     if (userExists) {
+//       return res.status(400).json({ success: false, message: 'User already exists' });
+//     }
+
+//     // If role is 'superadmin', validate devKey
+//     if (role === 'superadmin') {
+//       try {
+//         const key = await validateDevKey(devKey);
+//         // Mark the dev key as used
+//         await DevKey.updateOne({ key: devKey }, { $set: { isUsed: true } });
+//       } catch (error) {
+//         return res.status(400).json({ success: false, message: error.message });
+//       }
+//     }
+
+//     // Determine the appropriate model based on the role
+//     const Model = role === 'superadmin' ? SuperAdmin : HotelOwner;
+
+//     const newUser = new Model({
+//       name,
+//       email,
+//       password,
+//       role,
+//       hotelId,
+//       isApproved: role === 'superadmin', // SuperAdmin is auto-approved
+//     });
+
+//     await newUser.save();
+
+//     const token = generateToken(newUser._id, newUser.role);
+
+//     res.status(201).json({
+//       success: true,
+//       message: 'User created successfully',
+//       token,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ success: false, message: 'Server error' });
+//   }
+// };
+
+
 export const signUp = async (req, res) => {
-  const { email, password, role, devKey, name, hotelId } = req.body;
+  const { email, password, role, devKey, name } = req.body;
 
   try {
     // Check if user already exists
@@ -46,22 +95,35 @@ export const signUp = async (req, res) => {
     // Determine the appropriate model based on the role
     const Model = role === 'superadmin' ? SuperAdmin : HotelOwner;
 
+    // Create the user
     const newUser = new Model({
       name,
       email,
       password,
       role,
-      hotelId,
-      isApproved: role === 'superadmin', // SuperAdmin is auto-approved
+      approved: role === 'superadmin', // SuperAdmin is auto-approved
     });
+
+    // If hotelowner, create a new hotel and associate it with the user
+    if (role === 'hotelowner') {
+      const newHotel = new Hotel({
+        name: `${name}'s Hotel`, 
+        location: 'Default Location',
+        ownerId: newUser._id, 
+      });
+
+      const savedHotel = await newHotel.save();
+      newUser.hotelId = savedHotel._id; 
+    }
 
     await newUser.save();
 
+    // Generate JWT token
     const token = generateToken(newUser._id, newUser.role);
 
     res.status(201).json({
       success: true,
-      message: 'User created successfully',
+      message: 'User and associated hotel created successfully',
       token,
     });
   } catch (error) {
