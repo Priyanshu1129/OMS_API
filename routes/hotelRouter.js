@@ -20,6 +20,6 @@ router.put('/:hotelId', protect, validateOwnership, updateHotel);
 router.delete('/:hotelId', protect, validateOwnership, deleteHotel);
 
 // Route to get all hotels (SuperAdmin only)
-router.get('/', protect, superAdminOnly, getAllHotels);
+router.get('/getAllHotels', protect, superAdminOnly, getAllHotels);
 
 export default router;
