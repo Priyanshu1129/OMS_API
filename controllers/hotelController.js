@@ -1,109 +1,65 @@
 import Hotel from '../models/hotelModel.js';
+import { catchAsyncError } from '../middlewares/catchAsyncError.js';
+import { getHotelByIdService, updateHotelService, deleteHotelService, getAllHotelsService } from '../services/hotelServices.js';
+import { ROLES } from '../utils/constant.js';
 
 // Get hotel by ID (HotelOwner can only access their own hotel, SuperAdmin can access any hotel)
-export const getHotelById = async (req, res) => {
-  const hotelId = req.user.role === 'hotelowner' ? req.user.hotelId : req.params.hotelId;
+// controllers/hotelController.js
 
-  try {
-    const hotel = await Hotel.findById(hotelId);
 
-    if (!hotel) {
-      return res.status(404).json({ success: false, message: 'Hotel not found' });
-    }
+export const getHotelById = catchAsyncError(async (req, res) => {
+  const hotelId = req.user.role === ROLES.HOTEL_OWNER ? req.user.hotelId : req.params.hotelId;
 
-    // HotelOwner can only access their own hotel
-    if (req.user.role === 'hotelowner' && hotel.ownerId.toString() !== req.user.id) {
-      return res.status(403).json({ success: false, message: 'Access denied. You can only view your own hotel.' });
-    }
+  // Call the service to get hotel details
+  const hotel = await getHotelByIdService(req.user, hotelId);
 
-    res.status(200).json({
-      success: true,
-      hotel,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
+  res.status(200).json({
+    success: true,
+    message: 'Hotel details fetched successfully',
+    data: { hotel },
+  });
+});
+
 
 // Update hotel (SuperAdmin can update any hotel, HotelOwner can update only their own)
-export const updateHotel = async (req, res) => {
-  const hotelId = req.user.role === 'hotelowner' ? req.user.hotelId : req.params.hotelId;
+export const updateHotel = catchAsyncError(async (req, res) => {
+  const hotelId = req.user.role === ROLES.HOTEL_OWNER ? req.user.hotelId : req.params.hotelId;
   const { name, location, logo, description } = req.body;
 
-  try {
-    const hotel = await Hotel.findById(hotelId);
+  // Call the service to update the hotel
+  const updatedHotel = await updateHotelService(req.user, hotelId, { name, location, logo, description });
 
-    if (!hotel) {
-      return res.status(404).json({ success: false, message: 'Hotel not found' });
-    }
+  res.status(200).json({
+    success: true,
+    message: 'Hotel updated successfully',
+    data: { hotel: updatedHotel, }
+  });
+});
 
-    // SuperAdmin can update any hotel, HotelOwner can only update their own hotel
-    if (req.user.role === 'hotelowner' && hotel.ownerId.toString() !== req.user.id) {
-      return res.status(403).json({ success: false, message: 'Access denied. You can only update your own hotel.' });
-    }
-
-    hotel.name = name || hotel.name;
-    hotel.location = location || hotel.location;
-    hotel.logo = logo || hotel.logo;
-    hotel.description = description || hotel.description;
-
-    await hotel.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Hotel updated successfully',
-      hotel,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
 
 // Delete hotel (SuperAdmin can delete any hotel, HotelOwner can delete only their own)
-export const deleteHotel = async (req, res) => {
-  const hotelId = req.user.role === 'hotelowner' ? req.user.hotelId : req.params.hotelId;
 
-  try {
-    const hotel = await Hotel.findById(hotelId);
+export const deleteHotel = catchAsyncError(async (req, res) => {
+  const hotelId = req.user.role === ROLES.HOTEL_OWNER ? req.user.hotelId : req.params.hotelId;
 
-    if (!hotel) {
-      return res.status(404).json({ success: false, message: 'Hotel not found' });
-    }
+  // Call the service to delete the hotel
+  await deleteHotelService(req.user, hotelId);
 
-    // SuperAdmin can delete any hotel, HotelOwner can delete only their own hotel
-    if (req.user.role === 'hotelowner' && hotel.ownerId.toString() !== req.user.id) {
-      return res.status(403).json({ success: false, message: 'Access denied. You can only delete your own hotel.' });
-    }
+  res.status(200).json({
+    success: true,
+    message: 'Hotel deleted successfully',
+  });
+});
 
-    await hotel.remove();
-
-    res.status(200).json({
-      success: true,
-      message: 'Hotel deleted successfully',
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
 
 // Get all hotels (SuperAdmin only)
-export const getAllHotels = async (req, res) => {
-  if (req.user.role !== 'superadmin') {
-    return res.status(403).json({ success: false, message: 'Access denied. Only SuperAdmins can view all hotels.' });
-  }
+export const getAllHotels = catchAsyncError(async (req, res) => {
+  // Call the service to fetch all hotels
+  const hotels = await getAllHotelsService(req.user);
 
-  try {
-    const hotels = await Hotel.find().populate('ownerId', 'name');
-
-    res.status(200).json({
-      success: true,
-      hotels,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
+  res.status(200).json({
+    success: true,
+    message: "All hotels fetched successfully",
+    data: { hotels }
+  });
+});

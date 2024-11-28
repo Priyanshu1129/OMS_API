@@ -1,3 +1,4 @@
 /node_modules
 /models/not_in_use
 .env
+text.txt

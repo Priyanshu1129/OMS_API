@@ -33,7 +33,7 @@ export const error = (err, req, res, next) => {
     // if (err.type === "ClientError" && err.name === "AllRequired") {
     //   err.message = "All fields are required!";
     // }
-  
+
     
     // Send the error response
     return res.status(err.statusCode).json({

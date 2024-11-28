@@ -7,6 +7,7 @@ import { error } from '../middlewares/error.middleware.js'; // Global error hand
 import userRouter from '../routes/userRouter.js'; // Import userRouter
 import devKeyRouter from '../routes/devKeyRouter.js';
 import hotelRouter from "../routes/hotelRouter.js";
+import authRouter from "../routes/authRouter.js"
 
 const app = express();
 
@@ -34,8 +35,9 @@ app.get('/', (req, res) => {
   res.json({ message: 'Welcome to the Hotel Order Management System' });
 });
 
-app.use('/api/v1/users', userRouter);
+app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/devkeys', devKeyRouter);
+app.use('/api/v1/users', userRouter);
 app.use('/api/v1/hotels',hotelRouter)
 
 // Global Error Handler Middleware
