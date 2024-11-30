@@ -13,7 +13,7 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-  origin: ["https://your-frontend-url.com", "http://localhost:3000"], // Update with your frontend URLs
+  origin: ["https://your-frontend-url.co", "http://localhost:3000"], // Update with your frontend URLs
   methods: ["POST", "GET", "PUT", "DELETE"],
   credentials: true,
 };
