@@ -19,7 +19,7 @@ export const signUp = catchAsyncError(async (req, res, next, session) => {
 
   res.status(201).json({
     success: true,
-    message: "User and associated hotel created successfully",
+    message: "User created successfully",
     // data: {user: newUser}
   });
 }, true);

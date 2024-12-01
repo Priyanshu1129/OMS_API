@@ -58,7 +58,8 @@ export const createUserWithRole = async ({ email, password, role, devKey, name }
     return { newUser, token };
 
   } catch (error) {
-    throw new ServerError(error.message);
+    if(error instanceof ClientError) throw new ClientError(error.name, error.message);
+    else throw new ServerError(error.message);
   }
 };
 
