@@ -1,5 +1,6 @@
 import { ROLES, isValidRole } from "../utils/constant.js";
 import { User, SuperAdmin, HotelOwner } from '../models/userModel.js';
+import Hotel from '../models/hotelModel.js';
 import DevKey from '../models/devKeyModel.js';
 import { validateDevKey, generateToken } from "../utils/index.js"
 import { ClientError, ServerError } from "../utils/errorHandler.js"
@@ -27,14 +28,15 @@ export const createUserWithRole = async ({ email, password, role, devKey, name }
     }
 
     const Model = role === ROLES.SUPER_ADMIN ? SuperAdmin : HotelOwner;
-
+    const approve = role === ROLES.SUPER_ADMIN;
     // Create user
+    console.log(Model);
     const newUser = new Model({
       name,
       email,
       password,
       role,
-      isApproved: role === ROLES.SUPER_ADMIN, // SuperAdmin is auto-approved
+      isApproved: approve, // SuperAdmin is auto-approved
     });
 
     if (role === ROLES.HOTEL_OWNER) {
@@ -56,7 +58,7 @@ export const createUserWithRole = async ({ email, password, role, devKey, name }
     return { newUser, token };
 
   } catch (error) {
-    throw new ServerError('Error while creating user');
+    throw new ServerError(error.message);
   }
 };
 
