@@ -3,7 +3,7 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDb from '../connectDb.js'; // Assuming you have a database connection utility
-import { error } from '../middlewares/error.middleware.js'; // Global error handling middleware
+import { error } from '../middlewares/errorMiddleware.js'; // Global error handling middleware
 import userRouter from '../routes/userRouter.js'; // Import userRouter
 import devKeyRouter from '../routes/devKeyRouter.js';
 import hotelRouter from "../routes/hotelRouter.js";

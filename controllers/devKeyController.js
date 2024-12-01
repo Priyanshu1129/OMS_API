@@ -1,6 +1,6 @@
 // controllers/devKeyController.js
 import { generateDevKeyService, getAllDevKeysService, useDevKeyService } from '../services/devKeyServices.js';
-import catchAsyncError from '../utils/catchAsyncError.js';
+import {catchAsyncError} from '../middlewares/catchAsyncError.js';
 
 export const generateDevKey = catchAsyncError(async (req, res) => {
   // Call the service to generate a new dev key

@@ -1,9 +1,9 @@
-import { ROLES, isValidRole } from "../utils/constant";
+import { ROLES, isValidRole } from "../utils/constant.js";
 import { User, SuperAdmin, HotelOwner } from '../models/userModel.js';
 import DevKey from '../models/devKeyModel.js';
-import { validateDevKey, generateToken } from "../utils"
+import { validateDevKey, generateToken } from "../utils/index.js"
 import { ClientError, ServerError } from "../utils/errorHandler.js"
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 export const createUserWithRole = async ({ email, password, role, devKey, name }, session) => {
   try {

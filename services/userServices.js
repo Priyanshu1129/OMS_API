@@ -1,4 +1,4 @@
-import { ClientError } from '../utils';
+import { ClientError } from '../utils/index.js';
 import { HotelOwner, User } from '../models/userModel.js';
 
 
