@@ -1,4 +1,4 @@
-import { ClientError } from '../utils/index.js';
+import { ClientError,ServerError } from '../utils/index.js';
 import { HotelOwner, User } from '../models/userModel.js';
 import Hotel from '../models/hotelModel.js';
 
@@ -19,41 +19,36 @@ export const getUserProfileService = async (userId) => {
     }
 };
 
-export const approveHotelOwnerService = async (ownerId) => {
-    try {
-        if (!ownerId) {
-            throw new ClientError('ValidationError', 'Owner ID is required');
-        }
-
-        // Check if the hotel owner exists
-        const hotelOwner = await HotelOwner.findById(ownerId);
-
-        if (!hotelOwner) {
-            throw new ClientError("NotFoundError", "Hotel owner not found");
-        }
-
-        // Check if the hotel owner is already approved
-        if (hotelOwner.isApproved) {
-            throw new ClientError("ConflictError", "Hotel owner is already approved");
-        }
-
-        // Approve the hotel owner
-        hotelOwner.isApproved = true;
-
-        hotelOwner.hotel = new Hotel({
-            name: `${hotelOwner.name}'s Hotel`,
-            location: "Default Location",
-            ownerId: hotelOwner._id,
-        });
-        
-
-        await hotelOwner.save({ session });
-
-        return hotelOwner; // Return the updated hotel owner
-    } catch (error) {
-        throw new ServerError('Error while approving hotel owners');
+export const approveHotelOwnerService = async (ownerId, session) => {
+    if (!ownerId) {
+      throw new ClientError('ValidationError', 'Owner ID is required');
     }
-};
+  
+    const hotelOwner = await HotelOwner.findById(ownerId).session(session);
+    if (!hotelOwner) {
+      throw new ClientError("NotFoundError", "Hotel owner not found");
+    }
+  
+    if (hotelOwner.isApproved) {
+      throw new ClientError("ConflictError", "Hotel owner is already approved");
+    }
+  
+    hotelOwner.isApproved = true;
+  
+    const hotel = new Hotel({
+      name: `${hotelOwner.name}'s Hotel`,
+      location: "Default Location",
+      ownerId: hotelOwner._id,
+    });
+  
+    await hotel.save({ session });
+    hotelOwner.hotelId = hotel._id;
+  
+    await hotelOwner.save({ session });
+  
+    return await HotelOwner.findById(ownerId).populate('hotelId').session(session);
+  };
+  
 
 export const getAllHotelOwnersService = async () => {
     try {
@@ -145,7 +140,6 @@ export const membershipExtenderService = async (hotelOwnerId, days) => {
         await hotelOwner.save();
 
         return hotelOwner; // Return the updated hotel owner
-        
     } catch (error) {
         throw new ServerError('Error while extending membership');
     }

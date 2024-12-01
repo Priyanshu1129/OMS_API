@@ -26,9 +26,9 @@ export const signUp = catchAsyncError(async (req, res, next, session) => {
 
 
 export const login = catchAsyncError(async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password,role } = req.body;
 
-  const { user, token } = await authenticateUser({ email, password });
+  const { user, token } = await authenticateUser({ email, password,role });
 
   res.cookie("token", token, {
     httpOnly: true,
@@ -36,6 +36,8 @@ export const login = catchAsyncError(async (req, res) => {
     secure: process.env.NODE_ENV === "production",
     maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
   });
+
+  
 
   res.status(200).json({
     success: true,
@@ -46,6 +48,7 @@ export const login = catchAsyncError(async (req, res) => {
         name: user.name,
         role: user.role,
         email: user.email,
+        token,
       }
     }
   });

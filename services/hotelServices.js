@@ -99,6 +99,6 @@ export const getAllHotelsService = async (user) => {
     return hotels;
   } catch (error) {
     // If there's an unexpected server error, throw a ServerError
-    throw new ServerError('Error while fetching hotels');
+    throw new ServerError('Error while fetching hotels',error);
   }
 };

@@ -63,15 +63,18 @@ export const createUserWithRole = async ({ email, password, role, devKey, name }
   }
 };
 
-export const authenticateUser = async ({ email, password }) => {
+export const authenticateUser = async ({ email, password,role }) => {
   try {
     // Validate input
     if (!email || !password) {
       throw new ClientError('ValidationError', 'Email and password are required');
     }
 
+    const Model = role === ROLES.SUPER_ADMIN ? SuperAdmin : HotelOwner;
+
     // Find user by email
-    const user = await User.findOne({ email });
+    const user = await Model.findOne({ email });
+    
     if (!user) {
       throw new ClientError('AuthError', 'Invalid credentials');
     }
@@ -92,7 +95,8 @@ export const authenticateUser = async ({ email, password }) => {
 
     return { user, token };
   } catch (error) {
-    throw new ServerError('Error while authenticating user');
+    if (error instanceof ClientError) throw new ClientError(error.name, error.message);
+    else throw new ServerError('Error while authenticating user');
   }
 };
 

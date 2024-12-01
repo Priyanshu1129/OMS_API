@@ -1,4 +1,4 @@
-export const error = (err, req, res, next) => {
+export const  error = (err, req, res, next) => {
     // Log the error details for debugging
     console.error("Error details:", err);
   

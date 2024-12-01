@@ -18,16 +18,16 @@ export const getUserProfile = catchAsyncError(async (req, res) => {
   });
 });
 
-export const approveHotelOwner = catchAsyncError(async (req, res) => {
+export const approveHotelOwner = catchAsyncError(async (req, res,next,session) => {
   const { ownerId } = req.params;
-  const updatedHotelOwner = await approveHotelOwnerService(ownerId);
+  const updatedHotelOwner = await approveHotelOwnerService(ownerId, session);
 
   res.status(200).json({
     success: true,
     message: 'Hotel owner approved successfully',
-    //data: { hotelOwner: updatedHotelOwner}
+    data: { hotelOwner: updatedHotelOwner}
   });
-});
+}, true);
 
 export const getAllHotelOwners = catchAsyncError(async (req, res) => {
 
