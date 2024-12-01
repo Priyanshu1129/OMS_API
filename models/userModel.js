@@ -9,6 +9,7 @@ const userBaseSchema = new mongoose.Schema({
   role: { type: String, required: true },  // Role field remains the same
   hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel' },
   isApproved: { type: Boolean, default: false },
+  membershipExpires: { type: Date, default: null },
 }, {
   timestamps: true,
 });

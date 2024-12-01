@@ -39,16 +39,16 @@ export const createUserWithRole = async ({ email, password, role, devKey, name }
       isApproved: approve, // SuperAdmin is auto-approved
     });
 
-    if (role === ROLES.HOTEL_OWNER) {
-      const newHotel = new Hotel({
-        name: `${name}'s Hotel`,
-        location: "Default Location",
-        ownerId: newUser._id,
-      });
+    // if (role === ROLES.HOTEL_OWNER) {
+    //   const newHotel = new Hotel({
+    //     name: `${name}'s Hotel`,
+    //     location: "Default Location",
+    //     ownerId: newUser._id,
+    //   });
 
-      const savedHotel = await newHotel.save({ session });
-      newUser.hotelId = savedHotel._id;
-    }
+    //   const savedHotel = await newHotel.save({ session });
+    //   newUser.hotelId = savedHotel._id;
+    // }
 
     await newUser.save({ session });
 
@@ -94,3 +94,4 @@ export const authenticateUser = async ({ email, password }) => {
     throw new ServerError('Error while authenticating user');
   }
 };
+

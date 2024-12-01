@@ -1,6 +1,6 @@
 import { ClientError } from '../utils/index.js';
 import { HotelOwner, User } from '../models/userModel.js';
-
+import Hotel from '../models/hotelModel.js';
 
 export const getUserProfileService = async (userId) => {
     try {
@@ -27,6 +27,7 @@ export const approveHotelOwnerService = async (ownerId) => {
 
         // Check if the hotel owner exists
         const hotelOwner = await HotelOwner.findById(ownerId);
+
         if (!hotelOwner) {
             throw new ClientError("NotFoundError", "Hotel owner not found");
         }
@@ -38,7 +39,15 @@ export const approveHotelOwnerService = async (ownerId) => {
 
         // Approve the hotel owner
         hotelOwner.isApproved = true;
-        await hotelOwner.save();
+
+        hotelOwner.hotel = new Hotel({
+            name: `${hotelOwner.name}'s Hotel`,
+            location: "Default Location",
+            ownerId: hotelOwner._id,
+        });
+        
+
+        await hotelOwner.save({ session });
 
         return hotelOwner; // Return the updated hotel owner
     } catch (error) {
@@ -112,6 +121,33 @@ export const getApprovedOwnersService = async ({ page = 1, limit = 10 }) => {
         };
     } catch (error) {
         throw new ServerError('Error while fetching approved hotel owners');
+    }
+};
+
+export const membershipExtenderService = async (hotelOwnerId, days) => {
+    try {
+        if (!hotelOwnerId) {
+            throw new ClientError('ValidationError', 'Owner ID is required');
+        }
+
+        // Find the hotel owner
+        const hotelOwner = await HotelOwner.findById(hotelOwnerId);
+
+        if (!hotelOwner) {
+            throw new ClientError('NotFoundError', 'Hotel owner not found');
+        }
+
+        // Extend the membership
+        hotelOwner.membershipExpires = new Date(
+            hotelOwner.membershipExpires.getTime() + days * 24 * 60 * 60 * 1000
+        );
+
+        await hotelOwner.save();
+
+        return hotelOwner; // Return the updated hotel owner
+        
+    } catch (error) {
+        throw new ServerError('Error while extending membership');
     }
 };
 

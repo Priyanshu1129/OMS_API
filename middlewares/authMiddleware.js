@@ -33,6 +33,15 @@ export const protect = async (req, res, next) => {
       }
 
       // If user is found, move to the next middleware or route handler
+
+      if(req.user.isApproved === false){
+        throw new ClientError('User not approved', 401);
+      }
+
+      if(req.user.membershipExpires < new Date()){
+        throw new ClientError('Membership expired', 401);
+      }
+      
       next();
     } catch (error) {
       console.error(error);

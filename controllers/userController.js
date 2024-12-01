@@ -4,7 +4,8 @@ import {
   approveHotelOwnerService,
   getAllHotelOwnersService,
   getUnApprovedOwnersService,
-  getApprovedOwnersService
+  getApprovedOwnersService,
+  membershipExtenderService
 } from '../services/userServices.js';
 
 export const getUserProfile = catchAsyncError(async (req, res) => {
@@ -68,5 +69,19 @@ export const getApprovedOwners = catchAsyncError(async (req, res) => {
       approvedOwners,
       pagination,
     },
+  });
+});
+
+export const membershipExtender = catchAsyncError(async (req, res) => {
+  // Logic to extend membership
+  const {hotelOwnerId} = req.params.hotelOwnerId;
+  const {days} = req.body.days;
+
+  const updatedHotelOwner = await membershipExtenderService(hotelOwnerId, days);
+
+  res.status(200).json({
+    success: true,
+    message: "Membership extended successfully",
+    data: { updatedHotelOwner }
   });
 });
