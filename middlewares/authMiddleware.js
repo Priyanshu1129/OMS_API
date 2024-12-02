@@ -126,6 +126,52 @@ export const superAdminOnly = (req, res, next) => {
   next();
 };
 
+export const validateOwnership = async (req, res, next) => {
+  const { user } = req;
+
+  if (user.role === ROLES.SUPER_ADMIN) {
+    return next();
+  }
+
+  try {
+    const resource = req.baseUrl.split('/')[3];
+    const resourceIdKey = Object.keys(req.params).find((key) =>
+      key.toLowerCase().includes('id')
+    );
+
+    if (!resourceIdKey) {
+      return next(new ClientError('Resource ID not provided', 400));
+    }
+
+    const resourceId = req.params[resourceIdKey];
+    const ResourceModel =
+      mongoose.models[resource.charAt(0).toUpperCase() + resource.slice(1)];
+
+    if (!ResourceModel) {
+      return next(new ClientError(`Invalid resource: ${resource}`, 400));
+    }
+
+    const resourceData = await ResourceModel.findById(resourceId);
+
+    if (!resourceData) {
+      return next(new ClientError(`${resource} not found`, 404));
+    }
+
+    if (!resourceData.hotelId.equals(user.hotelId)) {
+      return next(
+        new ClientError(
+          'Access denied. This resource does not belong to your hotel.',
+          403
+        )
+      );
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 
 // export const validateOwnership = async (req, res, next) => {
@@ -180,48 +226,3 @@ export const superAdminOnly = (req, res, next) => {
 //   }
 // };
 
-export const validateOwnership = async (req, res, next) => {
-  const { user } = req;
-
-  if (user.role === ROLES.SUPER_ADMIN) {
-    return next();
-  }
-
-  try {
-    const resource = req.baseUrl.split('/')[3];
-    const resourceIdKey = Object.keys(req.params).find((key) =>
-      key.toLowerCase().includes('id')
-    );
-
-    if (!resourceIdKey) {
-      return next(new ClientError('Resource ID not provided', 400));
-    }
-
-    const resourceId = req.params[resourceIdKey];
-    const ResourceModel =
-      mongoose.models[resource.charAt(0).toUpperCase() + resource.slice(1)];
-
-    if (!ResourceModel) {
-      return next(new ClientError(`Invalid resource: ${resource}`, 400));
-    }
-
-    const resourceData = await ResourceModel.findById(resourceId);
-
-    if (!resourceData) {
-      return next(new ClientError(`${resource} not found`, 404));
-    }
-
-    if (!resourceData.hotelId.equals(user.hotelId)) {
-      return next(
-        new ClientError(
-          'Access denied. This resource does not belong to your hotel.',
-          403
-        )
-      );
-    }
-
-    next();
-  } catch (error) {
-    next(error);
-  }
-};

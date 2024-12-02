@@ -72,9 +72,11 @@ export const authenticateUser = async ({ email, password,role }) => {
 
     const Model = role === ROLES.SUPER_ADMIN ? SuperAdmin : HotelOwner;
 
+    // console.log(role, Model);
+
     // Find user by email
     const user = await Model.findOne({ email });
-    
+
     if (!user) {
       throw new ClientError('AuthError', 'Invalid credentials');
     }
@@ -99,4 +101,6 @@ export const authenticateUser = async ({ email, password,role }) => {
     else throw new ServerError('Error while authenticating user');
   }
 };
+
+
 
