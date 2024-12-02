@@ -135,6 +135,8 @@ export const validateOwnership = async (req, res, next) => {
 
   try {
     const resource = req.baseUrl.split('/')[3];
+    console.log(resource);
+
     const resourceIdKey = Object.keys(req.params).find((key) =>
       key.toLowerCase().includes('id')
     );
@@ -144,8 +146,14 @@ export const validateOwnership = async (req, res, next) => {
     }
 
     const resourceId = req.params[resourceIdKey];
+    const modelString = resource.charAt(0).toUpperCase() + resource.slice(1, -1);
+    console.log("modelString :",modelString);
+    
     const ResourceModel =
-      mongoose.models[resource.charAt(0).toUpperCase() + resource.slice(1)];
+      mongoose.models[modelString] || mongoose.model(modelString);
+
+      console.log(resourceId);  
+      console.log(ResourceModel);
 
     if (!ResourceModel) {
       return next(new ClientError(`Invalid resource: ${resource}`, 400));
