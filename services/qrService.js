@@ -1,11 +1,16 @@
 import QRCode from "qrcode";
 import qrModel from "../models/qrModel.js";
 import { ClientError } from "../utils/errorHandler.js";
+import { configDotenv } from "dotenv";
+
+const frontendUrl = process.env.FRONTEND_URL;
 
 export const createQrService = async (tableId, hotelId) => {
     try {
         // Set the width and height for the QR code to make it larger
-        const qrCodeImage = await QRCode.toDataURL(tableId, {
+        const qrString = frontendUrl+'/order/'+tableId;
+        console.log(qrString);
+        const qrCodeImage = await QRCode.toDataURL(qrString, {
             width: 300, // Increase width (default is 200)
             height: 300, // Increase height (default is 200)
             margin: 3, // Optional: Adjust margin around the QR code
@@ -28,11 +33,12 @@ export const createQrService = async (tableId, hotelId) => {
     }
 };
 
-export const getQrService = async (tableId) => {
+export const getQrService = async (tableId,hotelId) => {
     try {
         const qrCode = await qrModel.findOne({ tableId });
+  
         if (!qrCode) {
-            throw new ClientError('QR code not found', 404);
+           return createQrService(tableId, hotelId);
         }
         return qrCode;
     } catch (error) {

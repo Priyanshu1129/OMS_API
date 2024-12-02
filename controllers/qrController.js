@@ -5,15 +5,15 @@ import Table from "../models/tableModel.js";
 import Hotel from "../models/hotelModel.js";
 
 // Generate QR code
-export const generateQr = catchAsyncError(async (req, res, next) => {
-    const { tableId } = req.params; // Table ID from the URL parameters
+// export const generateQr = catchAsyncError(async (req, res, next) => {
+//     const { tableId } = req.params; // Table ID from the URL parameters
 
-    // Assuming the hotelId can be derived or passed separately (e.g., req.user.hotelId if authenticated)
-    const hotelId = req.user.hotelId; // Replace with actual source of hotelId
+//     // Assuming the hotelId can be derived or passed separately (e.g., req.user.hotelId if authenticated)
+//     const hotelId = req.user.hotelId; // Replace with actual source of hotelId
 
-    const qrCode = await createQrService(tableId, hotelId);
-    res.status(201).json({ message: "QR Code Generated", qrCode });
-});
+//     const qrCode = await createQrService(tableId, hotelId);
+//     res.status(201).json({ message: "QR Code Generated", qrCode });
+// });
 
 // Print QR code as a downloadable PDF
 export const printQr = catchAsyncError(async (req, res, next) => {
@@ -28,7 +28,7 @@ export const printQr = catchAsyncError(async (req, res, next) => {
 
     const hotelName = hotel.name;
 
-    const qrCodeData = await getQrService(tableId);
+    const qrCodeData = await getQrService(tableId,hotelId);
     const pdfBuffer = await generatePdfService(qrCodeData.imageUrl, tableId, tableNumber,hotelName);
 
     res.setHeader('Content-Type', 'application/pdf');
