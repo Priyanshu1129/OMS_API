@@ -118,31 +118,35 @@ export const getApprovedOwnersService = async ({ page = 1, limit = 10 }) => {
         throw new ServerError('Error while fetching approved hotel owners');
     }
 };
-
 export const membershipExtenderService = async (hotelOwnerId, days) => {
     try {
         if (!hotelOwnerId) {
             throw new ClientError('ValidationError', 'Owner ID is required');
         }
-
-        // Find the hotel owner
         const hotelOwner = await HotelOwner.findById(hotelOwnerId);
 
         if (!hotelOwner) {
             throw new ClientError('NotFoundError', 'Hotel owner not found');
         }
 
-        const currentDate = new Date();
-        const newExpiryDate = new Date(currentDate.setDate(currentDate.getDate() + days));
+        const now = new Date();
+        const currentExpiry = hotelOwner.membershipExpires ? new Date(hotelOwner.membershipExpires) : null;
 
-        hotelOwner.membershipExpires = newExpiryDate;
+        const effectiveExpiry = currentExpiry && currentExpiry > now ? currentExpiry : now;
+        effectiveExpiry.setDate(effectiveExpiry.getDate() + days);
+
+        hotelOwner.membershipExpires = effectiveExpiry;
 
         await hotelOwner.save();
 
         return hotelOwner; // Return the updated hotel owner
     } catch (error) {
-        if (error instanceof ClientError) throw new ClientError(error.type, error.message, error.statusCode);
-        else throw new ServerError('Error while extending membership', error);
+        if (error instanceof ClientError) {
+            throw new ClientError(error.type, error.message, error.statusCode);
+        } else {
+            throw new ServerError('Error while extending membership', error);
+        }
     }
 };
+
 
