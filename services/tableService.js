@@ -5,7 +5,7 @@ import { ROLES } from '../utils/constant.js';
 export const getTableByIdService = async (tableId) => {
     try {
 
-        const table = await Table.findById(tableId);
+        const table = await Table.findById(tableId).populate('hotelId', 'name');
         if (!table) {
         throw new ClientError('Table not found', 404);
         }
@@ -14,7 +14,7 @@ export const getTableByIdService = async (tableId) => {
         // if (user.role === ROLES.TABLE_OWNER && table.ownerId.toString() !== user.id) {
         // throw new ClientError('Access denied. You can only view your own table.', 403);
         // }
-    
+        table.populate('hotelId', 'name');
         return table;
     } catch (error) {
         throw new ServerError('Error while fetching table details');
@@ -25,10 +25,13 @@ export const getTablesService = async (user) => {
     try {
         // const tables = user.role === ROLES.TABLE_OWNER ? await Table.find({ ownerId: user.id }) : await Table.find();
 
-        const tables = await Table.find({ hotelId: user.hotelId });
+        const tables = await Table.find({ hotelId: user.hotelId }).populate('hotelId', 'name');
+        
+
         return tables;
     } catch (error) {
-        throw new ServerError('Error while fetching tables');
+        if(error instanceof ClientError) { throw new ClientError(error.message, error.statusCode); }
+        else throw new ServerError('Error while fetching tables');
     }
 }
 
