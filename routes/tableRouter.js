@@ -1,4 +1,4 @@
-import { protect,superAdminOnly } from "../middlewares/authMiddleware";
+import { protect,superAdminOnly } from "../middlewares/authMiddleware.js";
 import express from 'express';
 import { getTableById, getTables, createTable, updateTable, deleteTable, occupyTable, freeTable } from '../controllers/tableController.js';
 

@@ -19,6 +19,7 @@ router.patch('/approve-hotel-owner/:ownerId', protect, superAdminOnly, approveHo
 router.get('/hotel-owners', protect, superAdminOnly, getAllHotelOwners);
 router.get('/hotel-owners/pending-approval', protect, superAdminOnly, getUnApprovedOwners);
 router.get('/hotel-owners/approved', protect, superAdminOnly, getApprovedOwners);
-router.patch('/membership-extender/:ownerId', protect, superAdminOnly, membershipExtender);
+
+router.patch('/membership-extender/:hotelOwnerId', protect, superAdminOnly, membershipExtender);
 
 export default router;

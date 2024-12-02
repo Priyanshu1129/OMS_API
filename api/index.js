@@ -8,6 +8,7 @@ import userRouter from '../routes/userRouter.js'; // Import userRouter
 import devKeyRouter from '../routes/devKeyRouter.js';
 import hotelRouter from "../routes/hotelRouter.js";
 import authRouter from "../routes/authRouter.js"
+import tableRouter from "../routes/tableRouter.js"
 
 const app = express();
 
@@ -38,7 +39,8 @@ app.get('/', (req, res) => {
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/devkeys', devKeyRouter);
 app.use('/api/v1/users', userRouter);
-app.use('/api/v1/hotels',hotelRouter)
+app.use('/api/v1/hotels',hotelRouter);
+app.use('/api/v1/tables',tableRouter);
 
 // Global Error Handler Middleware
 app.use(error); // This will catch any errors from previous routes and middleware

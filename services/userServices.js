@@ -132,16 +132,17 @@ export const membershipExtenderService = async (hotelOwnerId, days) => {
             throw new ClientError('NotFoundError', 'Hotel owner not found');
         }
 
-        // Extend the membership
-        hotelOwner.membershipExpires = new Date(
-            hotelOwner.membershipExpires.getTime() + days * 24 * 60 * 60 * 1000
-        );
+        const currentDate = new Date();
+        const newExpiryDate = new Date(currentDate.setDate(currentDate.getDate() + days));
+
+        hotelOwner.membershipExpires = newExpiryDate;
 
         await hotelOwner.save();
 
         return hotelOwner; // Return the updated hotel owner
     } catch (error) {
-        throw new ServerError('Error while extending membership');
+        if (error instanceof ClientError) throw new ClientError(error.type, error.message, error.statusCode);
+        else throw new ServerError('Error while extending membership', error);
     }
 };
 

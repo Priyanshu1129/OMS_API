@@ -39,6 +39,7 @@ export const  error = (err, req, res, next) => {
     return res.status(err.statusCode).json({
       success: false,
       message: err.message,
+      errorDetails : err,
       // You may optionally add the stack trace for development environments
       ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
     });

@@ -74,8 +74,12 @@ export const getApprovedOwners = catchAsyncError(async (req, res) => {
 
 export const membershipExtender = catchAsyncError(async (req, res) => {
   // Logic to extend membership
-  const {hotelOwnerId} = req.params.hotelOwnerId;
-  const {days} = req.body.days;
+  const hotelOwnerId = req.params.hotelOwnerId;
+  // console.log(hotelOwnerId);
+  // console.log(req.body);
+  
+  const {days} = req.body;
+  // console.log(days);
 
   const updatedHotelOwner = await membershipExtenderService(hotelOwnerId, days);
 

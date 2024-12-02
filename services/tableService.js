@@ -1,7 +1,6 @@
-import Table from '../models/tableModel';
-import { ClientError, ServerError } from '../utils/errorHandler';
-import { ROLES } from '../utils/constant';
-import { getAllTablesOfHotel } from '../controllers/tableController';
+import Table from '../models/tableModel.js';
+import { ClientError, ServerError } from '../utils/errorHandler.js';
+import { ROLES } from '../utils/constant.js';
 
 export const getTableByIdService = async (tableId) => {
     try {
