@@ -9,6 +9,10 @@ import devKeyRouter from '../routes/devKeyRouter.js';
 import hotelRouter from "../routes/hotelRouter.js";
 import authRouter from "../routes/authRouter.js"
 import tableRouter from "../routes/tableRouter.js"
+import qrRouter from "../routes/qrRouter.js"
+import puppeteer from 'puppeteer';
+import fs from 'fs';
+import { launchBrowser } from '../utils/puppeteerHelper.js';
 
 const app = express();
 
@@ -41,8 +45,8 @@ app.use('/api/v1/devkeys', devKeyRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/hotels',hotelRouter);
 app.use('/api/v1/tables',tableRouter);
+app.use('/api/v1/qrs',qrRouter);
 
-// Global Error Handler Middleware
 app.use(error); // This will catch any errors from previous routes and middleware
 
 // Start the server
