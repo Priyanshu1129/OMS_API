@@ -24,7 +24,7 @@ export const getTableByIdService = async (tableId) => {
 export const getTablesService = async (user) => {
     try {
         // const tables = user.role === ROLES.TABLE_OWNER ? await Table.find({ ownerId: user.id }) : await Table.find();
-
+        console.log(user);
         const tables = await Table.find({ hotelId: user.hotelId }).populate('hotelId', 'name');
         
 

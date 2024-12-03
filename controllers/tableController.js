@@ -2,26 +2,27 @@ import { getTableByIdService,getTablesService, createTableService , deleteTableS
 import { ClientError, ServerError } from '../utils/errorHandler.js'; // Import the custom error classes
 import { catchAsyncError} from '../middlewares/catchAsyncError.js';
 import { HotelOwner } from '../models/userModel.js';
+import Hotel from '../models/hotelModel.js';
 
 export const getTableById = catchAsyncError(async (req, res) => {
     const tableId = req.params.id;
     const table = await getTableByIdService(tableId);
-    const hotelName = await HotelOwner.findById(req.user.id).select('hotelId').populate('hotelId', 'name');
+    const hotelName = await Hotel.findById(req.user.hotelId).select('name');
     res.status(200).json({
         success: true,
         message: 'Table fetched successfully',
-        hotelName: hotelName.hotelId.name,
+        hotelName: hotelName,
         data: { table },
     });
 });
 
 export const getTables = catchAsyncError(async (req, res) => {
     const tables = await getTablesService(req.user);
-    const hotelName = await HotelOwner.findById(req.user.id).select('hotelId').populate('hotelId', 'name');
+    const hotelName = await Hotel.findById(req.user.hotelId).select('name');
     res.status(200).json({
         success: true,
         message: 'All Tables fetched successfully',
-        hotelName: hotelName.hotelId.name,
+        hotelName: hotelName,
         data: { tables },
     });
 });

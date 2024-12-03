@@ -1,4 +1,4 @@
-import { protect,superAdminOnly, validateOwnership } from "../middlewares/authMiddleware.js";
+import { attachHotelId, protect,superAdminOnly, validateOwnership } from "../middlewares/authMiddleware.js";
 import express from 'express';
 import { getTableById, getTables, createTable, updateTable, deleteTable, occupyTable, freeTable } from '../controllers/tableController.js';
 
@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get('/table/:id', protect,validateOwnership, getTableById);
 
-router.get('/tables', protect, getTables);
+router.get('/tables', protect,attachHotelId, getTables);
 
 router.post('/table', protect, createTable);
 

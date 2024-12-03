@@ -113,6 +113,22 @@ export const protect = async (req, res, next) => {
   }
 };
 
+export const attachHotelId = (req, res, next) => {
+  const { user } = req;
+
+  if (user.role === ROLES.SUPER_ADMIN) {
+    const { hotelId } = req.body;
+
+    if (!hotelId) {
+      return next(
+        new ClientError('Hotel ID is required for superadmin role to access hotel resources', 400)
+      );
+    }
+
+    req.user.hotelId = hotelId;
+  }
+  next();
+};
 
 
 // Middleware to check if the logged-in user is a SuperAdmin
