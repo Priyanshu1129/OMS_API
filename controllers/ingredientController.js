@@ -16,7 +16,7 @@ export const getIngredientById = catchAsyncError(async (req, res) => {
 
 export const createIngredient = catchAsyncError(async (req, res) => {
     const ingredientData = req.body;
-    const ingredient = await createIngredientService(req.user, ingredientData);
+    const ingredient = await createIngredientService(req.user.hotelId, ingredientData);
     res.status(201).json({
         status: success,
         message: 'Ingredient created successfully',
@@ -25,9 +25,9 @@ export const createIngredient = catchAsyncError(async (req, res) => {
 });
 
 export const updateIngredient = catchAsyncError(async (req, res) => {
-    const ingredientId = req.params.id;
+    const ingredientId = req.params.ingredientId;
     const ingredientData = req.body;
-    const ingredient = await updateIngredientService(req.user, ingredientId, ingredientData);
+    const ingredient = await updateIngredientService(ingredientId, ingredientData);
     res.status(200).json({
         status: success,
         message: 'Ingredient updated successfully',
@@ -38,7 +38,7 @@ export const updateIngredient = catchAsyncError(async (req, res) => {
 
 export const deleteIngredient = catchAsyncError(async (req, res) => {
     const ingredientId = req.params.id;
-    await deleteIngredientService(req.user, ingredientId);
+    await deleteIngredientService(ingredientId);
     res.status(200).json({
         status: success,
         message: 'Ingredient deleted successfully',
@@ -47,7 +47,7 @@ export const deleteIngredient = catchAsyncError(async (req, res) => {
 
 export const getAllIngredients = catchAsyncError(async (req, res) => {
     // Call the service to fetch all ingredients
-    const ingredients = await getAllIngredientsService(req.user);
+    const ingredients = await getAllIngredientsService();
     res.status(200).json({
         status: success,
         message: 'All ingredients fetched successfully',
@@ -56,7 +56,7 @@ export const getAllIngredients = catchAsyncError(async (req, res) => {
 });
 
 export const getIngredientsOfHotel = catchAsyncError(async (req, res) => {
-    const ingredients = await getIngredientsOfHotelService(req.user);
+    const ingredients = await getIngredientsOfHotelService(req.user.hotelId);
     res.status(200).json({
         status: success,
         message: 'All ingredients of hotel fetched successfully',
