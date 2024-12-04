@@ -18,7 +18,7 @@ export const signUp = catchAsyncError(async (req, res, next, session) => {
   // });
 
   res.status(201).json({
-    success: true,
+    status: success,
     message: "User created successfully",
     // data: {user: newUser}
   });
@@ -40,7 +40,7 @@ export const login = catchAsyncError(async (req, res) => {
   
 
   res.status(200).json({
-    success: true,
+    status: success,
     message: 'Login successful',
     data: {
       user: {

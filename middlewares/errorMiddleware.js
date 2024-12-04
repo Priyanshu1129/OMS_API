@@ -37,7 +37,7 @@ export const  error = (err, req, res, next) => {
     
     // Send the error response
     return res.status(err.statusCode).json({
-      success: false,
+      status: failed,
       message: err.message,
       errorDetails : err,
       // You may optionally add the stack trace for development environments
