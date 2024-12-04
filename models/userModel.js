@@ -9,6 +9,8 @@ const userBaseSchema = new mongoose.Schema({
   role: { type: String, required: true },  // Role field remains the same
   hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel' },
   isApproved: { type: Boolean, default: false },
+    isVerified : {type : Boolean, default  : false}, // for email verification
+    otpDetails : { value : {type : Number , default : null}, expiry : { type : Date, default : null }   },
   membershipExpires: { type: Date, default: null },
 }, {
   timestamps: true,

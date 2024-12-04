@@ -5,7 +5,7 @@ import DevKey from '../models/devKeyModel.js';
 import { validateDevKey, generateToken } from "../utils/index.js"
 import { ClientError, ServerError } from "../utils/errorHandler.js"
 import bcrypt from 'bcryptjs';
-
+import sendEmail from "../utils/sendEmail.js";
 export const createUserWithRole = async ({ email, password, role, devKey, name }, session) => {
   try {
     // Validate inputs
@@ -29,6 +29,8 @@ export const createUserWithRole = async ({ email, password, role, devKey, name }
 
     const Model = role === ROLES.SUPER_ADMIN ? SuperAdmin : HotelOwner;
     const approve = role === ROLES.SUPER_ADMIN;
+    const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
     // Create user
     console.log(Model);
     const newUser = new Model({
@@ -37,8 +39,16 @@ export const createUserWithRole = async ({ email, password, role, devKey, name }
       password,
       role,
       isApproved: approve, // SuperAdmin is auto-approved
+      isVerified: false,
+      otpDetails: {
+        value: otp,
+        expiry: otpExpiry,
+      },
     });
-
+    
+    const subject = 'Email Verification OTP';
+    const description = `Your OTP for email verification is ${otp}. It is valid for 10 minutes.`;
+    await sendEmail(email, subject, description);
     // if (role === ROLES.HOTEL_OWNER) {
     //   const newHotel = new Hotel({
     //     name: `${name}'s Hotel`,
