@@ -7,9 +7,9 @@ export const generateDevKey = catchAsyncError(async (req, res) => {
   const devKey = await generateDevKeyService();
 
   res.status(201).json({
-    status: success,
+    status: "success",
     data: { devKey: devKey.key },
-    message: 'Dev key generated successfully',
+    message: 'Dev key generated "success"fully',
   });
 });
 
@@ -21,9 +21,9 @@ export const getAllDevKeys = catchAsyncError(async (req, res) => {
 
   // Respond with the fetched data
   res.status(200).json({
-    status: success,
+    status: "success",
     data: { devKeys },
-    message: 'Dev keys fetched successfully',
+    message: 'Dev keys fetched "success"fully',
   });
 });
 // Mark a DevKey as used (for testing purposes)
@@ -37,9 +37,9 @@ export const useDevKey = catchAsyncError(async (req, res) => {
   // Use the service to mark the key as used
   const { message } = await useDevKeyService(devKey);
 
-  // Send a successful response
+  // Send a "success"ful response
   res.status(200).json({
-    status: success,
+    status: "success",
     message: message,
   });
 });

@@ -14,7 +14,7 @@ export const getHotelById = catchAsyncError(async (req, res) => {
   const hotel = await getHotelByIdService(req.user, hotelId);
 
   res.status(200).json({
-    status: success,
+    status : "success",
     message: 'Hotel details fetched successfully',
     data: { hotel },
   });
@@ -30,7 +30,7 @@ export const updateHotel = catchAsyncError(async (req, res) => {
   const updatedHotel = await updateHotelService(req.user, hotelId, { name, location, logo, description });
 
   res.status(200).json({
-    status: success,
+    status : "success",
     message: 'Hotel updated successfully',
     data: { hotel: updatedHotel, }
   });
@@ -46,7 +46,7 @@ export const deleteHotel = catchAsyncError(async (req, res) => {
   await deleteHotelService(req.user, hotelId);
 
   res.status(200).json({
-    status: success,
+    status : "success",
     message: 'Hotel deleted successfully',
   });
 });
@@ -58,7 +58,7 @@ export const getAllHotels = catchAsyncError(async (req, res) => {
   const hotels = await getAllHotelsService(req.user);
 
   res.status(200).json({
-    status: success,
+    status : "success",
     message: "All hotels fetched successfully",
     data: { hotels }
   });
