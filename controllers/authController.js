@@ -30,7 +30,7 @@ export const signUp = catchAsyncError(async (req, res, next, session) => {
 
 
 export const login = catchAsyncError(async (req, res) => {
-  const { email, password, role="superadmin" } = req.body;
+  const { email, password, role } = req.body;
 
   const { user, token } = await authenticateUser({ email, password,role });
 
