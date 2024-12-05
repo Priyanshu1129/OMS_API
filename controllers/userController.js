@@ -12,7 +12,7 @@ export const getUserProfile = catchAsyncError(async (req, res) => {
   const userId = req.user?.id;
   const user = await getUserProfileService(userId);
   res.status(200).json({
-    status: success,
+    status : "success",
     message: "User profile fetched successfully",
     data: { user },
   });
@@ -23,7 +23,7 @@ export const approveHotelOwner = catchAsyncError(async (req, res,next,session) =
   const updatedHotelOwner = await approveHotelOwnerService(ownerId, session);
 
   res.status(200).json({
-    status: success,
+    status : "success",
     message: 'Hotel owner approved successfully',
     data: { hotelOwner: updatedHotelOwner}
   });
@@ -34,7 +34,7 @@ export const getAllHotelOwners = catchAsyncError(async (req, res) => {
   const hotelOwners = await getAllHotelOwnersService();
 
   res.status(200).json({
-    status: success,
+    status : "success",
     message: "All hotel owners fetched successfully",
     data: { hotelOwners }
   });
@@ -47,7 +47,7 @@ export const getUnApprovedOwners = catchAsyncError(async (req, res) => {
   const { unApprovedOwners, pagination } = await getUnApprovedOwnersService({ page, limit });
 
   res.status(200).json({
-    status: success,
+    status : "success",
     message: "Unapproved owners fetched successfully",
     data: {
       unApprovedOwners,
@@ -63,7 +63,7 @@ export const getApprovedOwners = catchAsyncError(async (req, res) => {
   const { approvedOwners, pagination } = await getApprovedOwnersService({ page, limit });
 
   res.status(200).json({
-    status: success,
+    status : "success",
     message: "Approved owners fetched successfully",
     data: {
       approvedOwners,
@@ -84,7 +84,7 @@ export const membershipExtender = catchAsyncError(async (req, res) => {
   const updatedHotelOwner = await membershipExtenderService(hotelOwnerId, days);
 
   res.status(200).json({
-    status: success,
+    status : "success",
     message: "Membership extended successfully",
     data: { updatedHotelOwner }
   });
