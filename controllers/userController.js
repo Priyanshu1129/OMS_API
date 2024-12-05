@@ -4,36 +4,37 @@ import {
   approveHotelOwnerService,
   getAllHotelOwnersService,
   getUnApprovedOwnersService,
-  getApprovedOwnersService
+  getApprovedOwnersService,
+  membershipExtenderService
 } from '../services/userServices.js';
 
 export const getUserProfile = catchAsyncError(async (req, res) => {
   const userId = req.user?.id;
   const user = await getUserProfileService(userId);
   res.status(200).json({
-    success: true,
+    status : "success",
     message: "User profile fetched successfully",
     data: { user },
   });
 });
 
-export const approveHotelOwner = catchAsyncError(async (req, res) => {
+export const approveHotelOwner = catchAsyncError(async (req, res,next,session) => {
   const { ownerId } = req.params;
-  const updatedHotelOwner = await approveHotelOwnerService(ownerId);
+  const updatedHotelOwner = await approveHotelOwnerService(ownerId, session);
 
   res.status(200).json({
-    success: true,
+    status : "success",
     message: 'Hotel owner approved successfully',
-    //data: { hotelOwner: updatedHotelOwner}
+    data: { hotelOwner: updatedHotelOwner}
   });
-});
+}, true);
 
 export const getAllHotelOwners = catchAsyncError(async (req, res) => {
 
   const hotelOwners = await getAllHotelOwnersService();
 
   res.status(200).json({
-    success: true,
+    status : "success",
     message: "All hotel owners fetched successfully",
     data: { hotelOwners }
   });
@@ -46,7 +47,7 @@ export const getUnApprovedOwners = catchAsyncError(async (req, res) => {
   const { unApprovedOwners, pagination } = await getUnApprovedOwnersService({ page, limit });
 
   res.status(200).json({
-    success: true,
+    status : "success",
     message: "Unapproved owners fetched successfully",
     data: {
       unApprovedOwners,
@@ -62,11 +63,29 @@ export const getApprovedOwners = catchAsyncError(async (req, res) => {
   const { approvedOwners, pagination } = await getApprovedOwnersService({ page, limit });
 
   res.status(200).json({
-    success: true,
+    status : "success",
     message: "Approved owners fetched successfully",
     data: {
       approvedOwners,
       pagination,
     },
+  });
+});
+
+export const membershipExtender = catchAsyncError(async (req, res) => {
+  // Logic to extend membership
+  const hotelOwnerId = req.params.hotelOwnerId;
+  // console.log(hotelOwnerId);
+  // console.log(req.body);
+  
+  const {days} = req.body;
+  // console.log(days);
+
+  const updatedHotelOwner = await membershipExtenderService(hotelOwnerId, days);
+
+  res.status(200).json({
+    status : "success",
+    message: "Membership extended successfully",
+    data: { updatedHotelOwner }
   });
 });

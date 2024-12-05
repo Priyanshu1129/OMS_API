@@ -5,6 +5,7 @@ import {
   getAllHotelOwners,
   getUnApprovedOwners,
   getApprovedOwners,
+  membershipExtender,
 } from '../controllers/userController.js';
 import { protect, superAdminOnly } from '../middlewares/authMiddleware.js';
 
@@ -18,5 +19,7 @@ router.patch('/approve-hotel-owner/:ownerId', protect, superAdminOnly, approveHo
 router.get('/hotel-owners', protect, superAdminOnly, getAllHotelOwners);
 router.get('/hotel-owners/pending-approval', protect, superAdminOnly, getUnApprovedOwners);
 router.get('/hotel-owners/approved', protect, superAdminOnly, getApprovedOwners);
+
+router.patch('/membership-extender/:hotelOwnerId', protect, superAdminOnly, membershipExtender);
 
 export default router;

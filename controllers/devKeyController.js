@@ -1,13 +1,13 @@
 // controllers/devKeyController.js
 import { generateDevKeyService, getAllDevKeysService, useDevKeyService } from '../services/devKeyServices.js';
-import catchAsyncError from '../utils/catchAsyncError.js';
+import {catchAsyncError} from '../middlewares/catchAsyncError.js';
 
 export const generateDevKey = catchAsyncError(async (req, res) => {
   // Call the service to generate a new dev key
   const devKey = await generateDevKeyService();
 
   res.status(201).json({
-    success: true,
+    status: "success",
     data: { devKey: devKey.key },
     message: 'Dev key generated successfully',
   });
@@ -21,7 +21,7 @@ export const getAllDevKeys = catchAsyncError(async (req, res) => {
 
   // Respond with the fetched data
   res.status(200).json({
-    success: true,
+    status: "success",
     data: { devKeys },
     message: 'Dev keys fetched successfully',
   });
@@ -39,7 +39,7 @@ export const useDevKey = catchAsyncError(async (req, res) => {
 
   // Send a successful response
   res.status(200).json({
-    success: true,
+    status: "success",
     message: message,
   });
 });

@@ -3,11 +3,16 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDb from '../connectDb.js'; // Assuming you have a database connection utility
-import { error } from '../middlewares/error.middleware.js'; // Global error handling middleware
+import { error } from '../middlewares/errorMiddleware.js'; // Global error handling middleware
 import userRouter from '../routes/userRouter.js'; // Import userRouter
 import devKeyRouter from '../routes/devKeyRouter.js';
 import hotelRouter from "../routes/hotelRouter.js";
 import authRouter from "../routes/authRouter.js"
+import tableRouter from "../routes/tableRouter.js"
+import qrRouter from "../routes/qrRouter.js"
+import puppeteer from 'puppeteer';
+import fs from 'fs';
+import { launchBrowser } from '../utils/puppeteerHelper.js';
 
 const app = express();
 
@@ -38,9 +43,10 @@ app.get('/', (req, res) => {
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/devkeys', devKeyRouter);
 app.use('/api/v1/users', userRouter);
-app.use('/api/v1/hotels',hotelRouter)
+app.use('/api/v1/hotels',hotelRouter);
+app.use('/api/v1/tables',tableRouter);
+app.use('/api/v1/qrs',qrRouter);
 
-// Global Error Handler Middleware
 app.use(error); // This will catch any errors from previous routes and middleware
 
 // Start the server
