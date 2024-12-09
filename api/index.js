@@ -18,8 +18,8 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-  // origin: ["https://your-frontend-url.co", "http://localhost:3000"], // Update with your frontend URLs
-  origin: "*", 
+  origin: ["https://orm-frontend-eight.vercel.app", "http://localhost:3000"], // Update with your frontend URLs
+  // origin: "*", 
   methods: ["POST", "GET", "PUT", "DELETE"],
   credentials: true,
 };
