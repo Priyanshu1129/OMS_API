@@ -20,7 +20,7 @@ const app = express();
 const corsOptions = {
   origin: ["https://orm-frontend-eight.vercel.app", "http://localhost:3000"], // Update with your frontend URLs
   // origin: "*", 
-  methods: ["POST", "GET", "PUT", "DELETE"],
+  methods: ["POST", "GET", "PUT", "DELETE", "PATCH"],
   credentials: true,
 };
 
