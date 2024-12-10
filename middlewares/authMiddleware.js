@@ -74,9 +74,9 @@ export const protect = async (req, res, next) => {
   //   token = req.headers.authorization.split(' ')[1];
    
   //logic to extract token from cookie
+  console.log("IN Protect Token : token", req.cookies)
   if (req.cookies && req.cookies.token) {
     token = req.cookies.token;
-
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 

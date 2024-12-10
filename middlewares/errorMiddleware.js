@@ -1,6 +1,6 @@
 export const  error = (err, req, res, next) => {
     // Log the error details for debugging
-    console.error("Error details:", err);
+    console.error("Error details : ", err);
   
     // Default error message and status
     err.message = err.message || "Internal server error";
@@ -10,7 +10,7 @@ export const  error = (err, req, res, next) => {
     if (err.code === 11000) {
       // MongoDB Duplicate key error
       err.message = `${Object.keys(err.keyValue)} already exists, please try another.`;
-      err.statusCode = 400;
+      err.statusCode = 400;              
     } else if (err.name === "CastError") {
       // Mongoose invalid ID error
       err.message = `${err.path} is invalid!`;
