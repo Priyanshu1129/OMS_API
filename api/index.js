@@ -10,9 +10,6 @@ import hotelRouter from "../routes/hotelRouter.js";
 import authRouter from "../routes/authRouter.js"
 import tableRouter from "../routes/tableRouter.js"
 import qrRouter from "../routes/qrRouter.js"
-import puppeteer from 'puppeteer';
-import fs from 'fs';
-import { launchBrowser } from '../utils/puppeteerHelper.js';
 
 const app = express();
 
