@@ -24,6 +24,26 @@ export const createIngredientService = async (hotelId, ingredientData) => {
     }
 }
 
+export const createMultipleIngredientsService = async (hotelId, ingredientsData) => {
+    try {
+        if (!hotelId) {
+            throw new ClientError('Hotel ID is required');
+        }
+
+        const ingredients = ingredientsData.map(ingredientData => ({ ...ingredientData, hotelId }));
+        const createdIngredients = await Ingredient.insertMany(ingredients);
+
+        return createdIngredients;
+    } catch (error) {
+        if (error instanceof ClientError) {
+            throw new ClientError(error.message);
+        }
+        else {
+            throw new ServerError('Ingredients creation failed');
+        }
+    }
+}
+
 export const getIngredientByIdService = async (ingredientId) => {
     try {
         const ingredient = await Ingredient.findById(ingredientId);
@@ -136,4 +156,23 @@ export const removeIngredientsFromDishService = async (dishId, ingredients) => {
         }
     }
 }
+
+export const syncIngredientsFromSourceToDestinationService = async (sourceHotelId,destinationHotelId) => {
+    try {
+        const sourceIngredients = await Ingredient.find({ hotelId: sourceHotelId });
+        if (sourceIngredients.length === 0) {
+            throw new ClientError('No ingredients found in source hotel');
+        }
+        const destinationIngredients = sourceIngredients.map(ingredient => ({ ...ingredient._doc, hotelId: destinationHotelId }));
+        const importedIngredients = await Ingredient.insertMany(destinationIngredients);
+        return importedIngredients;
+    } catch (error) {
+        if (error instanceof ClientError) {
+            throw new ClientError(error.message);
+        } else {
+            throw new ServerError('Failed to import ingredients');
+        }
+    }
+}
+
 

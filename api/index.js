@@ -10,6 +10,7 @@ import hotelRouter from "../routes/hotelRouter.js";
 import authRouter from "../routes/authRouter.js"
 import tableRouter from "../routes/tableRouter.js"
 import qrRouter from "../routes/qrRouter.js"
+import ingredientRouter from "../routes/ingredientRouter.js"
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/hotels',hotelRouter);
 app.use('/api/v1/tables',tableRouter);
 app.use('/api/v1/qrs',qrRouter);
+app.use('/api/v1/ingredients',ingredientRouter);
 
 app.use(error); // This will catch any errors from previous routes and middleware
 

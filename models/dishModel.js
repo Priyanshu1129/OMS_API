@@ -10,6 +10,7 @@ const categorySchema = new mongoose.Schema({
 const ingredientSchema = new mongoose.Schema({
   name: {type: String, required: true},
   logo : {type: String},
+  description: {type: String},
   hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel', required: true }
 })
 
