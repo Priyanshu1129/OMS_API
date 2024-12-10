@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const billSchema = new mongoose.Schema({
-  customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
+  customerName: { type: String },
   orderIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
   totalAmount: { type: Number, required: true },
   totalDiscount: { type: Number, default: 0 },
