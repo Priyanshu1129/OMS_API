@@ -12,7 +12,7 @@
       "dest": "api/index.js",
       "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"],
       "headers": {
-        "Access-Control-Allow-Origin": "https://crm-frontend-sigma-green.vercel.app",
+        "Access-Control-Allow-Origin": "https://orm-frontend-eight.vercel.app",
         "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS, PUT, DELETE, PATCH",
         "Access-Control-Allow-Headers": "Content-Type, Authorization"
