@@ -18,7 +18,8 @@ export const getTableByIdService = async (tableId) => {
         table.populate('hotelId', 'name');
         return table;
     } catch (error) {
-        throw new ServerError('Error while fetching table details');
+        if (error instanceof ClientError) throw error;
+        else throw new ServerError('Error while fetching table details');
     }
 }
 
@@ -27,7 +28,6 @@ export const getTablesService = async (user) => {
         // const tables = user.role === ROLES.TABLE_OWNER ? await Table.find({ ownerId: user.id }) : await Table.find();
         console.log(user);
         const tables = await Table.find({ hotelId: user.hotelId }).populate('hotelId', 'name');
-
 
         return tables;
     } catch (error) {
@@ -53,7 +53,8 @@ export const updateTableService = async (user, tableId, tableData) => {
         await table.save();
         return table;
     } catch (error) {
-        throw new ServerError('Error while updating table');
+        if (error instanceof ClientError) { throw error; }
+        else throw new ServerError('Error while updating table');
     }
 }
 
@@ -62,7 +63,9 @@ export const deleteTableService = async (user, tableId) => {
         const table = await getTableByIdService(user, tableId);
         await table.remove();
     } catch (error) {
-        throw new ServerError('Error while deleting table');
+        if (error instanceof ClientError) { throw error; }
+        else
+            throw new ServerError('Error while deleting table');
     }
 }
 
@@ -75,7 +78,9 @@ export const occupyTableService = async (user, tableId) => {
         table.status = 'occupied';
         await table.save();
     } catch (error) {
-        throw new ServerError('Error while occupying table');
+        if (error instanceof ClientError) { throw error; }
+        else
+            throw new ServerError('Error while occupying table');
     }
 }
 
@@ -88,7 +93,9 @@ export const freeTableService = async (user, tableId) => {
         table.status = 'free';
         await table.save();
     } catch (error) {
-        throw new ServerError('Error while freeing table');
+        if (error instanceof ClientError) { throw error; }
+        else
+            throw new ServerError('Error while freeing table');
     }
 }
 

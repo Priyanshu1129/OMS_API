@@ -1,3 +1,4 @@
+import e from "express";
 import { Category } from "../models/dishModel.js";
 import { ClientError,ServerError } from "../utils/errorHandler.js";
 
@@ -16,7 +17,7 @@ export const createCategoryService = async (hotelId, categoryData) => {
         return category;
     } catch (error) {
         if(error instanceof ClientError){
-            throw new ClientError(error.message);
+            throw new error;
         }
         else {
             throw new ServerError("Category creation failed");
@@ -36,7 +37,7 @@ export const createMultipleCategoriesService = async (hotelId, categoriesData) =
         return createdCategories;
     } catch (error) {
         if (error instanceof ClientError) {
-            throw new ClientError(error.message);
+            throw new error;
         }
         else {
             throw new ServerError('Categories creation failed');
@@ -55,7 +56,7 @@ export const getCategoryByIdService = async (categoryId) => {
     }
     catch (error) {
         if (error instanceof ClientError) {
-            throw new ClientError(error.message);
+            throw new error;
         } else {
             throw new ServerError('Failed to fetch category');
         }
@@ -74,7 +75,7 @@ export const getAllCategoriesService = async (hotelId) => {
     }
     catch (error) {
         if (error instanceof ClientError) {
-            throw new ClientError(error.message);
+            throw new error;
         } else {
             throw new ServerError('Failed to fetch categories');
         }
@@ -91,7 +92,7 @@ export const updateCategoryService = async (categoryId, categoryData) => {
     }
     catch (error) {
         if (error instanceof ClientError) {
-            throw new ClientError(error.message);
+            throw new error;
         } else {
             throw new ServerError('Failed to update category');
         }
@@ -106,7 +107,7 @@ export const deleteCategoryService = async (categoryId) => {
         }
     } catch (error) {
         if (error instanceof ClientError) {
-            throw new ClientError(error.message);
+            throw new error;
         } else {
             throw new ServerError('Failed to delete category');
         }
@@ -121,7 +122,7 @@ export const deleteMultipleCategoriesService = async (categoryIds) => {
         }
     } catch (error) {
         if (error instanceof ClientError) {
-            throw new ClientError(error.message);
+            throw new error;
         } else {
             throw new ServerError('Failed to delete categories');
         }
