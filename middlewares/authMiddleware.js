@@ -16,7 +16,7 @@ dotenv.config();
 //     try {
 //       // Get token from header
 //       token = req.headers.authorization.split(' ')[1];
-      
+
 
 //       // Verify token using JWT_SECRET
 //       const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -68,9 +68,12 @@ dotenv.config();
 
 export const protect = async (req, res, next) => {
   let token;
+  console.log(req.headers.authorization)
 
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
+
+    console.log('my-token>>>>>>>>>>>', token)
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -136,7 +139,7 @@ export const superAdminOnly = (req, res, next) => {
   // Ensure only SuperAdmins can access this route
 
   if (req.user.role !== ROLES.SUPER_ADMIN) {
-    return next( new ClientError("ForbiddenError", "Access denied. SuperAdmin only."));
+    return next(new ClientError("ForbiddenError", "Access denied. SuperAdmin only."));
   }
 
   next();
@@ -163,13 +166,13 @@ export const validateOwnership = async (req, res, next) => {
 
     const resourceId = req.params[resourceIdKey];
     const modelString = resource.charAt(0).toUpperCase() + resource.slice(1, -1);
-    console.log("modelString :",modelString);
-    
+    console.log("modelString :", modelString);
+
     const ResourceModel =
       mongoose.models[modelString] || mongoose.model(modelString);
 
-      console.log(resourceId);  
-      console.log(ResourceModel);
+    console.log(resourceId);
+    console.log(ResourceModel);
 
     if (!ResourceModel) {
       return next(new ClientError(`Invalid resource: ${resource}`, 400));

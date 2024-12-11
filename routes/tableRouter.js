@@ -1,18 +1,18 @@
-import { attachHotelId, protect,superAdminOnly, validateOwnership } from "../middlewares/authMiddleware.js";
+import { attachHotelId, protect, superAdminOnly, validateOwnership } from "../middlewares/authMiddleware.js";
 import express from 'express';
 import { getTableById, getTables, createTable, updateTable, deleteTable, occupyTable, freeTable } from '../controllers/tableController.js';
 
 const router = express.Router();
 
-router.get('/table/:id', protect,validateOwnership, getTableById);
+router.get('/:id', protect, validateOwnership, getTableById);
 
-router.get('/tables', protect,attachHotelId, getTables);
+router.get('/', protect, attachHotelId, getTables);
 
-router.post('/table', protect, createTable);
+router.post('/', protect, createTable);
 
-router.put('/table/:id', protect, updateTable);
+router.put('/:id', protect, updateTable);
 
-router.delete('/table/:id', protect, deleteTable);
+router.delete('/:id', protect, deleteTable);
 
 //occupy table
 // router.put('/table-occupy/:id', protect,occupyTable);

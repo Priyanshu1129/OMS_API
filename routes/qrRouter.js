@@ -1,10 +1,10 @@
 import express from "express";
-import {  printQr } from "../controllers/qrController.js";
+import { printQr } from "../controllers/qrController.js";
 import { protect } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.get('/:tableId',protect, printQr);
+router.get('/:tableId', protect, printQr);
 
 // Generate QR code using tableId in params
 // router.post('/generate/:tableId', protect, generateQr);
@@ -13,7 +13,5 @@ router.get('/:tableId',protect, printQr);
 // router.get('/print/:tableId', protect, printQr);
 
 // Generate QR code using tableId in params
-
-
 
 export default router;

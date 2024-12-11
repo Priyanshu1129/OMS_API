@@ -19,17 +19,17 @@ import Hotel from "../models/hotelModel.js";
 export const printQr = catchAsyncError(async (req, res, next) => {
     const { tableId } = req.params; // Table ID from the URL parameters\
 
-    const table =  await Table.findById(tableId);
+    const table = await Table.findById(tableId);
 
     const tableNumber = table.sequence;
     const hotelId = req.user.hotelId;
 
-    const hotel = await Hotel.findById(hotelId );
+    const hotel = await Hotel.findById(hotelId);
 
     const hotelName = hotel.name;
 
-    const qrCodeData = await getQrService(tableId,hotelId);
-    const pdfBuffer = await generatePdfService(qrCodeData.imageUrl, tableId, tableNumber,hotelName);
+    const qrCodeData = await getQrService(tableId, hotelId);
+    const pdfBuffer = await generatePdfService(qrCodeData.imageUrl, tableId, tableNumber, hotelName);
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=table-${tableId}-qr.pdf`);

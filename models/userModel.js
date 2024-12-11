@@ -9,22 +9,22 @@ const userBaseSchema = new mongoose.Schema({
   role: { type: String, required: true },  // Role field remains the same
   hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel' },
   isApproved: { type: Boolean, default: false },
-    isVerified : {type : Boolean, default  : false}, // for email verification
-    otpDetails : { value : {type : Number , default : null}, expiry : { type : Date, default : null }   },
+  isVerified: { type: Boolean, default: false }, // for email verification
+  otpDetails: { value: { type: Number, default: null }, expiry: { type: Date, default: null } },
   membershipExpires: { type: Date, default: null },
 }, {
   timestamps: true,
 });
 
 // Middleware to hash passwords before saving
-userBaseSchema.pre('save', async function(next) {
+userBaseSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
 // Password comparison method
-userBaseSchema.methods.matchPassword = async function(enteredPassword) {
+userBaseSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
@@ -55,9 +55,9 @@ export { User, SuperAdmin, HotelOwner };  // Export User explicitly
 //     email: { type: String, required: true, unique: true },
 //     password: { type: String, required: true },
 //     role: { type: String, required: true },  // No enum here, as it's managed by discriminators
-//     // role: { 
-//     //   type: String, 
-//     //   required: true, 
+//     // role: {
+//     //   type: String,
+//     //   required: true,
 //     //   enum: ['superadmin', 'hotelowner'], // Ensure only valid roles
 //     // },
 //     hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel' },
@@ -65,7 +65,7 @@ export { User, SuperAdmin, HotelOwner };  // Export User explicitly
 //   },
 //   {
 //     timestamps: true,
-//     discriminatorKey: '__t', 
+//     discriminatorKey: '__t',
 //   }
 // );
 

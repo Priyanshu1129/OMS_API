@@ -7,9 +7,9 @@ export const getTableByIdService = async (tableId) => {
 
         const table = await Table.findById(tableId).populate('hotelId', 'name');
         if (!table) {
-        throw new ClientError('Table not found', 404);
+            throw new ClientError('Table not found', 404);
         }
-        
+
         //not needed as already handled by middleware
         // if (user.role === ROLES.TABLE_OWNER && table.ownerId.toString() !== user.id) {
         // throw new ClientError('Access denied. You can only view your own table.', 403);
@@ -19,18 +19,18 @@ export const getTableByIdService = async (tableId) => {
     } catch (error) {
         throw new ServerError('Error while fetching table details');
     }
-    }
+}
 
 export const getTablesService = async (user) => {
     try {
         // const tables = user.role === ROLES.TABLE_OWNER ? await Table.find({ ownerId: user.id }) : await Table.find();
         console.log(user);
         const tables = await Table.find({ hotelId: user.hotelId }).populate('hotelId', 'name');
-        
+
 
         return tables;
     } catch (error) {
-        if(error instanceof ClientError) { throw new ClientError(error.message, error.statusCode); }
+        if (error instanceof ClientError) { throw new ClientError(error.message, error.statusCode); }
         else throw new ServerError('Error while fetching tables');
     }
 }
@@ -69,7 +69,7 @@ export const occupyTableService = async (user, tableId) => {
     try {
         const table = await getTableByIdService(user, tableId);
         if (table.status === 'occupied') {
-        throw new ClientError('Table is already occupied', 400);
+            throw new ClientError('Table is already occupied', 400);
         }
         table.status = 'occupied';
         await table.save();
@@ -82,7 +82,7 @@ export const freeTableService = async (user, tableId) => {
     try {
         const table = await getTableByIdService(user, tableId);
         if (table.status === 'free') {
-        throw new ClientError('Table is already free', 400);
+            throw new ClientError('Table is already free', 400);
         }
         table.status = 'free';
         await table.save();

@@ -45,7 +45,7 @@ export const createUserWithRole = async ({ email, password, role, devKey, name }
         expiry: otpExpiry,
       },
     });
-    
+
     const subject = 'Email Verification OTP';
     const description = `Your OTP for email verification is ${otp}. It is valid for 10 minutes.`;
     await sendEmail(email, subject, description);
@@ -68,12 +68,12 @@ export const createUserWithRole = async ({ email, password, role, devKey, name }
     return { newUser, token };
 
   } catch (error) {
-    if(error instanceof ClientError) throw new ClientError(error.name, error.message);
+    if (error instanceof ClientError) throw new ClientError(error.name, error.message);
     else throw new ServerError(error.message);
   }
 };
 
-export const authenticateUser = async ({ email, password,role }) => {
+export const authenticateUser = async ({ email, password, role }) => {
   try {
     // Validate input
     if (!email || !password) {
