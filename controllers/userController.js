@@ -5,7 +5,8 @@ import {
   getAllHotelOwnersService,
   getUnApprovedOwnersService,
   getApprovedOwnersService,
-  membershipExtenderService
+  membershipExtenderService,
+  deleteHotelOwnerService,
 } from '../services/userServices.js';
 
 export const getUserProfile = catchAsyncError(async (req, res) => {
@@ -87,5 +88,14 @@ export const membershipExtender = catchAsyncError(async (req, res) => {
     status : "success",
     message: "Membership extended successfully",
     data: { updatedHotelOwner }
+  });
+});
+
+export const deleteHotelOwner = catchAsyncError(async (req, res) => {
+  const { ownerId } = req.params;
+  await deleteHotelOwnerService(ownerId);
+  res.status(200).json({
+    status : "success",
+    message: 'Hotel owner deleted successfully',
   });
 });

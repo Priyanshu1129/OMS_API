@@ -152,3 +152,26 @@ export const membershipExtenderService = async (hotelOwnerId, days) => {
 };
 
 
+export const deleteHotelOwnerService = async (ownerId) => {
+    try {
+        if (!ownerId) {
+            throw new ClientError('ValidationError', 'Owner ID is required');
+        }
+
+        const hotelOwner = await HotelOwner.findById(ownerId);
+
+        if (!hotelOwner) {
+            throw new ClientError('NotFoundError', 'Hotel owner not found');
+        }
+
+        await hotelOwner.remove();
+
+        return hotelOwner;
+    } catch (error) {
+        if (error instanceof ClientError) {
+            throw new ClientError(error.type, error.message, error.statusCode);
+        } else {
+            throw new ServerError('Error while deleting hotel owner', error);
+        }
+    }
+};  
