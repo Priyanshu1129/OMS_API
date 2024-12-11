@@ -70,14 +70,17 @@ export const protect = async (req, res, next) => {
   let token;
   console.log(req.headers.authorization)
 
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    token = req.headers.authorization.split(' ')[1];
-
-    console.log('my-token>>>>>>>>>>>', token)
-
+  // this is logic old logic to extract token from header
+  // if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+  //   token = req.headers.authorization.split(' ')[1];
+   
+  //logic to extract token from cookie
+  console.log("IN Protect Token : ", req.cookies)
+  if (req.cookies && req.cookies.token) {
+    token = req.cookies.token;
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
+      console.log("decoded role ", decoded )
       if (decoded.role === ROLES.SUPER_ADMIN) {
         req.user = await SuperAdmin.findById(decoded.id).select('-password');
       } else if (decoded.role === ROLES.HOTEL_OWNER) {

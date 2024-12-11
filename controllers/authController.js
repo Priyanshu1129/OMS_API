@@ -13,12 +13,12 @@ export const signUp = catchAsyncError(async (req, res, next, session) => {
     session
   );
 
-  // res.cookie("token", token, {
-  //   httpOnly: true,
-  //   sameSite: 'None',
-  //   secure: process.env.NODE_ENV === "production",
-  //   maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
-  // });
+  res.cookie("token", token, {
+    httpOnly: false,
+    sameSite: 'None',
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
+  });
 
   res.status(201).json({
     status: "success",
@@ -35,7 +35,7 @@ export const login = catchAsyncError(async (req, res) => {
   const { user, token } = await authenticateUser({ email, password, role });
 
   res.cookie("token", token, {
-    httpOnly: true,
+    httpOnly: false,
     sameSite: 'None',
     secure: process.env.NODE_ENV === "production",
     maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days

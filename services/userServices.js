@@ -1,5 +1,5 @@
 import { ClientError,ServerError } from '../utils/index.js';
-import { HotelOwner, User } from '../models/userModel.js';
+import { HotelOwner, SuperAdmin } from '../models/userModel.js';
 import Hotel from '../models/hotelModel.js';
 
 export const getUserProfileService = async (userId) => {
@@ -8,12 +8,14 @@ export const getUserProfileService = async (userId) => {
             throw new ClientError('ValidationError', 'User ID is required');
         }
 
-        const user = await User.findById(userId).select('-password');
-        if (!user) {
+        const hotelOwner = await HotelOwner.findById(userId).select('-password');
+        const superAdmin = await SuperAdmin.findById(userId).select('-password');
+
+        if (!hotelOwner && !superAdmin) {
             throw new ClientError('NotFoundError', 'User not found');
         }
 
-        return user;
+        return hotelOwner || superAdmin;
     } catch (error) {
         throw new ServerError('Error while fetching user profile');
     }
