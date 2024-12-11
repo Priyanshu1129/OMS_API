@@ -1,22 +1,24 @@
 import { Dish } from "../models/dishModel.js";
 
-import { ClientError,ServerError } from "../utils/errorHandler.js";
+import { ClientError, ServerError } from "../utils/errorHandler.js";
 
-export const createDishService = async (hotelId, dishData) => {
+export const createDishService = async (dishData) => {
     try {
-        
-        if(!hotelId){
+        const hotelId = dishData.hotelId;
+        if (!hotelId) {
             throw new ClientError("Hotel ID is required");
         }
-
-        if(!dishData.name){
-            throw new ClientError("Dish name is required");
+        console.log('dish-data-1', dishData)
+        if (!dishData.name || !dishData.price) {
+            throw new ClientError("Dish name and price are required!");
         }
+        console.log('dish-data-2', dishData, typeof dishData.price)
         const dish = await Dish.create({ ...dishData, hotelId });
 
         return dish;
     } catch (error) {
-        if(error instanceof ClientError){
+        console.log("error while creating dish", error);
+        if (error instanceof ClientError) {
             throw new ClientError(error.message);
         }
         else {
@@ -39,14 +41,14 @@ export const getDishByIdService = async (dishId) => {
         } else {
             throw new ServerError('Failed to fetch dish');
         }
-    }   
+    }
 }
 
 export const getAllDishesService = async (hotelId) => {
     try {
-        const dishes = await Dish.find({hotelId});
+        const dishes = await Dish.find({ hotelId });
         if (!dishes || dishes.length === 0) {
-            throw new ClientError("NotFoundError", "No dishes found");
+            throw new ClientError("No dishes available!", "Not found");
         }
         return dishes;
     } catch (error) {
@@ -93,9 +95,9 @@ export const deleteDishService = async (dishId) => {
 
 export const getDishesByCategoryService = async (hotelId, categoryId) => {
     try {
-        const dishes = await Dish.find({ 
-            hotelId, 
-            categories: categoryId 
+        const dishes = await Dish.find({
+            hotelId,
+            categories: categoryId
         });
 
         if (!dishes || dishes.length === 0) {

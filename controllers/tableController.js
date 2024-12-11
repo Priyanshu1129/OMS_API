@@ -1,4 +1,4 @@
-import { getTableByIdService, getTablesService, createTableService, deleteTableService, updateTableService } from '../services/tableService.js';
+import { getTableByIdService, getTablesService, createTableService, deleteTableService, updateTableService, getOrdersByTableService } from '../services/tableService.js';
 import { ClientError, ServerError } from '../utils/errorHandler.js'; // Import the custom error classes
 import { catchAsyncError } from '../middlewares/catchAsyncError.js';
 import { HotelOwner } from '../models/userModel.js';
@@ -84,3 +84,18 @@ export const freeTable = catchAsyncError(async (req, res) => {
 //     });
 // });
 
+export const getOrdersByTable = catchAsyncError(async (req, res, next) => {
+    const { tableId } = req.params;
+    console.log('req, to get orders of table')
+    if (!tableId) {
+        throw new ClientError("Please provide table id to get orders");
+    }
+
+    const orders = await getOrdersByTableService(tableId);
+
+    res.status(201).json({
+        success: true,
+        message: "Orders fetched successfully",
+        data: { orders }
+    })
+})

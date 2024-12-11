@@ -4,34 +4,25 @@ import {
     onQRScan,
     updateOrder,
     deleteOrder,
-    getOrdersByTable,
     getOrderById
 } from '../controllers/orderController.js';
-import { updateBill } from "../controllers/billController.js";
 import express from 'express';
 
 const router = express.Router();
 
-// for customer 
-router.get('/get-services', onQRScan);
+// for customer on scanning QR
+router.get('/get-services/:hotelId/:tableId', onQRScan);
 
 // for customer and hotel owner 
-router.post('/', createOrder);
+router.post('/:hotelId/:tableId', createOrder);
 
-// for hotel owner update customer order on request
+// for hotel owner update to update order on customer's order on request
 router.put('/:orderId', protect, validateOwnership, updateOrder);
+
+// for hotel owner to fetch order by id
+router.get('/:orderId', protect, validateOwnership, getOrderById);
 
 // for hotel owner delete customer order on request
 router.delete('/:orderId', protect, validateOwnership, deleteOrder);
-
-// for hotel owner list orders by table id
-router.get('/get-customer-orders/:tableId', protect, validateOwnership, getOrdersByTable);
-
-// for hotel owner 
-router.get('/:orderId', protect, validateOwnership, getOrderById);
-
-// for hotel owner to update bill by table id
-router.put('/:tableId', protect, validateOwnership, updateBill);
-
 
 export default router;

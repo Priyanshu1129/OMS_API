@@ -2,12 +2,26 @@ import Bill from "../models/billModel.js"
 import Order from "../models/orderModel.js"; // Import Order model
 import Customer from "../models/customerModel.js"; // Import Customer model
 import { Dish } from "../models/dishModel.js";
-import { ServerError } from "../utils/errorHandler.js";
+import { ClientError, ServerError } from "../utils/errorHandler.js";
+
+const calculateDiscount = (dish, quantity) => {
+    let discount = 0;
+    const offer = dish.appliedOffer;
+    if (offer?.discountType === 'percent') {
+        let cost = dish.price * quantity;
+        discount = (cost * offer.value) / 100;
+    } else if (offer?.discountType === 'amount') {
+        discount = offer.value * quantity;
+    }
+    return discount;
+}
+
 export const createBill = async ({ customerName, dishes, hotelId, tableId, session }) => {
     try {
+        if (!customerName) throw new ClientError("Customer name is required!");
         // Fetch dish details from the database
-        const dishIds = dishes.map(d => d.dishId); // Assume dishes is an array of { dishId, quantity }
-        const dishDetails = await Dish.find({ _id: { $in: dishIds }, hotelId }).populate('appliedOffer');
+        const dishIds = dishes.map(d => d._id); // Assume dishes is an array of { dishId, quantity }
+        const dishDetails = await Dish.find({ _id: { $in: dishIds }, hotelId });
 
         if (!dishDetails.length) {
             throw new ServerError('No valid dishes found for the provided IDs');
@@ -19,33 +33,33 @@ export const createBill = async ({ customerName, dishes, hotelId, tableId, sessi
 
         // Calculate total amount, discount, and final amount
         for (const dish of dishDetails) {
-            const order = dishes.find(d => d.dishId === dish._id.toString());
+            const order = dishes.find(d => d._id === dish._id.toString());
+
             if (!order) continue; // Skip if no matching order found
 
-            const quantity = order.quantity;
-            const price = dish.price * quantity;
+            const quantity = Number(order.quantity) || 0;
+            if (quantity == 0) continue;
+            const cost = dish.price * quantity;
 
             // Calculate discount if an offer is applied
             let discount = 0;
             if (dish.appliedOffer) {
-                const offer = dish.appliedOffer;
-                if (offer.discountType === 'percent') {
-                    discount = (price * offer.value) / 100;
-                } else if (offer.discountType === 'amount') {
-                    discount = offer.value * quantity;
-                }
+                discount = calculateDiscount(dish, quantity);
             }
 
-            totalAmount += price;
+            totalAmount += cost;
             totalDiscount += discount;
 
             // Add dish to orderedItems
             orderedItems.push({
-                dishName: dish.name,
-                quantity,
-                notes: order.notes || '', // Assume notes are provided in the `dishes` input
+                dishId: dish._id,
+                quantity
             });
         }
+
+        console.log("orderedItems", orderedItems);
+        console.log("totalAmount", totalAmount);
+        console.log("totalDiscount", totalDiscount)
 
         const finalAmount = totalAmount - totalDiscount;
 
@@ -69,17 +83,18 @@ export const createBill = async ({ customerName, dishes, hotelId, tableId, sessi
     }
 };
 
-export const updateBillDishes = async ({ billId, newDishes, session }) => {
+export const updateBillDishes = async ({ billId, oldOrder, newDishes, session }) => {
     try {
         // Fetch the existing bill
         const bill = await Bill.findById(billId);
         if (!bill) {
-            throw new ServerError('Bill not found');
+            throw new ServerError('Something went wrong, bill not found!');
         }
 
         // Fetch details of the new ordered dishes
         const dishIds = newDishes.map(d => d._id);
-        const dishDetails = await Dish.find({ _id: { $in: dishIds }, hotelId: bill.hotelId }).populate('appliedOffer');
+        const dishDetails = await Dish.find({ _id: { $in: dishIds }, hotelId: bill.hotelId });
+
 
         if (!dishDetails.length) {
             throw new ServerError('No valid dishes found for the provided IDs');
@@ -90,50 +105,53 @@ export const updateBillDishes = async ({ billId, newDishes, session }) => {
 
         // Process each new dish
         for (const dish of dishDetails) {
-            const order = newDishes.find(d => d._id === dish._id.toString());
+            const order = newDishes.find(d => d._id.toString() === dish._id.toString());
+            console.log("order----->", order)
             if (!order) continue; // Skip if no matching order found
 
-            const quantity = order.quantity;
-            const price = dish.price * Math.abs(quantity); // Use absolute value to calculate price
+            const quantity = Number(order.quantity);
+            const cost = dish.price * quantity;
+
+            console.log('new quantity', quantity);
+            console.log("new cost", cost);
 
             // Calculate discount if an offer is applied
             let discount = 0;
             if (dish.appliedOffer) {
-                const offer = dish.appliedOffer;
-                if (offer.discountType === 'percent') {
-                    discount = (price * offer.value) / 100;
-                } else if (offer.discountType === 'amount') {
-                    discount = offer.value * Math.abs(quantity);
-                }
+                discount = calculateDiscount(dish, quantity);
             }
 
             // Check if the dish already exists in orderedItems
-            const existingItem = bill.orderedItems.find(item => item.dishName === dish.name);
-
+            const existingItem = bill.orderedItems.find(item => item?.dishId?.toString() == dish._id?.toString());
+            console.log('existing-item-in-bill:', existingItem);
             if (existingItem) {
                 // Adjust the quantity
-                existingItem.quantity += quantity;
-
+                if (!oldOrder) {
+                    existingItem.quantity += quantity
+                    additionalAmount += cost;
+                    additionalDiscount += discount;
+                } else {
+                    const oldQuantity = oldOrder.dishes.find((d) => d.dishId.toString() == dish._id.toString()).quantity;
+                    const changeInQuantity = quantity - oldQuantity;
+                    existingItem.quantity += changeInQuantity;
+                    const changeInCost = cost - (oldQuantity * dish.price);
+                    additionalAmount += changeInCost;
+                    const changeInDiscount = discount - calculateDiscount(dish.price, oldQuantity);
+                    additionalDiscount += changeInDiscount;
+                    console.log('it is old order', changeInQuantity, changeInCost, changeInDiscount);
+                }
                 // Remove the item if the quantity becomes zero or negative
                 if (existingItem.quantity <= 0) {
-                    bill.orderedItems = bill.orderedItems.filter(item => item.dishName !== dish.name);
+                    bill.orderedItems = bill.orderedItems.filter(item => item.dishId.toString() != dish._id.toString());
                 }
             } else if (quantity > 0) {
                 // Add the new dish to orderedItems (only if quantity is positive)
                 bill.orderedItems.push({
-                    dishName: dish.name,
-                    quantity,
-                    notes: order.notes || '',
+                    dishId: dish._id,
+                    quantity
                 });
-            }
-
-            // Update totals
-            if (quantity > 0) {
-                additionalAmount += price;
+                additionalAmount += cost;
                 additionalDiscount += discount;
-            } else {
-                additionalAmount -= price;
-                additionalDiscount -= discount;
             }
         }
 
@@ -151,6 +169,7 @@ export const updateBillDishes = async ({ billId, newDishes, session }) => {
         throw error; // Re-throw the error for the calling function to handle
     }
 };
+
 
 export const updateBillService = async (billData, session) => {
     try {
@@ -186,10 +205,10 @@ export const updateBillService = async (billData, session) => {
         // Step 3: If the status is 'paid' or 'payLater', delete associated orders and customers
         if (status === 'paid' || status === 'payLater') {
             // Delete all orders related to this tableId
-            await Order.deleteMany({ tableId }).session(session); // Delete all orders for the tableId
+            await Order.deleteMany({ billId }).session(session); // Delete all orders for the tableId
 
             // Delete the customer associated with this tableId
-            await Customer.deleteOne({ tableId }).session(session); // Delete customer for the tableId
+            await Customer.deleteOne({ billId }).session(session); // Delete customer for the tableId
         }
 
         // Return the updated bill

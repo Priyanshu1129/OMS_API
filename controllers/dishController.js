@@ -1,19 +1,19 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import {
-  createDishService,
-  deleteDishService,
-  getAllDishesService,
-  getDishByIdService,
-  updateDishService,
-  getDishesByCategoryService,
+    createDishService,
+    deleteDishService,
+    getAllDishesService,
+    getDishByIdService,
+    updateDishService,
+    getDishesByCategoryService,
 } from "../services/dishServices.js";
 
 export const getDishById = catchAsyncError(async (req, res) => {
     const dishId = req.params.dishId;
-    
+
     // Call the service to get dish details
     const dish = await getDishByIdService(dishId);
-    
+
     res.status(200).json({
         status: "success",
         message: "Dish details fetched successfully",
@@ -23,10 +23,10 @@ export const getDishById = catchAsyncError(async (req, res) => {
 
 export const getAllDishes = catchAsyncError(async (req, res) => {
     const hotelId = req.user.hotelId;
-    
+    console.log('dishes-fetching-request')
     // Call the service to get all dishes
     const dishes = await getAllDishesService(hotelId);
-    
+
     res.status(200).json({
         status: "success",
         message: "All dishes fetched successfully",
@@ -37,10 +37,10 @@ export const getAllDishes = catchAsyncError(async (req, res) => {
 export const createDish = catchAsyncError(async (req, res) => {
     const dishData = req.body;
     dishData.hotelId = req.user.hotelId;
-    
+
     // Call the service to create a new dish
     const dish = await createDishService(dishData);
-    
+
     res.status(201).json({
         status: "success",
         message: "Dish created successfully",
@@ -51,10 +51,10 @@ export const createDish = catchAsyncError(async (req, res) => {
 export const updateDish = catchAsyncError(async (req, res) => {
     const dishId = req.params.dishId;
     const dishData = req.body;
-    
+
     // Call the service to update the dish
     const dish = await updateDishService(dishId, dishData);
-    
+
     res.status(200).json({
         status: "success",
         message: "Dish updated successfully",
@@ -64,10 +64,10 @@ export const updateDish = catchAsyncError(async (req, res) => {
 
 export const deleteDish = catchAsyncError(async (req, res) => {
     const dishId = req.params.dishId;
-    
+
     // Call the service to delete the dish
     await deleteDishService(dishId);
-    
+
     res.status(200).json({
         status: "success",
         message: "Dish deleted successfully",
@@ -76,10 +76,10 @@ export const deleteDish = catchAsyncError(async (req, res) => {
 
 export const getDishesByCategory = catchAsyncError(async (req, res) => {
     const { categoryId } = req.params;
-    
+
     // Call the service to get dishes by category
-    const dishes = await getDishesByCategoryService(req.user.hotelId,categoryId);
-    
+    const dishes = await getDishesByCategoryService(req.user.hotelId, categoryId);
+
     res.status(200).json({
         status: "success",
         message: "Dishes fetched successfully",

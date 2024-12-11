@@ -1,20 +1,21 @@
 import express from 'express';
-import {protect,attachHotelId, superAdminOnly} from '../middlewares/authMiddleware.js';
+import { protect, attachHotelId, superAdminOnly } from '../middlewares/authMiddleware.js';
 
-import { createDish, getAllDishes, getDishById , getDishesByCategory, updateDish, deleteDish } from '../controllers/dishController.js';
+import { createDish, getAllDishes, getDishById, getDishesByCategory, updateDish, deleteDish } from '../controllers/dishController.js';
 
 const router = express.Router();
 
-router.get('/', protect,attachHotelId, getAllDishes);
-router.post('/', protect,attachHotelId, createDish);
+router.get('/', protect, attachHotelId, getAllDishes);
 
-router.get('/category/:categoryId', protect,attachHotelId, getDishesByCategory);
+router.post('/', protect, attachHotelId, createDish);
 
-router.get('/:dishId', protect,attachHotelId, getDishById);
+router.get('/category/:categoryId', protect, attachHotelId, getDishesByCategory);
 
-router.patch('/:dishId', protect,attachHotelId, updateDish);
+router.get('/:dishId', protect, attachHotelId, getDishById);
 
-router.delete('/:dishId', protect,attachHotelId, deleteDish);
+router.patch('/:dishId', protect, attachHotelId, updateDish);
+
+router.delete('/:dishId', protect, attachHotelId, deleteDish);
 
 
 

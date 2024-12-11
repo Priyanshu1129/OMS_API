@@ -1,6 +1,7 @@
 import Table from '../models/tableModel.js';
 import { ClientError, ServerError } from '../utils/errorHandler.js';
 import { ROLES } from '../utils/constant.js';
+import Order from "../models/orderModel.js";
 
 export const getTableByIdService = async (tableId) => {
     try {
@@ -99,3 +100,17 @@ export const freeTableService = async (user, tableId) => {
 //         throw new ServerError('Error while fetching tables');
 //     }
 // }
+
+export const getOrdersByTableService = async (tableId) => {
+    // Step 1: Query the orders based on tableId
+    const orders = await Order.find({ tableId }).populate({
+        "path": "dishes.dishId",
+        "select": "-createdAt -updatedAt -quantity -hotelId "
+    }); // Optionally populate dishes with dish details
+    if (!orders || orders.length === 0) {
+        throw new ClientError("No orders available for this table.");
+    }
+
+    // Step 2: Return the list of orders
+    return orders;
+};

@@ -2,11 +2,11 @@ import mongoose from 'mongoose';
 
 const orderSchema = new mongoose.Schema({
   billId: { type: mongoose.Schema.Types.ObjectId, ref: 'Bill', required: true },
-  customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
+  customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true },
   dishes: [{
-    dishId: { type: mongoose.Schema.Types.ObjectId, ref: 'Dish' },
+    dishId: { type: mongoose.Schema.Types.ObjectId, ref: 'Dish', required: true },
     quantity: { type: Number, required: true },
-    notes: { type: String }
+    note: { type: String }
   }],
   status: { type: String, enum: ['pending', 'preparing', 'completed', 'cancelled'], default: 'pending' },
   tableId: { type: mongoose.Schema.Types.ObjectId, ref: 'Table', required: true },

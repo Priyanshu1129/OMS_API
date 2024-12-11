@@ -68,19 +68,18 @@ dotenv.config();
 
 export const protect = async (req, res, next) => {
   let token;
-  console.log(req.headers.authorization)
 
   // this is logic old logic to extract token from header
   // if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
   //   token = req.headers.authorization.split(' ')[1];
-   
+
   //logic to extract token from cookie
   console.log("IN Protect Token : ", req.cookies)
   if (req.cookies && req.cookies.token) {
     token = req.cookies.token;
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log("decoded role ", decoded )
+      console.log("decoded role ", decoded)
       if (decoded.role === ROLES.SUPER_ADMIN) {
         req.user = await SuperAdmin.findById(decoded.id).select('-password');
       } else if (decoded.role === ROLES.HOTEL_OWNER) {
@@ -127,7 +126,7 @@ export const attachHotelId = (req, res, next) => {
 
     if (!hotelId) {
       return next(
-        new ClientError('Hotel ID is required for superadmin role to access hotel resources', 400)
+        new ClientError('Hotel ID is required for super admin role to access hotel resources', 400)
       );
     }
 
@@ -157,7 +156,7 @@ export const validateOwnership = async (req, res, next) => {
 
   try {
     const resource = req.baseUrl.split('/')[3];
-    console.log(resource);
+    console.log("resource", resource);
 
     const resourceIdKey = Object.keys(req.params).find((key) =>
       key.toLowerCase().includes('id')
@@ -174,14 +173,15 @@ export const validateOwnership = async (req, res, next) => {
     const ResourceModel =
       mongoose.models[modelString] || mongoose.model(modelString);
 
-    console.log(resourceId);
-    console.log(ResourceModel);
+    console.log("resourceId", resourceId);
+    console.log("resourceModel", ResourceModel);
 
     if (!ResourceModel) {
       return next(new ClientError(`Invalid resource: ${resource}`, 400));
     }
 
     const resourceData = await ResourceModel.findById(resourceId);
+    console.log('resourceData', resourceData);
 
     if (!resourceData) {
       return next(new ClientError(`${resource} not found`, 404));

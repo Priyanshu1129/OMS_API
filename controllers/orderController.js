@@ -1,5 +1,5 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
-import { addNewOrderService, updateOrderService, deleteOrderService, getOrdersByTableService } from "../services/orderServices.js"
+import { addNewOrderService, updateOrderService, deleteOrderService } from "../services/orderServices.js"
 import { ClientError } from "../utils/errorHandler.js";
 import { onQRScanService } from "../services/orderServices.js";
 import Order from "../models/orderModel.js";
@@ -20,22 +20,6 @@ export const onQRScan = catchAsyncError(async (req, res, next) => {
     })
 })
 
-export const getOrdersByTable = catchAsyncError(async (req, res, next) => {
-    const { tableId } = req.params;
-    if (!tableId) {
-        throw new ClientError("Please provide table id to get orders");
-    }
-
-    const orders = await getOrdersByTableService(tableId).populate('dishes.dishId');
-
-    res.status(201).json({
-        success: true,
-        message: "Orders fetched successfully",
-        data: { orders }
-    })
-})
-
-
 export const getOrderById = catchAsyncError(async (req, res, next) => {
     const { orderId } = req.params;
     if (!orderId) {
@@ -52,12 +36,13 @@ export const getOrderById = catchAsyncError(async (req, res, next) => {
 })
 
 export const createOrder = catchAsyncError(async (req, res, next, session) => {
-    const { customerName, tableId, hotelId, dishes, status, note } = req.body;
+    const { tableId, hotelId } = req.params
+    const { customerName, dishes, status, note } = req.body;
     if (!hotelId || !tableId || !dishes || dishes.length <= 0) {
         throw new ClientError("Please provide sufficient data to create order");
     }
 
-    const newOrder = await addNewOrderService(req.body, session);
+    const newOrder = await addNewOrderService({ ...req.body, tableId, hotelId }, session);
 
     res.status(201).json({
         success: true,
@@ -67,12 +52,13 @@ export const createOrder = catchAsyncError(async (req, res, next, session) => {
 }, true)
 
 export const updateOrder = catchAsyncError(async (req, res, next, session) => {
-    const { orderId, dishes, status, note } = req.body;
-    if (!orderId || (!dishes && !status || !note)) {
+    const { orderId } = req.params;
+    const { dishes, status, note } = req.body;
+    if (!orderId || (!dishes && !status && !note)) {
         throw new ClientError("Please provide sufficient data to update order");
     }
 
-    const updatedOrder = await updateOrderService(req.body, session);
+    const updatedOrder = await updateOrderService({ orderId, ...req.body }, session);
 
     res.status(201).json({
         success: true,
@@ -87,7 +73,7 @@ export const deleteOrder = catchAsyncError(async (req, res, next, session) => {
         throw new ClientError("Please provide sufficient data to delete order");
     }
 
-    const deletedOrder = await deleteOrderService(req.body, session);
+    const deletedOrder = await deleteOrderService(orderId, session);
 
     res.status(201).json({
         success: true,

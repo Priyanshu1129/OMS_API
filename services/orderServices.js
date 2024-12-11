@@ -9,18 +9,26 @@ import { ClientError, ServerError } from "../utils/errorHandler.js";
 
 export const onQRScanService = async ({ tableId, hotelId }) => {
 
-    const table = await Table.find({ tableId }).select('sequence status')
+    const table = await Table.findById(tableId).select('sequence status')
+
+    if (!table) {
+        throw new ClientError('Table not found!');
+    }
 
     const customer = await Customer.findOne({ tableId, hotelId });
 
-    if ((orders.length > 0 && !customer) || (orders.length > 0 && orders[0].customerId != customer._id)) {
+    const orders = await Order.find({ tableId, hotelId })
+    if ((orders.length > 0 && !customer) || (orders.length > 0 && orders[0].customerId != customer._id.toString())) {
         throw new ServerError("Orders are available while customer is not");
     }
+    let bill = null
+    if (orders.length > 0)
+        bill = await Bill.findById(customer.billId).select('totalAmount totalDiscount finalAmount status')
 
-    const orders = await Order.find({ tableId, hotelId })
+    // for creating menu 
     const dishes = await Dish.find({ hotelId });
     const categories = await Category.find({ hotelId });
-    const bill = await Bill.findOne({ tableId, hotelId }).select('totalAmount totalDiscount finalAmount status')
+
 
     const data = {
         table: table,
@@ -47,7 +55,8 @@ export const addNewOrderService = async (orderData, session) => {
         let bill;
         if (!customer) {
             // If customer doesn't exist, create a new bill and customer
-            bill = await createBill({ customerName, hotelId, dishes, session });
+            bill = await createBill({ customerName, hotelId, tableId, dishes, session });
+            console.log("new bill created ----", bill);
             customer = new Customer({
                 hotelId,
                 tableId,
@@ -58,6 +67,7 @@ export const addNewOrderService = async (orderData, session) => {
         } else {
             // If customer exists, update the existing bill
             bill = await updateBillDishes({ billId: customer.billId, newDishes: dishes, session });
+            console.log("existing bill updated ----", bill);
         }
 
         // Step 3: Create a new order after the bill is created or updated
@@ -89,35 +99,38 @@ export const addNewOrderService = async (orderData, session) => {
 // only for hotel owner
 export const updateOrderService = async (orderData, session) => {
     try {
-        const { orderId, dishes, status, note } = orderData;
+        const { orderId, status, note } = orderData;
+        let dishes = orderData.dishes;
 
         // Step 1: Find the existing order by ID
         const order = await Order.findById(orderId).session(session);
+        const oldOrder = { ...order.toObject() };
 
         if (!order) {
             throw new ClientError("Order not found");
         }
 
+        dishes = dishes?.filter((item) => item.quantity >= 0);
         // Step 2: Update the order details
-        if (dishes) {
+        if (dishes && dishes.length > 0) {
             // Update the dishes
             dishes.forEach(newDish => {
-                const existingDish = order.dishes.find(dish => dish.dishId.toString() === newDish._id);
+                const existingDish = order.dishes.find(dish => dish.dishId.toString() === newDish._id.toString());
 
                 if (existingDish) {
                     // If the dish exists, update the quantity
-                    existingDish.quantity += newDish.quantity;
+                    existingDish.quantity = Number(newDish.quantity);
 
                     // Ensure quantity does not go below zero
                     if (existingDish.quantity <= 0) {
-                        order.dishes = order.dishes.filter(dish => dish.dishId.toString() !== newDish._id);
+                        order.dishes = order.dishes.filter(dish => dish.dishId.toString() !== newDish._id.toString());
                     }
-                } else if (newDish.quantity > 0) {
+                } else if (Number(newDish.quantity) > 0) {
                     // If the dish doesn't exist, add it only if quantity is positive
                     order.dishes.push({
                         dishId: newDish._id,
-                        quantity: newDish.quantity,
-                        notes: newDish.notes || ''
+                        quantity: Number(newDish.quantity),
+                        note: newDish.note || ''
                     });
                 }
             });
@@ -136,10 +149,10 @@ export const updateOrderService = async (orderData, session) => {
         // Save the updated order
         await order.save({ session });
 
-        // Step 3: Update the associated bill
-        const billId = order.billId // Assuming a function exists to get the billId
-        if (billId) {
-            await updateBillDishes({ billId, newDishes: dishes, session });
+        // Update the associated bill
+        if (dishes && dishes.length > 0) {
+            const billId = order.billId
+            await updateBillDishes({ billId, oldOrder, newDishes: dishes, session });
         }
 
         return order;
@@ -149,9 +162,8 @@ export const updateOrderService = async (orderData, session) => {
 };
 
 // only for hotel owner
-export const deleteOrderService = async (orderData, session) => {
+export const deleteOrderService = async (orderId, session) => {
     try {
-        const { orderId } = orderData;
 
         // Step 1: Find the order by ID
         const order = await Order.findById(orderId).session(session);
@@ -173,31 +185,16 @@ export const deleteOrderService = async (orderData, session) => {
         // Step 4: Update the associated bill
         const updateDishes = dishes.map(dish => ({
             _id: dish.dishId,
-            quantity: -dish.quantity, // Negative to remove items from the bill
+            quantity: 0,
         }));
 
-        const bill = await updateBillDishes({ billId, newDishes: updateDishes, session });
+        const bill = await updateBillDishes({ billId, oldOrder: order, newDishes: updateDishes, session });
 
-        return { updatedBill: bill };
+        return order;
 
     } catch (error) {
         throw new ServerError(error.message); // Replace with your error handling logic
     }
 };
 
-export const getOrdersByTableService = async (tableId) => {
-    try {
-        // Step 1: Query the orders based on tableId
-        const orders = await Order.find({ tableId }).populate('dishes.dishId'); // Optionally populate dishes with dish details
-        
-        if (!orders || orders.length === 0) {
-            throw new ServerError("No orders found for this table.");
-        }
 
-        // Step 2: Return the list of orders
-        return orders;
-    } catch (error) {
-        console.log("Error while fetching orders by table ID:", error);
-        throw new ServerError("Error while fetching orders");
-    }
-};

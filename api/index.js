@@ -10,16 +10,12 @@ import hotelRouter from "../routes/hotelRouter.js";
 import authRouter from "../routes/authRouter.js"
 import tableRouter from "../routes/tableRouter.js"
 import qrRouter from "../routes/qrRouter.js"
-<<<<<<< HEAD
-import orderRouter from "../routes/orderRouter.js"
-import puppeteer from 'puppeteer';
-import fs from 'fs';
-import { launchBrowser } from '../utils/puppeteerHelper.js';
-=======
 import ingredientRouter from "../routes/ingredientRouter.js"
 import categoryRouter from "../routes/categoryRouter.js"
 import dishRouter from "../routes/dishRouter.js"
->>>>>>> c76815da05457de51049a488ed87eeedab113607
+import orderRouter from "../routes/orderRouter.js"
+import billRouter from "../routes/billRouter.js"
+
 
 const app = express();
 
@@ -51,13 +47,14 @@ app.get('/', (req, res) => {
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/devkey', devKeyRouter);
 app.use('/api/v1/users', userRouter);
-app.use('/api/v1/hotels',hotelRouter);
-app.use('/api/v1/tables',tableRouter);
-app.use('/api/v1/qrs',qrRouter);
-app.use('/api/v1/ingredients',ingredientRouter);
-app.use('/api/v1/categories',categoryRouter);
-app.use('/api/v1/dishes/',dishRouter);
+app.use('/api/v1/hotels', hotelRouter);
+app.use('/api/v1/tables', tableRouter);
+app.use('/api/v1/qrs', qrRouter);
+app.use('/api/v1/ingredients', ingredientRouter);
+app.use('/api/v1/categories', categoryRouter);
+app.use('/api/v1/dishes/', dishRouter);
 app.use('/api/v1/orders', orderRouter);
+app.use('/api/v1/bills', billRouter);
 
 app.use(error); // This will catch any errors from previous routes and middleware
 

@@ -2,7 +2,10 @@ import mongoose from 'mongoose';
 
 const billSchema = new mongoose.Schema({
   customerName: { type: String, required: true },
-  orderedItems: [],
+  orderedItems: [{
+    dishId: { type: mongoose.Schema.Types.ObjectId, ref: 'Dish' },
+    quantity: { type: Number, required: true }
+  }],
   totalAmount: { type: Number, required: true },
   totalDiscount: { type: Number, default: 0 },
   status: { type: String, enum: ['paid', 'unpaid', 'payLater'], default: 'unpaid' },

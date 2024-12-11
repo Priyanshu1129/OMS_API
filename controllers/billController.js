@@ -21,11 +21,12 @@ export const getBill = catchAsyncError(async (req, res, next) => {
 
 export const updateBill = catchAsyncError(async (req, res, next, session) => {
     const { tableId, billId } = req.params;
-    if (!tableId) {
+    const { customerName, status, totalAmount, totalDiscount, finalAmount } = req.body;
+    if (!billId || (!customerName && !status && !totalAmount && !totalDiscount && !finalAmount)) {
         throw new ClientError("Please provide sufficient data to update bill");
     }
 
-    const updatedBill = await updateBillService({ billId, tableId, ...req.body }, session);
+    const updatedBill = await updateBillService({ billId, ...req.body }, session);
 
     res.status(201).json({
         success: true,
