@@ -1,5 +1,5 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
-import { addNewOrderService, updateOrderService, deleteOrderService, getOrdersByTableService, updateBillService } from "../services/orderServices.js"
+import { addNewOrderService, updateOrderService, deleteOrderService, getOrdersByTableService } from "../services/orderServices.js"
 import { ClientError } from "../utils/errorHandler.js";
 import { onQRScanService } from "../services/orderServices.js";
 import Order from "../models/orderModel.js";

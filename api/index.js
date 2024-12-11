@@ -49,7 +49,6 @@ app.use('/api/v1/hotels', hotelRouter);
 app.use('/api/v1/tables', tableRouter);
 app.use('/api/v1/qrs', qrRouter);
 app.use('/api/v1/orders', orderRouter);
-// app.use('/api/v1/bills', billRouter);
 
 app.use(error); // This will catch any errors from previous routes and middleware
 

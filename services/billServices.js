@@ -1,6 +1,6 @@
 import Bill from "../models/billModel.js"
-import Order from "../models/orderModel"; // Import Order model
-import Customer from "../models/customerModel"; // Import Customer model
+import Order from "../models/orderModel.js"; // Import Order model
+import Customer from "../models/customerModel.js"; // Import Customer model
 import { Dish } from "../models/dishModel.js";
 import { ServerError } from "../utils/errorHandler.js";
 export const createBill = async ({ customerName, dishes, hotelId, tableId, session }) => {

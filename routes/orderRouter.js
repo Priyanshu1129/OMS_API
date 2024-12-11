@@ -5,9 +5,9 @@ import {
     updateOrder,
     deleteOrder,
     getOrdersByTable,
-    getOrderById,
-    updateBillByTable
+    getOrderById
 } from '../controllers/orderController.js';
+import { updateBill } from "../controllers/billController.js";
 import express from 'express';
 
 const router = express.Router();
@@ -31,7 +31,7 @@ router.get('/get-customer-orders/:tableId', protect, validateOwnership, getOrder
 router.get('/:orderId', protect, validateOwnership, getOrderById);
 
 // for hotel owner to update bill by table id
-router.put('/:tableId', protect, validateOwnership, updateBillByTable);
+router.put('/:tableId', protect, validateOwnership, updateBill);
 
 
 export default router;

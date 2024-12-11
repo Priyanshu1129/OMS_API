@@ -164,7 +164,7 @@ export const deleteOrderService = async (orderData, session) => {
         const { billId, dishes } = order;
 
         if (!billId) {
-            throw new ServerErrorError("Bill ID not found in the order");
+            throw new ServerError("Bill ID not found in the order");
         }
 
         // Step 3: Delete the order
