@@ -17,7 +17,7 @@ export const createIngredientService = async (hotelId, ingredientData) => {
         return ingredient;
     } catch (error) {
         if(error instanceof ClientError){
-            throw new ClientError(error.message);
+            throw new error;
         }
         else {
             throw new ServerError("Ingredient creation failed");
@@ -37,7 +37,7 @@ export const createMultipleIngredientsService = async (hotelId, ingredientsData)
         return createdIngredients;
     } catch (error) {
         if (error instanceof ClientError) {
-            throw new ClientError(error.message);
+            throw error;
         }
         else {
             throw new ServerError('Ingredients creation failed');
@@ -54,7 +54,7 @@ export const getIngredientByIdService = async (ingredientId) => {
         return ingredient;
     } catch (error) {
         if (error instanceof ClientError) {
-            throw new ClientError(error.message);
+            throw error;
         } else {
             throw new ServerError('Failed to fetch ingredient');
         }

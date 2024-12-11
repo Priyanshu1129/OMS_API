@@ -21,8 +21,12 @@ export const getHotelByIdService = async (user, hotelId) => {
 
     return hotel;
   } catch (error) {
-    // If any server-side error occurs, throw a server error
-    throw new ServerError('Error while fetching hotel details');
+    if(error instanceof ClientError) {
+      throw error;
+    }
+    else {
+      throw new ServerError('Error while fetching hotel details');
+    }
   }
 };
 
@@ -54,8 +58,10 @@ export const updateHotelService = async (user, hotelId, updateData) => {
 
     return hotel;
   } catch (error) {
-    // If there's a server error, throw a ServerError
-    throw new ServerError('Error while updating hotel details');
+    if(error instanceof ClientError) {
+      throw error;
+    }
+    else throw new ServerError('Error while updating hotel details');
   }
 };
 
@@ -80,7 +86,10 @@ export const deleteHotelService = async (user, hotelId) => {
     await hotel.remove();
 
   } catch (error) {
-    // If there's a server error, throw a ServerError
+    if(error instanceof ClientError) {
+      throw error;
+    }
+    else
     throw new ServerError('Error while deleting hotel');
   }
 };
@@ -98,7 +107,10 @@ export const getAllHotelsService = async (user) => {
 
     return hotels;
   } catch (error) {
-    // If there's an unexpected server error, throw a ServerError
+    if(error instanceof ClientError) {
+      throw error;
+    }
+    else
     throw new ServerError('Error while fetching hotels',error);
   }
 };

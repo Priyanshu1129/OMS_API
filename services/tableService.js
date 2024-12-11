@@ -17,7 +17,8 @@ export const getTableByIdService = async (tableId) => {
         table.populate('hotelId', 'name');
         return table;
     } catch (error) {
-        throw new ServerError('Error while fetching table details');
+        if(error instanceof ClientError) throw error;
+        else throw new ServerError('Error while fetching table details');
     }
     }
 
@@ -30,7 +31,7 @@ export const getTablesService = async (user) => {
 
         return tables;
     } catch (error) {
-        if(error instanceof ClientError) { throw new ClientError(error.message, error.statusCode); }
+        if(error instanceof ClientError) { throw new error; }
         else throw new ServerError('Error while fetching tables');
     }
 }
@@ -52,7 +53,8 @@ export const updateTableService = async (user, tableId, tableData) => {
         await table.save();
         return table;
     } catch (error) {
-        throw new ServerError('Error while updating table');
+        if(error instanceof ClientError) { throw error; }
+        else throw new ServerError('Error while updating table');
     }
 }
 
@@ -61,6 +63,8 @@ export const deleteTableService = async (user, tableId) => {
         const table = await getTableByIdService(user, tableId);
         await table.remove();
     } catch (error) {
+        if(error instanceof ClientError) { throw error; }
+        else
         throw new ServerError('Error while deleting table');
     }
 }
@@ -74,6 +78,8 @@ export const occupyTableService = async (user, tableId) => {
         table.status = 'occupied';
         await table.save();
     } catch (error) {
+        if(error instanceof ClientError) { throw error; }
+        else
         throw new ServerError('Error while occupying table');
     }
 }
@@ -87,6 +93,8 @@ export const freeTableService = async (user, tableId) => {
         table.status = 'free';
         await table.save();
     } catch (error) {
+        if(error instanceof ClientError) { throw error; }
+        else
         throw new ServerError('Error while freeing table');
     }
 }

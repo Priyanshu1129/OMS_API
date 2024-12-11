@@ -1,6 +1,7 @@
 import { ClientError,ServerError } from '../utils/index.js';
 import { HotelOwner, SuperAdmin } from '../models/userModel.js';
 import Hotel from '../models/hotelModel.js';
+import e from 'express';
 
 export const getUserProfileService = async (userId) => {
     try {
@@ -17,6 +18,9 @@ export const getUserProfileService = async (userId) => {
 
         return hotelOwner || superAdmin;
     } catch (error) {
+        if (error instanceof ClientError) {
+            throw error;
+        } else 
         throw new ServerError('Error while fetching user profile');
     }
 };
@@ -62,6 +66,9 @@ export const getAllHotelOwnersService = async () => {
 
         return hotelOwners;
     } catch (error) {
+        if (error instanceof ClientError) {
+            throw error;
+        } else
         throw new ServerError('Error while fetching all hotels owners');
     }
 };
@@ -90,6 +97,9 @@ export const getUnApprovedOwnersService = async ({ page = 1, limit = 10 }) => {
             },
         };
     } catch (error) {
+        if (error instanceof ClientError) {
+            throw error;
+        } else
         throw new ServerError('Error while fetching unapproved hotel owners');
     }
 };
@@ -117,6 +127,9 @@ export const getApprovedOwnersService = async ({ page = 1, limit = 10 }) => {
             },
         };
     } catch (error) {
+        if (error instanceof ClientError) {
+            throw error;
+        } else
         throw new ServerError('Error while fetching approved hotel owners');
     }
 };
@@ -144,7 +157,7 @@ export const membershipExtenderService = async (hotelOwnerId, days) => {
         return hotelOwner; // Return the updated hotel owner
     } catch (error) {
         if (error instanceof ClientError) {
-            throw new ClientError(error.type, error.message, error.statusCode);
+            throw new error;
         } else {
             throw new ServerError('Error while extending membership', error);
         }
@@ -169,7 +182,7 @@ export const deleteHotelOwnerService = async (ownerId) => {
         return hotelOwner;
     } catch (error) {
         if (error instanceof ClientError) {
-            throw new ClientError(error.type, error.message, error.statusCode);
+            throw new error;
         } else {
             throw new ServerError('Error while deleting hotel owner', error);
         }
