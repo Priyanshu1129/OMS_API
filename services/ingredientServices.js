@@ -71,7 +71,7 @@ export const updateIngredientService = async (ingredientId, ingredientData) => {
     }
     catch (error) {
         if (error instanceof ClientError) {
-            throw new ClientError(error.message);
+            throw error;
         } else {
             throw new ServerError('Failed to update ingredient');
         }
@@ -83,7 +83,7 @@ export const updateIngredientService = async (ingredientId, ingredientData) => {
 export const deleteIngredientService = async (ingredientId) => {
     try {
         // console.log(`objectId: ${ingredientId}`);
-        
+
         if (!mongoose.Types.ObjectId.isValid(ingredientId)) {
             throw new ClientError('Invalid ingredient ID');
         }
