@@ -82,28 +82,23 @@ export const updateIngredientService = async (ingredientId, ingredientData) => {
 
 export const deleteIngredientService = async (ingredientId) => {
     try {
-        console.log(`objectId: ${ingredientId}`);
-        // Validate ingredientId
+        // console.log(`objectId: ${ingredientId}`);
+        
         if (!mongoose.Types.ObjectId.isValid(ingredientId)) {
             throw new ClientError('Invalid ingredient ID');
         }
-
-        // Find the ingredient by ID
         const ingredient = await Ingredient.findById(ingredientId);
         if (!ingredient) {
             throw new ClientError('Ingredient not found');
         }
 
-        // Delete the ingredient
         await ingredient.deleteOne();
-
-        // Return the deleted ingredient data
         return ingredient;
     } catch (error) {
         if (error instanceof ClientError) {
-            throw error; // Rethrow the ClientError directly
+            throw error; 
         }
-        throw new ServerError('Failed to delete ingredient',error.message); // Handle server errors
+        throw new ServerError('Failed to delete ingredient',error.message); 
     }
 };
 
