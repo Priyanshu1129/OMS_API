@@ -58,10 +58,11 @@ export const updateIngredient = catchAsyncError(async (req, res) => {
 
 export const deleteIngredient = catchAsyncError(async (req, res) => {
     const ingredientId = req.params.id;
-    await deleteIngredientService(ingredientId);
+    const ingredient = await deleteIngredientService(ingredientId);
     res.status(200).json({
         status : "success",
         message: 'Ingredient deleted successfully',
+        data : {ingredient}
     });
 });
 

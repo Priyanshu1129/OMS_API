@@ -84,6 +84,7 @@ export const deleteIngredientService = async (ingredientId) => {
         if (!ingredient) {
             throw new ClientError('Ingredient not found');
         }
+        return ingredient;
     } catch (error) {
         if (error instanceof ClientError) {
             throw new ClientError(error.message);
