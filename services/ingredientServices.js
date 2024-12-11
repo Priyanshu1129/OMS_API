@@ -1,5 +1,6 @@
 import { Ingredient } from "../models/dishModel.js";
 import { ClientError,ServerError } from "../utils/errorHandler.js";
+import mongoose from 'mongoose';
 
 export const createIngredientService = async (hotelId, ingredientData) => {
     try {
@@ -78,21 +79,33 @@ export const updateIngredientService = async (ingredientId, ingredientData) => {
 
 }   
 
+
 export const deleteIngredientService = async (ingredientId) => {
     try {
-        const ingredient = await Ingredient.findByIdAndDelete(ingredientId);
+        console.log(`objectId: ${ingredientId}`);
+        // Validate ingredientId
+        if (!mongoose.Types.ObjectId.isValid(ingredientId)) {
+            throw new ClientError('Invalid ingredient ID');
+        }
+
+        // Find the ingredient by ID
+        const ingredient = await Ingredient.findById(ingredientId);
         if (!ingredient) {
             throw new ClientError('Ingredient not found');
         }
+
+        // Delete the ingredient
+        await ingredient.deleteOne();
+
+        // Return the deleted ingredient data
         return ingredient;
     } catch (error) {
         if (error instanceof ClientError) {
-            throw new ClientError(error.message);
-        } else {
-            throw new ServerError('Failed to delete ingredient');
+            throw error; // Rethrow the ClientError directly
         }
+        throw new ServerError('Failed to delete ingredient',error.message); // Handle server errors
     }
-}
+};
 
 export const getAllIngredientsService = async () => {
     try {

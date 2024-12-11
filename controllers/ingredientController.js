@@ -57,7 +57,7 @@ export const updateIngredient = catchAsyncError(async (req, res) => {
 
 
 export const deleteIngredient = catchAsyncError(async (req, res) => {
-    const ingredientId = req.params.id;
+    const ingredientId = req.params.ingredientId;
     const ingredient = await deleteIngredientService(ingredientId);
     res.status(200).json({
         status : "success",
