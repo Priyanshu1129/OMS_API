@@ -156,7 +156,6 @@ export const updateBillDishes = async ({ billId, oldOrder, newDishes, session })
                 additionalDiscount += discount;
             }
         }
-        console.log('Jay Ganesh')
         console.log('additional amount', additionalAmount)
         console.log('additional discount', additionalDiscount)
         // Update the bill totals
