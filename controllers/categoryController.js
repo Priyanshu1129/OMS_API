@@ -32,6 +32,7 @@ export const getCategoryById = catchAsyncError(async (req, res) => {
 });
 
 export const getAllCategories = catchAsyncError(async (req, res) => {
+    console.log("req. for all categories");
     const categories = await getAllCategoriesService(req.user.hotelId);
     res.status(200).json({
         status : "success",
