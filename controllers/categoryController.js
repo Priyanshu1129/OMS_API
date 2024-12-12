@@ -32,7 +32,6 @@ export const getCategoryById = catchAsyncError(async (req, res) => {
 });
 
 export const getAllCategories = catchAsyncError(async (req, res) => {
-    console.log("req. for all categories");
     const categories = await getAllCategoriesService(req.user.hotelId);
     res.status(200).json({
         status : "success",
@@ -54,10 +53,11 @@ export const updateCategory = catchAsyncError(async (req, res) => {
 
 export const deleteCategory = catchAsyncError(async (req, res) => {
     const categoryId = req.params.categoryId;
-    await deleteCategoryService(categoryId);
+    const category = await deleteCategoryService(categoryId);
     res.status(200).json({
         status : "success",
         message: 'Category deleted successfully',
+        data : {category : category}
     });
 });
 
