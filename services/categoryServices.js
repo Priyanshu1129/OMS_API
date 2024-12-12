@@ -68,7 +68,7 @@ export const getAllCategoriesService = async (hotelId) => {
         const categories = await Category.find({ hotelId });
 
         if (!categories || categories.length === 0) {
-            throw new ClientError("NotFoundError", "No categories found");
+            return [];
         }
 
         return categories;
@@ -105,6 +105,7 @@ export const deleteCategoryService = async (categoryId) => {
         if (!category) {
             throw new ClientError('Category not found');
         }
+        return category;
     } catch (error) {
         if (error instanceof ClientError) {
             throw new error;
