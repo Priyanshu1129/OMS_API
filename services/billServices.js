@@ -23,7 +23,7 @@ export const createBill = async ({ customerName, dishes, hotelId, tableId, sessi
         const dishIds = dishes.map(d => d._id); // Assume dishes is an array of { dishId, quantity }
         const dishDetails = await Dish.find({ _id: { $in: dishIds }, hotelId });
 
-        if (!dishDetails.length) {
+        if (!dishDetails || !dishDetails.length) {
             throw new ServerError('No valid dishes found for the provided IDs');
         }
 
@@ -96,7 +96,7 @@ export const updateBillDishes = async ({ billId, oldOrder, newDishes, session })
         const dishDetails = await Dish.find({ _id: { $in: dishIds }, hotelId: bill.hotelId });
 
 
-        if (!dishDetails.length) {
+        if (!dishDetails || !dishDetails.length) {
             throw new ServerError('No valid dishes found for the provided IDs');
         }
 

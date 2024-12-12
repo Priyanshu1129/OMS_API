@@ -1,22 +1,22 @@
 import e from "express";
 import { Category } from "../models/dishModel.js";
-import { ClientError,ServerError } from "../utils/errorHandler.js";
+import { ClientError, ServerError } from "../utils/errorHandler.js";
 
 export const createCategoryService = async (hotelId, categoryData) => {
     try {
-        
-        if(!hotelId){
+
+        if (!hotelId) {
             throw new ClientError("Hotel ID is required");
         }
 
-        if(!categoryData.name){
+        if (!categoryData.name) {
             throw new ClientError("Category name is required");
         }
         const category = await Category.create({ ...categoryData, hotelId });
 
         return category;
     } catch (error) {
-        if(error instanceof ClientError){
+        if (error instanceof ClientError) {
             throw new error;
         }
         else {
@@ -74,11 +74,7 @@ export const getAllCategoriesService = async (hotelId) => {
         return categories;
     }
     catch (error) {
-        if (error instanceof ClientError) {
-            throw new error;
-        } else {
-            throw new ServerError('Failed to fetch categories');
-        }
+        throw error;
     }
 }
 

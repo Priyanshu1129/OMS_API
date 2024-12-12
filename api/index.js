@@ -15,6 +15,7 @@ import categoryRouter from "../routes/categoryRouter.js"
 import dishRouter from "../routes/dishRouter.js"
 import orderRouter from "../routes/orderRouter.js"
 import billRouter from "../routes/billRouter.js"
+import offerRouter from "../routes/offerRouter.js";
 
 
 const app = express();
@@ -55,6 +56,7 @@ app.use('/api/v1/categories', categoryRouter);
 app.use('/api/v1/dishes/', dishRouter);
 app.use('/api/v1/orders', orderRouter);
 app.use('/api/v1/bills', billRouter);
+app.use('/api/v1/offers', offerRouter);
 
 app.use(error); // This will catch any errors from previous routes and middleware
 
