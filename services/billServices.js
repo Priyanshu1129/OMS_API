@@ -21,7 +21,7 @@ export const createBill = async ({ customerName, dishes, hotelId, tableId, sessi
         if (!customerName) throw new ClientError("Customer name is required!");
         // Fetch dish details from the database
         const dishIds = dishes.map(d => d._id); // Assume dishes is an array of { dishId, quantity }
-        const dishDetails = await Dish.find({ _id: { $in: dishIds }, hotelId });
+        const dishDetails = await Dish.find({ _id: { $in: dishIds }, hotelId }).populate('appliedOffer');
 
         if (!dishDetails || !dishDetails.length) {
             throw new ServerError('No valid dishes found for the provided IDs');
@@ -44,7 +44,9 @@ export const createBill = async ({ customerName, dishes, hotelId, tableId, sessi
             // Calculate discount if an offer is applied
             let discount = 0;
             if (dish.appliedOffer) {
+                console.log('discount-calculation')
                 discount = calculateDiscount(dish, quantity);
+                console.log('discount-calculation', discount)
             }
 
             totalAmount += cost;
@@ -93,7 +95,7 @@ export const updateBillDishes = async ({ billId, oldOrder, newDishes, session })
 
         // Fetch details of the new ordered dishes
         const dishIds = newDishes.map(d => d._id);
-        const dishDetails = await Dish.find({ _id: { $in: dishIds }, hotelId: bill.hotelId });
+        const dishDetails = await Dish.find({ _id: { $in: dishIds }, hotelId: bill.hotelId }).populate('appliedOffer');
 
 
         if (!dishDetails || !dishDetails.length) {
@@ -154,7 +156,9 @@ export const updateBillDishes = async ({ billId, oldOrder, newDishes, session })
                 additionalDiscount += discount;
             }
         }
-
+        console.log('Jay Ganesh')
+        console.log('additional amount', additionalAmount)
+        console.log('additional discount', additionalDiscount)
         // Update the bill totals
         bill.totalAmount += additionalAmount;
         bill.totalDiscount += additionalDiscount;

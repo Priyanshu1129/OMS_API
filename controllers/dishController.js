@@ -6,7 +6,9 @@ import {
     getDishByIdService,
     updateDishService,
     getDishesByCategoryService,
+    removeOfferFromDishService,
 } from "../services/dishServices.js";
+import { ClientError } from "../utils/errorHandler.js";
 
 export const getDishById = catchAsyncError(async (req, res) => {
     const dishId = req.params.dishId;
@@ -87,3 +89,17 @@ export const getDishesByCategory = catchAsyncError(async (req, res) => {
     });
 });
 
+
+export const removeOfferFromDish = catchAsyncError(async (req, res, next, session) => {
+    const { dishId } = req.params;
+    if (!dishId) {
+        throw new ClientError("Please provide dish id to remove offer from dish!")
+    }
+    const dish = removeOfferFromDishService(dishId, session);
+
+    res.status(200).json({
+        status: "success",
+        message: "Offer removed from dish successfully",
+        data: { dish },
+    });
+}, true)
