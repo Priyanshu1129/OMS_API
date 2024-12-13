@@ -23,6 +23,7 @@ const dishSchema = new mongoose.Schema(
       minlength: 3, // Ensures the name is at least 3 characters
       maxlength: 100, // Ensures the name is not too long
     },
+    logo : { type : String , default : "https://static.vecteezy.com/system/resources/previews/010/354/788/original/main-dish-icon-colorful-flat-design-illustration-graphics-free-vector.jpg"},
     appliedOffer: { type: mongoose.Schema.Types.ObjectId, ref: 'Offer', default: null },
     quantity: {
       type: Number,
