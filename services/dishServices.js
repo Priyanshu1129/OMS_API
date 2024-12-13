@@ -42,7 +42,7 @@ export const getDishByIdService = async (dishId) => {
 
 export const getAllDishesService = async (hotelId) => {
     try {
-        const dishes = await Dish.find({ hotelId }).populate("ingredients");
+        const dishes = await Dish.find({ hotelId }).populate("ingredients categories");
         if (!dishes || dishes.length === 0) {
             throw new ClientError("No dishes available!", "Not found");
         }

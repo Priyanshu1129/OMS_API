@@ -9,6 +9,7 @@ import {
     removeOfferFromDishService,
 } from "../services/dishServices.js";
 import { ClientError } from "../utils/errorHandler.js";
+import uploadAndGetAvatarUrl from "../utils/uploadAndGetUrl.js";
 
 export const getDishById = catchAsyncError(async (req, res) => {
     const dishId = req.params.dishId;
@@ -42,6 +43,11 @@ export const createDish = catchAsyncError(async (req, res) => {
 
     // Call the service to create a new dish
     const dish = await createDishService(dishData);
+    if (req.file) {
+        const logoUrl = await uploadAndGetAvatarUrl(req.file, 'OMS', dish._id, "stream");
+        dish.logo = logoUrl;
+        await dish.save();
+    }
 
     res.status(201).json({
         status: "success",
@@ -56,6 +62,11 @@ export const updateDish = catchAsyncError(async (req, res) => {
 
     // Call the service to update the dish
     const dish = await updateDishService(dishId, dishData);
+    if (req.file) {
+        const logoUrl = await uploadAndGetAvatarUrl(req.file, 'OMS', dish._id, "stream");
+        dish.logo = logoUrl;
+        await dish.save();
+    }
 
     res.status(200).json({
         status: "success",
