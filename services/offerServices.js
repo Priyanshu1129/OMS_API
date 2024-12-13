@@ -26,6 +26,14 @@ export const createOfferService = async (offerData, session) => {
         if (!dishDetails || !dishDetails.length) {
             throw new ClientError("No valid dishes found for the provided IDs to apply offer!");
         }
+
+        // Check if any dish already has an offer applied
+        const dishesWithOffer = dishDetails.filter(dish => dish.appliedOffer);
+        if (dishesWithOffer.length > 0) {
+            const dishIdsWithOffer = dishesWithOffer.map(dish => dish._id);
+            throw new ClientError(`Some provided dishes are already associated with other offers!`);
+        }
+
         // to ensure only valid dish pass into applied On
         const validDishIds = dishDetails.map(dish => dish._id);
         offerData.appliedOn = validDishIds;
@@ -49,9 +57,9 @@ export const createOfferService = async (offerData, session) => {
     return offer; // Return the created offer document
 };
 
-
 export const updateOfferService = async (offerId, updatedData, session) => {
-    const { title, value, type, discountType, appliedOn, appliedAbove, startDate, endDate } = updatedData;
+    const { title, value, type, discountType, appliedAbove, startDate, endDate } = updatedData;
+    let appliedOn = updatedData.appliedOn;
 
     // Fetch the existing offer
     const existingOffer = await Offer.findById(offerId).session(session);
@@ -109,16 +117,33 @@ export const updateOfferService = async (offerId, updatedData, session) => {
         );
     }
 
+    // Construct the update object explicitly
+    const updateFields = {};
+    if (title !== undefined) updateFields.title = title;
+    if (value !== undefined) updateFields.value = value;
+    if (type !== undefined) updateFields.type = type;
+    if (discountType !== undefined) updateFields.discountType = discountType;
+    if (startDate !== undefined) updateFields.startDate = startDate;
+    if (endDate !== undefined) updateFields.endDate = endDate;
+    if (type === "specific") {
+        updateFields.appliedOn = appliedOn;
+    } else if (type === "global") {
+        updateFields.appliedOn = [];
+        if (appliedAbove !== undefined) {
+            updateFields.appliedAbove = appliedAbove;
+        }
+    }
+
+
     // Update the offer document with the provided data
     const updatedOffer = await Offer.findByIdAndUpdate(
         offerId,
-        { ...(type === "specific" ? { appliedOn } : { appliedOn: [] }), type, discountType },
+        updateFields,
         { new: true, session }
     );
 
     return updatedOffer;
 };
-
 
 export const deleteOfferService = async (offerId, session) => {
     // Fetch the offer with the given ID

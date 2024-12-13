@@ -1,4 +1,5 @@
 import { Dish } from "../models/dishModel.js";
+import Offer from "../models/offerModel.js";
 
 import { ClientError, ServerError } from "../utils/errorHandler.js";
 
@@ -57,6 +58,7 @@ export const getAllDishesService = async (hotelId) => {
 
 export const updateDishService = async (dishId, dishData) => {
     try {
+
         const dish = await Dish.findByIdAndUpdate(dishId, dishData, { new: true, runValidators: true });
         if (!dish) {
             throw new ClientError('Dish not found');
@@ -105,4 +107,39 @@ export const getDishesByCategoryService = async (hotelId, categoryId) => {
     }
 };
 
+export const removeOfferFromDishService = async (dishId, session) => {
+    // Fetch the dish to get the appliedOffer
+    try {
+        const dish = await Dish.findById(dishId);
+
+        if (!dish) {
+            throw new ClientError('Dish not found!');
+        }
+
+        if (!dish.appliedOffer) {
+            throw new ClientError('No offer is applied to this dish!');
+        }
+
+        const offerId = dish.appliedOffer;
+
+        // Remove the offer from the dish
+        await Dish.findByIdAndUpdate(
+            dishId,
+            { $unset: { appliedOffer: "" } },
+            { session }
+        );
+
+        // Remove the dishId from the offer's appliedOn array
+        await Offer.findByIdAndUpdate(
+            offerId,
+            { $pull: { appliedOn: dishId } },
+            { session }
+        );
+
+        return dish;
+    } catch (error) {
+        console.log("error- while removing offer", error)
+        throw error
+    }
+};
 

@@ -51,7 +51,7 @@ export const updateOffer = catchAsyncError(async (req, res, next, session) => {
         throw new ClientError("Please provide offer id to update offer!");
     }
 
-    const { title, value, type, discountType, appliedOn, startDate, endDate } = req.body;
+    const { title, value, type, discountType, appliedOn, startDate, endDate , appliedAbove} = req.body;
     if (
         !title &&
         !value &&
@@ -59,7 +59,8 @@ export const updateOffer = catchAsyncError(async (req, res, next, session) => {
         !startDate &&
         !endDate &&
         !type &&
-        !appliedOn
+        !appliedOn &&
+        !appliedAbove
     ) {
         throw new ClientError("Please provide at least one field to update the offer!");
     }
