@@ -25,7 +25,7 @@ export const createDishService = async (dishData) => {
 
 export const getDishByIdService = async (dishId) => {
     try {
-        const dish = await Dish.findById(dishId);
+        const dish = await Dish.findById(dishId).populate("ingredients categories");
         if (!dish) {
             throw new ClientError('Dish not found');
         }
