@@ -48,11 +48,9 @@ export const getAllDishesService = async (hotelId) => {
         }
         return dishes;
     } catch (error) {
-        if (error instanceof ClientError) {
-            throw new error;
-        } else {
+            console.log("get all dish err : ", error)
             throw new ServerError('Failed to fetch dishes');
-        }
+        
     }
 }
 
@@ -67,11 +65,8 @@ export const updateDishService = async (dishId, dishData) => {
         return dish;
     }
     catch (error) {
-        if (error instanceof ClientError) {
-            throw new error;
-        } else {
+            console.log("update dish err : ", error)
             throw new ServerError('Failed to update dish');
-        }
     }
 
 }
