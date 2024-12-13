@@ -59,7 +59,8 @@ export const getAllDishesService = async (hotelId) => {
 export const updateDishService = async (dishId, dishData) => {
     try {
 
-        const dish = await Dish.findByIdAndUpdate(dishId, dishData, { new: true, runValidators: true });
+        const dish = await Dish.findByIdAndUpdate(dishId, dishData, { new: true, runValidators: true }).populate("ingredients");
+        
         if (!dish) {
             throw new ClientError('Dish not found');
         }
