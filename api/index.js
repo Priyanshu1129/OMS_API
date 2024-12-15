@@ -47,9 +47,8 @@ const initializeServices = async () => {
         await connectDb(process.env.DATABASE_URL);
         console.log("Database connected successfully...");
 
-        // Connect to Ably
-        global.ably = await connectAbly(process.env.ABLY_API_KEY);
-        console.log("Ably initialized successfully...");
+        // No need to store global Ably instance anymore
+        console.log("Services initialized successfully...");
 
         return true;
     } catch (error) {
