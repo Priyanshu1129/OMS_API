@@ -7,13 +7,13 @@ const router = express.Router();
 
 router.get('/', protect, attachHotelId, getAllDishes);
 
-router.post('/', uploadStream.single('logo'), protect, attachHotelId, createDish);
+router.post('/', protect, attachHotelId, createDish);
 
 router.get('/category/:categoryId', protect, attachHotelId, getDishesByCategory);
 
 router.get('/:dishId', protect, attachHotelId, getDishById);
 
-router.patch('/:dishId', uploadStream.single('logo'), protect, attachHotelId, updateDish);
+router.patch('/:dishId', protect, attachHotelId, updateDish);
 
 router.delete('/:dishId', protect, attachHotelId, deleteDish);
 

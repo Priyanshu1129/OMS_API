@@ -16,6 +16,8 @@ import dishRouter from "../routes/dishRouter.js"
 import orderRouter from "../routes/orderRouter.js"
 import billRouter from "../routes/billRouter.js"
 import offerRouter from "../routes/offerRouter.js";
+import imageUploadService from '../services/imageUploadService.js';
+import utilsRouter from '../routes/utilsRouter.js';
 
 
 const app = express();
@@ -45,6 +47,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'Welcome to the Hotel Order Management System' });
 });
 
+app.use('/api/v1/uploads', utilsRouter);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/devkey', devKeyRouter);
 app.use('/api/v1/users', userRouter);
