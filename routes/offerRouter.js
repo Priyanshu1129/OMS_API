@@ -9,11 +9,11 @@ router.get('/:id', protect, validateOwnership, getOfferDetails);
 
 router.get('/', protect, attachHotelId, getAllOffers);
 
-router.post('/', protect, createOffer);
+router.post('/', protect, attachHotelId, createOffer);
 
-router.patch('/:id', protect, updateOffer);
+router.put('/:id', protect, validateOwnership, updateOffer);
 
-router.delete('/:id', protect, deleteOffer);
+router.delete('/:id', protect, validateOwnership, deleteOffer);
 
 
 export default router;
