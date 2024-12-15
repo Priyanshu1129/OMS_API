@@ -4,31 +4,48 @@ import Customer from "../models/customerModel.js";
 import {Dish} from "../models/dishModel.js";
 import Table from "../models/tableModel.js";
 import Hotel from "../models/hotelModel.js";
+import { ServerError } from "../utils/errorHandler.js";
 
-// const ably = new Ably.Realtime(process.env.ABLY_API_KEY);
-const ably = new Ably.Realtime("iM-CAA.WXKTig:PMGZCC-MK8vA-qBjmxEMOT_lhPRuD6EA9Q9GnDJ2s-w");
+const connectAbly = async (ABLY_API_KEY) => {
+    try {
+        const ably = new Ably.Realtime({
+            key: ABLY_API_KEY,
+            clientId: `server-${Date.now()}`
+        });
 
-// Add error handling for publish
-// export const orderPublishService = async (order, hotelId) => {
-//   try {
-//     ably.connection.on("connected", () => {
-//       console.log("Connected to Ably");
-//     });         
-    
-//     const channelName = `hotel-${hotelId}`;
-//     const channel = ably.channels.get(channelName);
+        // Add connection state monitoring
+        ably.connection.on("connected", () => {
+            console.log("Connected to Ably successfully");
+        });
 
-//     const populatedOrder = await populateOrder(order);
+        ably.connection.on("failed", (error) => {
+            console.error("Failed to connect to Ably:", error);
+            throw new ServerError("Failed to connect to Ably");
+        });
 
-//     await channel.publish("new-order", populatedOrder);
-//   } catch (error) {
-//     console.error("Error publishing order:", error);
-//     throw error;
-//   }
-// };
+        ably.connection.on("disconnected", () => {
+            console.warn("Disconnected from Ably - attempting to reconnect...");
+        });
+
+        ably.connection.on("closed", () => {
+            console.log("Ably connection closed");
+        });
+
+        return ably;
+    } catch (error) {
+        console.error("Error initializing Ably:", error);
+        throw new ServerError("Failed to initialize real-time service");
+    }
+};
+
+export default connectAbly;
 
 export const orderPublishService = async (order) => {
     try {
+        if (!global.ably || !global.ably.connection.state === 'connected') {
+            throw new Error('Ably connection not established');
+        }
+
         // Step 1: Populate order data
         const populatedOrder = await populateOrder(order);
         
@@ -47,16 +64,18 @@ export const orderPublishService = async (order) => {
             status: populatedOrder.status
         };
 
-        // Step 3: Publish sanitized order to Ably
-        const channel = ably.channels.get(`hotel-${order.hotelId}`);  // Specify the channel name
-        await channel.publish('new-order', sanitizedOrder);
+        const channel = global.ably.channels.get(`hotel-${order.hotelId}`);
+        await channel.publish({
+            name: 'new-order',
+            data: sanitizedOrder,
+            timestamp: Date.now()
+        });
 
     } catch (error) {
         console.error('Error publishing order:', error);
-        throw error;
+        throw new ServerError('Failed to publish order to real-time service');
     }
 };
-
 
 
 export const populateOrder = async (order) => {
@@ -95,26 +114,3 @@ export const populateOrder = async (order) => {
 
     return cleanOrder;
 };
-
-
-
-// Add subscription service
-export const subscribeToOrders = (hotelId, callback) => {
-  const channelName = `hotel-${hotelId}`;
-  const channel = ably.channels.get(channelName);
-  channel.subscribe("new-order", (message) => {
-    callback(message.data);
-  });
-  return () => channel.unsubscribe(); // Return cleanup function
-};
-
-// Add connection state monitoring
-ably.connection.on("connected", () => {
-  console.log("Connected to Ably");
-});
-
-ably.connection.on("failed", () => {
-  console.error("Failed to connect to Ably");
-});
-
-export default ably;
