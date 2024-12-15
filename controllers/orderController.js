@@ -109,7 +109,8 @@ export const getOrderDetails = catchAsyncError(async (req, res) => {
 
 export const publishOrder = catchAsyncError(async (req, res) => {
     const { orderId } = req.params;
-    
+    console.log("orderId", orderId);
+    console.log("inside publishOrder");
     if (!orderId) {
         throw new ClientError("Please provide order ID");
     }
@@ -126,6 +127,7 @@ export const publishOrder = catchAsyncError(async (req, res) => {
             message: "Order published successfully"
         });
     } catch (error) {
+        console.error('Error publishing order:', error);
         throw new ServerError(`Failed to publish order: ${error.message}`);
     }
 });

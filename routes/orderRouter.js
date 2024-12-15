@@ -14,6 +14,7 @@ const router = express.Router();
 
 // for customer on scanning QR
 router.get('/get-services/:hotelId/:tableId', onQRScan);
+router.post('/publish/:orderId', publishOrder);
 
 // for customer and hotel owner 
 router.post('/:hotelId/:tableId', createOrder);
@@ -31,6 +32,5 @@ router.delete('/:orderId', protect, validateOwnership, deleteOrder);
 
 router.get('/details/:orderId', getOrderDetails);
 
-router.post('/publish/:orderId', publishOrder);
 
 export default router;
