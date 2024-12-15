@@ -128,17 +128,19 @@ export const updateBillDishes = async ({ billId, oldOrder, newDishes, session })
             console.log('existing-item-in-bill:', existingItem);
             if (existingItem) {
                 // Adjust the quantity
-                if (!oldOrder) {
+                const oldQuantity = oldOrder?.dishes?.find((d) => d.dishId.toString() == dish._id.toString())?.quantity;
+                if (oldQuantity == undefined) {
+                    // if new order created by customer for the same dish
                     existingItem.quantity += quantity
                     additionalAmount += cost;
                     additionalDiscount += discount;
                 } else {
-                    const oldQuantity = oldOrder.dishes.find((d) => d.dishId.toString() == dish._id.toString()).quantity;
+                    // if old order updated by the owner 
                     const changeInQuantity = quantity - oldQuantity;
                     existingItem.quantity += changeInQuantity;
                     const changeInCost = cost - (oldQuantity * dish.price);
                     additionalAmount += changeInCost;
-                    const changeInDiscount = discount - calculateDiscount(dish.price, oldQuantity);
+                    const changeInDiscount = discount - calculateDiscount(dish, oldQuantity);
                     additionalDiscount += changeInDiscount;
                     console.log('it is old order', changeInQuantity, changeInCost, changeInDiscount);
                 }
@@ -219,7 +221,7 @@ export const updateBillService = async (billData, session) => {
 
     } catch (error) {
         console.error("Error while updating bill:", error.message);
-        throw new ServerError(error.message); // Handle error
+        throw error; // Handle error
     }
 };
 
