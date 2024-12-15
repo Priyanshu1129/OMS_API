@@ -70,29 +70,38 @@ export const addNewOrderService = async (orderData, session) => {
             console.log("existing bill updated ----", bill);
         }
 
-        // Step 3: Create a new order after the bill is created or updated
+        // Step 3: Create a new order
         const newOrder = new Order({
-            customerId: customer._id,  // Linking the new order to the existing customer
+            customerId: customer._id,
             billId: bill._id,
             dishes: dishes.map(dish => ({
                 dishId: dish._id,
                 quantity: dish.quantity,
                 notes: dish.notes
             })),
-            status: status || 'pending', // Default status to 'pending'
+            status: status || 'pending',
             tableId,
             hotelId,
-            note: note || '',  // Default to empty string if no note is provided
+            note: note || '',
         });
 
         // Save the new order
         await newOrder.save({ session });
+
+        // Populate the necessary fields before returning
+        await newOrder.populate([
+            { path: 'billId', select: '_id amount' },
+            { path: 'customerId', select: '_id name' },
+            { path: 'dishes.dishId', select: '_id name' },
+            { path: 'tableId', select: '_id number' },
+            { path: 'hotelId', select: '_id name' }
+        ]);
     
         return newOrder;
-        // updated bill can be sent here in response
 
     } catch (error) {
-        throw new ServerError(error.message); // Handle error properly
+        console.error('Error in addNewOrderService:', error);
+        throw new ServerError(error.message);
     }
 };
 
