@@ -20,31 +20,18 @@ const initializeAblyRest = () => {
 export const orderPublishService = async (order) => {
   try {
     const ablyRest = initializeAblyRest();
-    const channel = ablyRest.channels.get(`hotel-${order.hotelId._id || order.hotelId}`);
+    const channel = ablyRest.channels.get(`hotel-${order.hotelId}`);
 
     const sanitizedOrder = {
       orderId: order._id,
-      bill: {
-        _id: order.billId._id,
-        amount: order.billId.amount,
-      },
-      customer: {
-        _id: order.customerId._id,
-        name: order.customerId.name,
-      },
+      billId: order.billId,
+      customerId: order.customerId,
       dishes: order.dishes.map(dish => ({
-        _id: dish.dishId._id,
-        name: dish.dishId.name,
+        dishId: dish.dishId,
         quantity: dish.quantity,
       })),
-      table: {
-        _id: order.tableId._id,
-        number: order.tableId.number,
-      },
-      hotel: {
-        _id: order.hotelId._id || order.hotelId,
-        name: order.hotelId.name || '',
-      },
+      tableId: order.tableId,
+      hotelId: order.hotelId,
       status: order.status
     };
 
@@ -54,10 +41,7 @@ export const orderPublishService = async (order) => {
     });
 
   } catch (error) {
-    console.error('Error publishing order:', {
-      error: error.message,
-      orderData: JSON.stringify(order, null, 2)
-    });
+    console.error('Error publishing order:', error.message);
     throw new ServerError(`Failed to publish order via REST: ${error.message}`);
   }
 };

@@ -4,7 +4,8 @@ import {
     onQRScan,
     updateOrder,
     deleteOrder,
-    getOrderById
+    getOrderById,
+    getOrderDetails
 } from '../controllers/orderController.js';
 import express from 'express';
 
@@ -26,5 +27,7 @@ router.get('/:orderId', getOrderById);
 
 // for hotel owner delete customer order on request
 router.delete('/:orderId', protect, validateOwnership, deleteOrder);
+
+router.get('/details/:orderId', protect, validateOwnership, getOrderDetails);
 
 export default router;
