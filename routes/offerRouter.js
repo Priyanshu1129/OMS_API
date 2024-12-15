@@ -11,7 +11,7 @@ router.get('/', protect, attachHotelId, getAllOffers);
 
 router.post('/', protect, createOffer);
 
-router.put('/:id', protect, updateOffer);
+router.patch('/:id', protect, updateOffer);
 
 router.delete('/:id', protect, deleteOffer);
 

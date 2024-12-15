@@ -33,7 +33,8 @@ const offerSchema = new mongoose.Schema({
     type: Date,
     default: () => new Date(Date.now() + (30 * 6) * 24 * 60 * 60 * 1000),
     required: true
-  }
+  },
+  description : {type : String, default : ""}
 }, { timestamps: true });
 
 export default mongoose.model('Offer', offerSchema);
