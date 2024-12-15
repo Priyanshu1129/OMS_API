@@ -3,6 +3,7 @@ import { addNewOrderService, updateOrderService, deleteOrderService } from "../s
 import { ClientError } from "../utils/errorHandler.js";
 import { onQRScanService } from "../services/orderServices.js";
 import Order from "../models/orderModel.js";
+import { orderPublishService } from "../services/ablyService.js";
 
 export const onQRScan = catchAsyncError(async (req, res, next) => {
     const { hotelId, tableId } = req.params;
@@ -26,6 +27,13 @@ export const getOrderById = catchAsyncError(async (req, res, next) => {
         throw new ClientError("Please provide order id to get order");
     }
     const orderDetails = await Order.findById(orderId);
+
+    //populate order details
+    await orderDetails.populate('billId customerId tableId hotelId');
+
+    //populate dishes array details
+    await orderDetails.populate('dishes.dishId');
+
     if (!orderDetails) throw new ClientError("Order not available");
 
     res.status(201).json({
@@ -43,6 +51,9 @@ export const createOrder = catchAsyncError(async (req, res, next, session) => {
     }
 
     const newOrder = await addNewOrderService({ ...req.body, tableId, hotelId }, session);
+
+    await orderPublishService(newOrder, hotelId);
+
 
     res.status(201).json({
         success: true,

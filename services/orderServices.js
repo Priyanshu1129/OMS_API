@@ -87,7 +87,7 @@ export const addNewOrderService = async (orderData, session) => {
 
         // Save the new order
         await newOrder.save({ session });
-
+    
         return newOrder;
         // updated bill can be sent here in response
 
