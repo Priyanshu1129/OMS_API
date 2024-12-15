@@ -5,7 +5,8 @@ import {
     updateOrder,
     deleteOrder,
     getOrderById,
-    getOrderDetails
+    getOrderDetails,
+    publishOrder
 } from '../controllers/orderController.js';
 import express from 'express';
 
@@ -29,5 +30,7 @@ router.get('/:orderId', getOrderById);
 router.delete('/:orderId', protect, validateOwnership, deleteOrder);
 
 router.get('/details/:orderId', getOrderDetails);
+
+router.post('/publish/:orderId', publishOrder);
 
 export default router;

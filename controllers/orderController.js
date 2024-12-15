@@ -52,13 +52,6 @@ export const createOrder = catchAsyncError(async (req, res, next, session) => {
     }
 
     const newOrder = await addNewOrderService({ ...req.body, tableId, hotelId }, session);
-    
-    try {   
-        await orderPublishService(newOrder);
-    } catch (error) {
-        console.warn('Order published failed:', error);
-        // throw new Error(error);
-    }
 
     res.status(201).json({
         success: true,
@@ -112,6 +105,29 @@ export const getOrderDetails = catchAsyncError(async (req, res) => {
         message: "Order details fetched successfully",
         data: { order: orderDetails }
     });
+});
+
+export const publishOrder = catchAsyncError(async (req, res) => {
+    const { orderId } = req.params;
+    
+    if (!orderId) {
+        throw new ClientError("Please provide order ID");
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+        throw new ClientError("Order not found");
+    }
+
+    try {   
+        await orderPublishService(order);
+        res.status(200).json({
+            success: true,
+            message: "Order published successfully"
+        });
+    } catch (error) {
+        throw new ServerError(`Failed to publish order: ${error.message}`);
+    }
 });
 
 
