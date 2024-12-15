@@ -22,15 +22,21 @@ import utilsRouter from '../routes/utilsRouter.js';
 
 const app = express();
 
-// CORS configuration
 const corsOptions = {
-  origin: ["https://orm-frontend-eight.vercel.app", "http://localhost:3000"], // Update with your frontend URLs
-  // origin: "*", 
-  methods: ["POST", "GET", "PUT", "DELETE", "PATCH"],
-  credentials: true,
+  origin: [
+    "https://orm-frontend-eight.vercel.app", // Production frontend URL
+    "http://localhost:3000" // Local development URL
+  ],
+  methods: ["POST", "GET", "PUT", "DELETE", "PATCH"], // Allowed methods
+  credentials: true, // Enable cookies and authentication headers
 };
 
+// Apply CORS middleware
 app.use(cors(corsOptions));
+
+// Explicitly handle preflight requests
+app.options('*', cors(corsOptions)); 
+
 dotenv.config();
 
 // Middleware setup
