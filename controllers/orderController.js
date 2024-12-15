@@ -57,7 +57,7 @@ export const createOrder = catchAsyncError(async (req, res, next, session) => {
         await orderPublishService(newOrder);
     } catch (error) {
         console.warn('Order published failed:', error);
-        throw new Error(error);
+        // throw new Error(error);
     }
 
     res.status(201).json({
