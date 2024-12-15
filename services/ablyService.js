@@ -50,40 +50,54 @@ export const orderPublishService = async (order) => {
 };
 
 export const populateOrder = async (order) => {
-  // Populate only necessary fields and use lean() to avoid Mongoose-specific metadata
-  const billDetails = await Bill.findById(order.billId).lean();
-  const customerDetails = await Customer.findById(order.customerId).lean();
-  const dishesDetails = await Dish.find({ _id: { $in: order.dishes.map(dish => dish.dishId) } }).lean();
-  const tableDetails = await Table.findById(order.tableId).lean();
-  const hotelDetails = await Hotel.findById(order.hotelId).lean();
+  try {
+    // Populate only necessary fields and use lean() to avoid Mongoose-specific metadata
+    const billDetails = await Bill.findById(order.billId).lean();
+    if (!billDetails) throw new Error(`Bill not found for ID: ${order.billId}`);
+    
+    const customerDetails = await Customer.findById(order.customerId).lean();
+    if (!customerDetails) throw new Error(`Customer not found for ID: ${order.customerId}`);
+    
+    const dishesDetails = await Dish.find({ _id: { $in: order.dishes.map(dish => dish.dishId) } }).lean();
+    if (!dishesDetails || dishesDetails.length === 0) throw new Error('No dishes found');
+    
+    const tableDetails = await Table.findById(order.tableId).lean();
+    if (!tableDetails) throw new Error(`Table not found for ID: ${order.tableId}`);
+    
+    const hotelDetails = await Hotel.findById(order.hotelId).lean();
+    if (!hotelDetails) throw new Error(`Hotel not found for ID: ${order.hotelId}`);
 
-  // Remove any circular references or avoid deep population that causes loops
-  const cleanOrder = {
-    ...order,
-    bill: {
-      _id: billDetails._id,
-      amount: billDetails.amount,  // Only include necessary fields
-    },
-    customer: {
-      _id: customerDetails._id,
-      name: customerDetails.name,  // Only include necessary fields
-    },
-    dishes: dishesDetails.map(dish => ({
-      _id: dish._id,
-      name: dish.name,  // Only include necessary fields
-    })),
-    table: {
-      _id: tableDetails._id,
-      number: tableDetails.number,  // Only include necessary fields
-    },
-    hotel: {
-      _id: hotelDetails._id,
-      name: hotelDetails.name,  // Only include necessary fields
-    },
-    status: order.status,  // Status is simple data, no need to populate
-  };
+    // Remove any circular references or avoid deep population that causes loops
+    const cleanOrder = {
+      ...order,
+      bill: {
+        _id: billDetails._id,
+        amount: billDetails.amount,
+      },
+      customer: {
+        _id: customerDetails._id,
+        name: customerDetails.name,
+      },
+      dishes: dishesDetails.map(dish => ({
+        _id: dish._id,
+        name: dish.name,
+      })),
+      table: {
+        _id: tableDetails._id,
+        number: tableDetails.number,
+      },
+      hotel: {
+        _id: hotelDetails._id,
+        name: hotelDetails.name,
+      },
+      status: order.status,
+    };
 
-  return cleanOrder;
+    return cleanOrder;
+  } catch (error) {
+    console.error('Error in populateOrder:', error);
+    throw new ServerError(`Failed to populate order: ${error.message}`);
+  }
 };
 
 export default initializeAblyRest;
