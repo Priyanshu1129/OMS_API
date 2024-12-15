@@ -45,7 +45,7 @@ export const orderPublishService = async (order) => {
 
   } catch (error) {
     console.error('Error publishing order:', error);
-    throw new ServerError('Failed to publish order via REST');
+    throw new ServerError(`Failed to publish order via REST: ${error.message}`);
   }
 };
 
