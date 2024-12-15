@@ -28,6 +28,6 @@ router.get('/:orderId', getOrderById);
 // for hotel owner delete customer order on request
 router.delete('/:orderId', protect, validateOwnership, deleteOrder);
 
-router.get('/details/:orderId', protect, validateOwnership, getOrderDetails);
+router.get('/details/:orderId', getOrderDetails);
 
 export default router;
