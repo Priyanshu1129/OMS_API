@@ -52,8 +52,11 @@ export const createOrder = catchAsyncError(async (req, res, next, session) => {
 
     const newOrder = await addNewOrderService({ ...req.body, tableId, hotelId }, session);
 
-    await orderPublishService(newOrder, hotelId);
-
+    try {   
+        await orderPublishService(newOrder, hotelId);
+    } catch (error) {
+        throw new ClientError("Failed to publish order to Ably");
+    }
 
     res.status(201).json({
         success: true,
