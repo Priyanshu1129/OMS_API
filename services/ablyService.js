@@ -5,7 +5,8 @@ import {Dish} from "../models/dishModel.js";
 import Table from "../models/tableModel.js";
 import Hotel from "../models/hotelModel.js";
 
-const ably = new Ably.Realtime(process.env.ABLY_API_KEY);
+// const ably = new Ably.Realtime(process.env.ABLY_API_KEY);
+const ably = new Ably.Realtime("iM-CAA.WXKTig:PMGZCC-MK8vA-qBjmxEMOT_lhPRuD6EA9Q9GnDJ2s-w");
 
 // Add error handling for publish
 // export const orderPublishService = async (order, hotelId) => {
