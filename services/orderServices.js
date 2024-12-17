@@ -51,48 +51,42 @@ export const addNewOrderService = async (orderData, session) => {
         // Step 1: Check if customer exists for the given tableId
         let customer = await Customer.findOne({ tableId }).session(session);
 
-        // Step 2: Create or Update the bill (before creating the order)
+        // Step 2: Create or Update the bill
         let bill;
         if (!customer) {
-            // If customer doesn't exist, create a new bill and customer
             bill = await createBill({ customerName, hotelId, tableId, dishes, session });
-            console.log("new bill created ----", bill);
             customer = new Customer({
                 hotelId,
                 tableId,
                 name: customerName,
                 billId: bill._id,
             });
-            await customer.save({ session });  // Save the customer after creating the bill
+            await customer.save({ session });
         } else {
-            // If customer exists, update the existing bill
             bill = await updateBillDishes({ billId: customer.billId, newDishes: dishes, session });
-            console.log("existing bill updated ----", bill);
         }
 
-        // Step 3: Create a new order after the bill is created or updated
+        // Step 3: Create a new order without population
         const newOrder = new Order({
-            customerId: customer._id,  // Linking the new order to the existing customer
+            customerId: customer._id,
             billId: bill._id,
             dishes: dishes.map(dish => ({
                 dishId: dish._id,
                 quantity: dish.quantity,
                 notes: dish.notes
             })),
-            status: status || 'pending', // Default status to 'pending'
+            status: status || 'pending',
             tableId,
             hotelId,
-            note: note || '',  // Default to empty string if no note is provided
+            note: note || '',
         });
 
-        // Save the new order
         await newOrder.save({ session });
-    
         return newOrder;
-        // updated bill can be sent here in response
 
     } catch (error) {
-        throw new ServerError(error.message); // Handle error properly
+        console.error('Error in addNewOrderService:', error);
+        throw new ServerError(error.message);
     }
 };
 
@@ -195,6 +189,26 @@ export const deleteOrderService = async (orderId, session) => {
     } catch (error) {
         throw new ServerError(error.message); // Replace with your error handling logic
     }
+};
+
+export const getOrderDetailsService = async (orderId) => {
+  try {
+    const order = await Order.findById(orderId)
+      .populate('billId', '_id amount')
+      .populate('customerId', '_id name')
+      .populate('dishes.dishId', '_id name price')
+      .populate('tableId', '_id number')
+      .populate('hotelId', '_id name');
+
+    if (!order) {
+      throw new ClientError('Order not found');
+    }
+
+    return order;
+  } catch (error) {
+    console.error('Error in getOrderDetailsService:', error);
+    throw new ServerError(error.message);
+  }
 };
 
 
