@@ -30,7 +30,7 @@ export const getAllOffers = catchAsyncError(async (req, res, next) => {
 
 export const createOffer = catchAsyncError(async (req, res, next, session) => {
     const { hotelId } = req.user
-    const { title, value, type, discountType, appliedOn, startDate, endDate } = req.body;
+    const { title, value, type, discountType, appliedOn, startDate , endDate } = req.body;
 
     if (!hotelId || !title || !value || !type || !discountType ||
         (type == "specific" && (!appliedOn || appliedOn.length == 0))) {

@@ -42,7 +42,7 @@ export const createDish = catchAsyncError(async (req, res) => {
     dishData.hotelId = req.user.hotelId;
 
     // Call the service to create a new dish
-    const dish = await createDishService(dishData);s
+    const dish = await createDishService(dishData);
 
     res.status(201).json({
         status: "success",

@@ -62,6 +62,7 @@ export const getIngredientByIdService = async (ingredientId) => {
 }
 
 export const updateIngredientService = async (ingredientId, ingredientData) => {
+    console.log("ingredient data ", ingredientData)
     try {
         const ingredient = await Ingredient.findByIdAndUpdate(ingredientId, ingredientData, { new: true, runValidators: true });
         if (!ingredient) {
