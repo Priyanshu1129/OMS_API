@@ -28,7 +28,7 @@ export const createOfferService = async (offerData, session) => {
         }
 
         // Check if any dish already has an offer applied
-        const dishesWithOffer = dishDetails.filter(dish => dish.appliedOffer);
+        const dishesWithOffer = dishDetails.filter(dish => dish.offer);
         if (dishesWithOffer.length > 0) {
             const dishIdsWithOffer = dishesWithOffer.map(dish => dish._id);
             throw new ClientError(`Some provided dishes are already associated with other offers!`);
@@ -45,11 +45,11 @@ export const createOfferService = async (offerData, session) => {
     const offer = await Offer.create({ ...offerData, session });
 
     if (dishDetails && dishDetails.length) {
-        // Update all the fetched dishes with the new offer's ID in the appliedOffer field
+        // Update all the fetched dishes with the new offer's ID in the offer field
         const offerId = offer._id; // Since `create` returns an array when used with transactions
         await Dish.updateMany(
             { _id: { $in: dishDetails.map(dish => dish._id) } },
-            { $set: { appliedOffer: offerId } },
+            { $set: { offer: offerId } },
             { session }
         );
     }
@@ -99,11 +99,11 @@ export const updateOfferService = async (offerId, updatedData, session) => {
         appliedOn = validDishIds;
     }
 
-    // Remove appliedOffer from previously associated dishes if type or appliedOn changes
+    // Remove offer from previously associated dishes if type or appliedOn changes
     if (existingOffer.type === "specific" && existingOffer.appliedOn && existingOffer.appliedOn.length > 0) {
         await Dish.updateMany(
-            { _id: { $in: existingOffer.appliedOn }, appliedOffer: offerId },
-            { $unset: { appliedOffer: "" } },
+            { _id: { $in: existingOffer.appliedOn }, offer: offerId },
+            { $unset: { offer: "" } },
             { session }
         );
     }
@@ -112,7 +112,7 @@ export const updateOfferService = async (offerId, updatedData, session) => {
         // Update the dishes with the new offer's ID
         await Dish.updateMany(
             { _id: { $in: dishDetails.map(dish => dish._id) } },
-            { $set: { appliedOffer: offerId } },
+            { $set: { offer: offerId } },
             { session }
         );
     }
@@ -156,8 +156,8 @@ export const deleteOfferService = async (offerId, session) => {
         // Fetch all dishes that have the offer applied
         // const dishIds = offer.appliedOn.map(dish => dish._id);
         await Dish.updateMany(
-            { _id: { $in: offer.appliedOn }, appliedOffer: offerId },
-            { $unset: { appliedOffer: "" } }, // Removes the appliedOffer field
+            { _id: { $in: offer.appliedOn }, offer: offerId },
+            { $unset: { offer: "" } }, // Removes the offer field
             { session }
         );
     }

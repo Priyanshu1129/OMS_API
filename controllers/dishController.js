@@ -101,8 +101,8 @@ export const removeOfferFromDish = catchAsyncError(async (req, res, next, sessio
     if (!dishId) {
         throw new ClientError("Please provide dish id to remove offer from dish!")
     }
-    const dish = removeOfferFromDishService(dishId, session);
-
+    const dish = await removeOfferFromDishService(dishId, session);
+    console.log("dish in remove offer" ,dish)
     res.status(200).json({
         status: "success",
         message: "Offer removed from dish successfully",

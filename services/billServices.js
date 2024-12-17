@@ -6,7 +6,7 @@ import { ClientError, ServerError } from "../utils/errorHandler.js";
 
 const calculateDiscount = (dish, quantity) => {
     let discount = 0;
-    const offer = dish.appliedOffer;
+    const offer = dish.offer;
     if (offer?.discountType === 'percent') {
         let cost = dish.price * quantity;
         discount = (cost * offer.value) / 100;
@@ -21,7 +21,7 @@ export const createBill = async ({ customerName, dishes, hotelId, tableId, sessi
         if (!customerName) throw new ClientError("Customer name is required!");
         // Fetch dish details from the database
         const dishIds = dishes.map(d => d._id); // Assume dishes is an array of { dishId, quantity }
-        const dishDetails = await Dish.find({ _id: { $in: dishIds }, hotelId }).populate('appliedOffer');
+        const dishDetails = await Dish.find({ _id: { $in: dishIds }, hotelId }).populate('offer');
 
         if (!dishDetails || !dishDetails.length) {
             throw new ServerError('No valid dishes found for the provided IDs');
@@ -43,7 +43,7 @@ export const createBill = async ({ customerName, dishes, hotelId, tableId, sessi
 
             // Calculate discount if an offer is applied
             let discount = 0;
-            if (dish.appliedOffer) {
+            if (dish.offer) {
                 console.log('discount-calculation')
                 discount = calculateDiscount(dish, quantity);
                 console.log('discount-calculation', discount)
@@ -95,7 +95,7 @@ export const updateBillDishes = async ({ billId, oldOrder, newDishes, session })
 
         // Fetch details of the new ordered dishes
         const dishIds = newDishes.map(d => d._id);
-        const dishDetails = await Dish.find({ _id: { $in: dishIds }, hotelId: bill.hotelId }).populate('appliedOffer');
+        const dishDetails = await Dish.find({ _id: { $in: dishIds }, hotelId: bill.hotelId }).populate('offer');
 
 
         if (!dishDetails || !dishDetails.length) {
@@ -119,7 +119,7 @@ export const updateBillDishes = async ({ billId, oldOrder, newDishes, session })
 
             // Calculate discount if an offer is applied
             let discount = 0;
-            if (dish.appliedOffer) {
+            if (dish.offer) {
                 discount = calculateDiscount(dish, quantity);
             }
 
