@@ -20,9 +20,9 @@ router.post('/:hotelId/:tableId', createOrder);
 router.put('/:orderId', protect, validateOwnership, updateOrder);
 
 // for hotel owner to fetch order by id
+
 // router.get('/:orderId', protect, validateOwnership, getOrderById);
 router.get('/:orderId', getOrderById);
-
 
 // for hotel owner delete customer order on request
 router.delete('/:orderId', protect, validateOwnership, deleteOrder);
