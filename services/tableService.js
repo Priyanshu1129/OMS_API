@@ -137,7 +137,9 @@ export const getOrdersByTableService = async (tableId) => {
     return orders;
 };
 
+
 export const generateTableBillService = async (tableId, session) => {
+    // Start Transaction
     const orders = await Order.find({ tableId }).session(session);
     if (!orders || orders.length === 0) {
         throw new ClientError('No orders are available to generate bill for the table');
@@ -146,16 +148,19 @@ export const generateTableBillService = async (tableId, session) => {
     const customerId = orders[0].customerId;
     const customer = await Customer.findById(customerId).session(session);
 
-    let bill = await Bill.create({
-        tableId,
-        hotelId: customer.hotelId,
-        customerName: customer.name,
-        status: "unpaid",
-        totalAmount: 0,
-        totalDiscount: 0,
-        finalAmount: 0,
-        orderedItems: []
-    });
+    let bill = await Bill.create(
+        {
+            tableId,
+            hotelId: customer.hotelId,
+            customerName: customer.name,
+            status: "unpaid",
+            totalAmount: 0,
+            totalDiscount: 0,
+            finalAmount: 0,
+            orderedItems: [],
+        },
+        { session }
+    );
 
     let allOrderedDishes = [];
     let allOrderedDishesIds = [];
@@ -198,6 +203,10 @@ export const generateTableBillService = async (tableId, session) => {
     }
 
     await bill.save({ session });
+
+    // Delete Customer and Orders
+    await Customer.findByIdAndDelete(customerId).session(session);
+    await Order.deleteMany({ tableId }).session(session);
 
     return bill;
 };
