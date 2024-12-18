@@ -2,10 +2,7 @@ import Order from "../models/orderModel.js";
 import Customer from "../models/customerModel.js";
 import { Category, Dish } from "../models/dishModel.js";
 import Table from "../models/tableModel.js"
-import Bill from "../models/billModel.js"
-import { createBill, updateBillDishes } from "./billServices.js";
 import { ClientError, ServerError } from "../utils/errorHandler.js";
-
 
 export const onQRScanService = async ({ tableId, hotelId }) => {
 
@@ -21,9 +18,6 @@ export const onQRScanService = async ({ tableId, hotelId }) => {
     if ((orders.length > 0 && !customer) || (orders.length > 0 && orders[0].customerId != customer._id.toString())) {
         throw new ServerError("Orders are available while customer is not");
     }
-    let bill = null
-    if (orders.length > 0)
-        bill = await Bill.findById(customer.billId).select('totalAmount totalDiscount finalAmount status')
 
     // for creating menu 
     const dishes = await Dish.find({ hotelId });
@@ -32,13 +26,12 @@ export const onQRScanService = async ({ tableId, hotelId }) => {
 
     const data = {
         table: table,
-        customerName: customer?.name,
+        customerName: customer?.name || null,
         existingOrders: orders,
         menu: {
-            dishes,
-            categories
-        },
-        bill
+            categories,
+            dishes
+        }
     };
 
     return data;
@@ -46,36 +39,27 @@ export const onQRScanService = async ({ tableId, hotelId }) => {
 
 export const addNewOrderService = async (orderData, session) => {
     try {
-        const { customerName, tableId, hotelId, dishes, status, note } = orderData;
+        const { customerName, tableId, hotelId, dishes, note } = orderData;
 
-        // Step 1: Check if customer exists for the given tableId
         let customer = await Customer.findOne({ tableId }).session(session);
 
-        // Step 2: Create or Update the bill
-        let bill;
         if (!customer) {
-            bill = await createBill({ customerName, hotelId, tableId, dishes, session });
             customer = new Customer({
                 hotelId,
                 tableId,
                 name: customerName,
-                billId: bill._id,
             });
             await customer.save({ session });
-        } else {
-            bill = await updateBillDishes({ billId: customer.billId, newDishes: dishes, session });
         }
 
-        // Step 3: Create a new order without population
         const newOrder = new Order({
             customerId: customer._id,
-            billId: bill._id,
             dishes: dishes.map(dish => ({
                 dishId: dish._id,
                 quantity: dish.quantity,
                 notes: dish.notes
             })),
-            status: status || 'pending',
+            status: 'draft',
             tableId,
             hotelId,
             note: note || '',
@@ -96,18 +80,14 @@ export const updateOrderService = async (orderData, session) => {
         const { orderId, status, note } = orderData;
         let dishes = orderData.dishes;
 
-        // Step 1: Find the existing order by ID
         const order = await Order.findById(orderId).session(session);
-        const oldOrder = { ...order.toObject() };
 
         if (!order) {
             throw new ClientError("Order not found");
         }
 
         dishes = dishes?.filter((item) => item.quantity >= 0);
-        // Step 2: Update the order details
         if (dishes && dishes.length > 0) {
-            // Update the dishes
             dishes.forEach(newDish => {
                 const existingDish = order.dishes.find(dish => dish.dishId.toString() === newDish._id.toString());
 
@@ -143,15 +123,10 @@ export const updateOrderService = async (orderData, session) => {
         // Save the updated order
         await order.save({ session });
 
-        // Update the associated bill
-        if (dishes && dishes.length > 0) {
-            const billId = order.billId
-            await updateBillDishes({ billId, oldOrder, newDishes: dishes, session });
-        }
-
         return order;
     } catch (error) {
-        throw new ServerError(error.message); // Replace with your error handling logic
+        console.log('error occurred while updating order!')
+        throw error; // Replace with your error handling logic
     }
 };
 
@@ -166,23 +141,8 @@ export const deleteOrderService = async (orderId, session) => {
             throw new ClientError("Order not found");
         }
 
-        // Step 2: Extract billId and dishes from the order
-        const { billId, dishes } = order;
-
-        if (!billId) {
-            throw new ServerError("Bill ID not found in the order");
-        }
-
         // Step 3: Delete the order
         await Order.findByIdAndDelete(orderId, { session });
-
-        // Step 4: Update the associated bill
-        const updateDishes = dishes.map(dish => ({
-            _id: dish.dishId,
-            quantity: 0,
-        }));
-
-        const bill = await updateBillDishes({ billId, oldOrder: order, newDishes: updateDishes, session });
 
         return order;
 
@@ -192,23 +152,22 @@ export const deleteOrderService = async (orderId, session) => {
 };
 
 export const getOrderDetailsService = async (orderId) => {
-  try {
-    const order = await Order.findById(orderId)
-      .populate('billId', '_id amount')
-      .populate('customerId', '_id name')
-      .populate('dishes.dishId', '_id name price')
-      .populate('tableId', '_id number')
-      .populate('hotelId', '_id name');
+    try {
+        const order = await Order.findById(orderId)
+            .populate('customerId', '_id name')
+            .populate('dishes.dishId', '_id name price')
+            .populate('tableId', '_id number')
+            .populate('hotelId', '_id name');
 
-    if (!order) {
-      throw new ClientError('Order not found');
+        if (!order) {
+            throw new ClientError('Order not found');
+        }
+
+        return order;
+    } catch (error) {
+        console.error('Error in getOrderDetailsService:', error);
+        throw new ServerError(error.message);
     }
-
-    return order;
-  } catch (error) {
-    console.error('Error in getOrderDetailsService:', error);
-    throw new ServerError(error.message);
-  }
 };
 
 

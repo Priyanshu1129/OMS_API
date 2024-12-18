@@ -2,6 +2,21 @@ import Table from '../models/tableModel.js';
 import { ClientError, ServerError } from '../utils/errorHandler.js';
 import { ROLES } from '../utils/constant.js';
 import Order from "../models/orderModel.js";
+import { Dish } from "../models/dishModel.js";
+import Bill from '../models/billModel.js';
+import Customer from "../models/customerModel.js";
+
+const calculateDiscount = (dish, quantity) => {
+    let discount = 0;
+    const offer = dish.offer;
+    if (offer?.discountType === 'percent') {
+        let cost = dish.price * quantity;
+        discount = (cost * offer.value) / 100;
+    } else if (offer?.discountType === 'amount') {
+        discount = offer.value * quantity;
+    }
+    return discount;
+}
 
 export const getTableByIdService = async (tableId) => {
     try {
@@ -120,4 +135,69 @@ export const getOrdersByTableService = async (tableId) => {
 
     // Step 2: Return the list of orders
     return orders;
+};
+
+export const generateTableBillService = async (tableId, session) => {
+    const orders = await Order.find({ tableId }).session(session);
+    if (!orders || orders.length === 0) {
+        throw new ClientError('No orders are available to generate bill for the table');
+    }
+
+    const customerId = orders[0].customerId;
+    const customer = await Customer.findById(customerId).session(session);
+
+    let bill = await Bill.create({
+        tableId,
+        hotelId: customer.hotelId,
+        customerName: customer.name,
+        status: "unpaid",
+        totalAmount: 0,
+        totalDiscount: 0,
+        finalAmount: 0,
+        orderedItems: []
+    });
+
+    let allOrderedDishes = [];
+    let allOrderedDishesIds = [];
+
+    orders.forEach((order) => {
+        order.dishes.forEach((dish) => {
+            if (!allOrderedDishesIds.includes(dish.dishId)) {
+                allOrderedDishesIds.push(dish.dishId);
+            }
+            let existingDish = allOrderedDishes.find((d) => d.dishId === dish.dishId);
+            if (!existingDish) {
+                allOrderedDishes.push({ dishId: dish.dishId, quantity: dish.quantity });
+            } else {
+                existingDish.quantity += dish.quantity;
+            }
+        });
+    });
+
+    bill.orderedItems = allOrderedDishes;
+    const dishesInfo = await Dish.find({ _id: { $in: allOrderedDishesIds } })
+        .populate('offer')
+        .session(session);
+
+    if (!dishesInfo || dishesInfo.length === 0) {
+        throw new ServerError("Dishes not found while generating bill!");
+    }
+
+    allOrderedDishes.forEach((item) => {
+        const dish = dishesInfo.find((d) => String(d._id) === String(item.dishId));
+        if (dish) {
+            bill.totalAmount += dish.price * item.quantity;
+            bill.totalDiscount += calculateDiscount(dish, item.quantity);
+        }
+    });
+
+    bill.finalAmount = bill.totalAmount - bill.totalDiscount;
+
+    if (bill.orderedItems.length === 0) {
+        throw new ServerError('Unable to generate bill!');
+    }
+
+    await bill.save({ session });
+
+    return bill;
 };

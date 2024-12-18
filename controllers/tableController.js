@@ -1,4 +1,4 @@
-import { getTableByIdService, getTablesService, createTableService, deleteTableService, updateTableService, getOrdersByTableService } from '../services/tableService.js';
+import { getTableByIdService, getTablesService, createTableService, deleteTableService, updateTableService, getOrdersByTableService, generateTableBillService } from '../services/tableService.js';
 import { ClientError, ServerError } from '../utils/errorHandler.js'; // Import the custom error classes
 import { catchAsyncError } from '../middlewares/catchAsyncError.js';
 
@@ -93,3 +93,18 @@ export const getOrdersByTable = catchAsyncError(async (req, res, next) => {
         data: { orders }
     })
 })
+
+export const generateTableBill = catchAsyncError(async (req, res, next, session) => {
+    const { id } = req.params;
+    if (!id) {
+        throw new ClientError("Please provide table id to generate bill!");
+    }
+    const bill = await generateTableBillService(id, session);
+
+    res.status(201).json({
+        status: "success",
+        message: "Bill generated successfully",
+        data: { bill }
+    })
+
+}, true)

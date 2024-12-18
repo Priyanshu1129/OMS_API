@@ -1,7 +1,7 @@
 import Ably from "ably";
 import Bill from "../models/billModel.js";
 import Customer from "../models/customerModel.js";
-import {Dish} from "../models/dishModel.js";
+import { Dish } from "../models/dishModel.js";
 import Table from "../models/tableModel.js";
 import Hotel from "../models/hotelModel.js";
 import { ServerError } from "../utils/errorHandler.js";
@@ -51,16 +51,16 @@ export const populateOrder = async (order) => {
     // Populate only necessary fields and use lean() to avoid Mongoose-specific metadata
     const billDetails = await Bill.findById(order.billId).lean();
     if (!billDetails) throw new Error(`Bill not found for ID: ${order.billId}`);
-    
+
     const customerDetails = await Customer.findById(order.customerId).lean();
     if (!customerDetails) throw new Error(`Customer not found for ID: ${order.customerId}`);
-    
+
     const dishesDetails = await Dish.find({ _id: { $in: order.dishes.map(dish => dish.dishId) } }).lean();
     if (!dishesDetails || dishesDetails.length === 0) throw new Error('No dishes found');
-    
+
     const tableDetails = await Table.findById(order.tableId).lean();
     if (!tableDetails) throw new Error(`Table not found for ID: ${order.tableId}`);
-    
+
     const hotelDetails = await Hotel.findById(order.hotelId).lean();
     if (!hotelDetails) throw new Error(`Hotel not found for ID: ${order.hotelId}`);
 

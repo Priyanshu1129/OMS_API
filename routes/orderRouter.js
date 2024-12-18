@@ -14,6 +14,8 @@ const router = express.Router();
 
 // for customer on scanning QR
 router.get('/get-services/:hotelId/:tableId', onQRScan);
+
+
 router.post('/publish/:orderId', publishOrder);
 
 // for customer and hotel owner 

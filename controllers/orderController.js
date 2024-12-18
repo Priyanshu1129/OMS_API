@@ -29,7 +29,7 @@ export const getOrderById = catchAsyncError(async (req, res, next) => {
     const orderDetails = await Order.findById(orderId);
 
     //populate order details
-    await orderDetails.populate('billId customerId tableId hotelId');
+    await orderDetails.populate('customerId tableId hotelId');
 
     //populate dishes array details
     await orderDetails.populate('dishes.dishId');
@@ -46,7 +46,6 @@ export const getOrderById = catchAsyncError(async (req, res, next) => {
 export const createOrder = catchAsyncError(async (req, res, next, session) => {
     const { tableId, hotelId } = req.params;
     const { customerName, dishes, status, note } = req.body;
-    
     if (!hotelId || !tableId || !dishes || dishes.length <= 0) {
         throw new ClientError("Please provide sufficient data to create order");
     }
@@ -93,7 +92,7 @@ export const deleteOrder = catchAsyncError(async (req, res, next, session) => {
 
 export const getOrderDetails = catchAsyncError(async (req, res) => {
     const { orderId } = req.params;
-    
+
     if (!orderId) {
         throw new ClientError("Please provide order ID");
     }
@@ -120,7 +119,7 @@ export const publishOrder = catchAsyncError(async (req, res) => {
         throw new ClientError("Order not found");
     }
 
-    try {   
+    try {
         await orderPublishService(order);
         res.status(200).json({
             success: true,
