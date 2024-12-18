@@ -42,7 +42,7 @@ export const createDish = catchAsyncError(async (req, res) => {
     dishData.hotelId = req.user.hotelId;
 
     // Call the service to create a new dish
-    const dish = await createDishService(dishData);s
+    const dish = await createDishService(dishData);
 
     res.status(201).json({
         status: "success",
@@ -101,8 +101,8 @@ export const removeOfferFromDish = catchAsyncError(async (req, res, next, sessio
     if (!dishId) {
         throw new ClientError("Please provide dish id to remove offer from dish!")
     }
-    const dish = removeOfferFromDishService(dishId, session);
-
+    const dish = await removeOfferFromDishService(dishId, session);
+    console.log("dish in remove offer" ,dish)
     res.status(200).json({
         status: "success",
         message: "Offer removed from dish successfully",

@@ -12,6 +12,7 @@ import {
 export const getUserProfile = catchAsyncError(async (req, res) => {
   const userId = req.user?.id;
   const user = await getUserProfileService(userId);
+  console.log("user------", user)
   res.status(200).json({
     status : "success",
     message: "User profile fetched successfully",

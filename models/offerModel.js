@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 
 const offerSchema = new mongoose.Schema({
-  title: { type: String, required: true },
+  name: { type: String, required: true },
+  logo : { type: String },
   appliedOn: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Dish' }],
   type: { type: String, enum: ['specific', 'global'], required: true },
   discountType: { type: String, enum: ['percent', 'amount'], required: true },
@@ -28,12 +29,13 @@ const offerSchema = new mongoose.Schema({
     }
   },
   disable: { type: Boolean, default: false },
-  startDate: { type: Date, default: Date.now, required: true },
+  startDate: { type: Date, default: Date.now},
   endDate: {
     type: Date,
     default: () => new Date(Date.now() + (30 * 6) * 24 * 60 * 60 * 1000),
-    required: true
-  }
+   
+  },
+  description : {type : String, default : ""}
 }, { timestamps: true });
 
 export default mongoose.model('Offer', offerSchema);

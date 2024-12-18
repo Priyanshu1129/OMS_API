@@ -24,7 +24,7 @@ const dishSchema = new mongoose.Schema(
       maxlength: 100, // Ensures the name is not too long
     },
     logo : { type : String , default : "https://static.vecteezy.com/system/resources/previews/010/354/788/original/main-dish-icon-colorful-flat-design-illustration-graphics-free-vector.jpg"},
-    appliedOffer: { type: mongoose.Schema.Types.ObjectId, ref: 'Offer', default: null },
+    offer: { type: mongoose.Schema.Types.ObjectId, ref: 'Offer', default: null },
     quantity: {
       type: Number,
       default: 1,
@@ -50,13 +50,14 @@ const dishSchema = new mongoose.Schema(
       trim: true, // Trims any leading/trailing whitespace
       maxlength: 500, // Optional: limit description length
     },
-    categories: [
+    category:
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category',
+        default : null
         // required: true,
       },
-    ],
+    
     ingredients: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -69,6 +70,14 @@ const dishSchema = new mongoose.Schema(
       ref: 'Hotel',
       required: true,
     },
+     bestSeller : {  
+      type : Boolean,
+      default : false
+    },
+    outOfStock : {
+      type : Boolean,
+      default : false
+    }
   },
   { timestamps: true }
 );

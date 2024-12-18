@@ -25,13 +25,14 @@ export const createDishService = async (dishData) => {
 
 export const getDishByIdService = async (dishId) => {
     try {
-        const dish = await Dish.findById(dishId).populate("ingredients categories");
+        const dish = await Dish.findById(dishId).populate("ingredients category offer");
         if (!dish) {
             throw new ClientError('Dish not found');
         }
         return dish;
     }
     catch (error) {
+        console.log("fetch-all-dish", error)
         if (error instanceof ClientError) {
             throw new error;
         } else {
@@ -42,7 +43,7 @@ export const getDishByIdService = async (dishId) => {
 
 export const getAllDishesService = async (hotelId) => {
     try {
-        const dishes = await Dish.find({ hotelId }).populate("ingredients categories");
+        const dishes = await Dish.find({ hotelId }).populate("ingredients category offer");
         if (!dishes || dishes.length === 0) {
             throw new ClientError("No dishes available!", "Not found");
         }
@@ -104,7 +105,7 @@ export const getDishesByCategoryService = async (hotelId, categoryId) => {
 };
 
 export const removeOfferFromDishService = async (dishId, session) => {
-    // Fetch the dish to get the appliedOffer
+    // Fetch the dish to get the offer
     try {
         const dish = await Dish.findById(dishId);
 
@@ -112,27 +113,27 @@ export const removeOfferFromDishService = async (dishId, session) => {
             throw new ClientError('Dish not found!');
         }
 
-        if (!dish.appliedOffer) {
+        if (!dish.offer) {
             throw new ClientError('No offer is applied to this dish!');
         }
 
-        const offerId = dish.appliedOffer;
+        const offerId = dish.offer;
 
         // Remove the offer from the dish
-        await Dish.findByIdAndUpdate(
+        const updatedDish = await Dish.findByIdAndUpdate(
             dishId,
-            { $unset: { appliedOffer: "" } },
-            { session }
+            { $unset: { offer: "" } },
+            {new : true}
         );
 
         // Remove the dishId from the offer's appliedOn array
         await Offer.findByIdAndUpdate(
             offerId,
             { $pull: { appliedOn: dishId } },
-            { session }
+         
         );
 
-        return dish;
+        return updatedDish;
     } catch (error) {
         console.log("error- while removing offer", error)
         throw error

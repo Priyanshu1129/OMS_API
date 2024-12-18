@@ -1,5 +1,5 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
-import { addNewOrderService, updateOrderService, deleteOrderService } from "../services/orderServices.js"
+import { addNewOrderService, updateOrderService, deleteOrderService, getOrderDetailsService } from "../services/orderServices.js"
 import { ClientError } from "../utils/errorHandler.js";
 import { onQRScanService } from "../services/orderServices.js";
 import Order from "../models/orderModel.js";
@@ -44,23 +44,21 @@ export const getOrderById = catchAsyncError(async (req, res, next) => {
 })
 
 export const createOrder = catchAsyncError(async (req, res, next, session) => {
-    const { tableId, hotelId } = req.params
+    const { tableId, hotelId } = req.params;
     const { customerName, dishes, status, note } = req.body;
+    
     if (!hotelId || !tableId || !dishes || dishes.length <= 0) {
         throw new ClientError("Please provide sufficient data to create order");
     }
 
     const newOrder = await addNewOrderService({ ...req.body, tableId, hotelId }, session);
 
-    await orderPublishService(newOrder, hotelId);
-
-
     res.status(201).json({
         success: true,
         message: "New order created successfully",
-        data: { newOrder }
-    })
-}, true)
+        data: { orderId: newOrder._id }
+    });
+}, true);
 
 export const updateOrder = catchAsyncError(async (req, res, next, session) => {
     const { orderId } = req.params;
@@ -92,5 +90,46 @@ export const deleteOrder = catchAsyncError(async (req, res, next, session) => {
         data: { deletedOrder }
     })
 }, true)
+
+export const getOrderDetails = catchAsyncError(async (req, res) => {
+    const { orderId } = req.params;
+    
+    if (!orderId) {
+        throw new ClientError("Please provide order ID");
+    }
+
+    const orderDetails = await getOrderDetailsService(orderId);
+
+    res.status(200).json({
+        success: true,
+        message: "Order details fetched successfully",
+        data: { order: orderDetails }
+    });
+});
+
+export const publishOrder = catchAsyncError(async (req, res) => {
+    const { orderId } = req.params;
+    console.log("orderId", orderId);
+    console.log("inside publishOrder");
+    if (!orderId) {
+        throw new ClientError("Please provide order ID");
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+        throw new ClientError("Order not found");
+    }
+
+    try {   
+        await orderPublishService(order);
+        res.status(200).json({
+            success: true,
+            message: "Order published successfully"
+        });
+    } catch (error) {
+        console.error('Error publishing order:', error);
+        throw new ServerError(`Failed to publish order: ${error.message}`);
+    }
+});
 
 
