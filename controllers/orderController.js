@@ -79,6 +79,29 @@ export const createOrder = catchAsyncError(async (req, res, next, session) => {
   });
 }, true);
 
+export const updateOrderByOwner = catchAsyncError(
+  async (req, res, next, session) => {
+    const { orderId } = req.params;
+    const { dishes } = req.body;
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId,
+      { dishes: dishes },
+      { new: true }
+    )
+      .populate("customerId", "_id name")
+      .populate("dishes.dishId")
+      .populate("tableId", "_id sequence")
+      .populate("hotelId", "_id name")
+      .session(session);
+
+    return res.status(201).json({
+      status: "success",
+      message: "Order updated Successfully",
+      data: { order: updatedOrder },
+    });
+  }
+);
+
 export const updateOrder = catchAsyncError(async (req, res, next, session) => {
   const { orderId } = req.params;
   const { dishes, status, note } = req.body;

@@ -8,7 +8,8 @@ import {
     getOrderDetails,
     publishOrder,
     getAllOrders,
-    updateStatus
+    updateStatus,
+    updateOrderByOwner
 } from '../controllers/orderController.js';
 import express from 'express';
 
@@ -26,6 +27,9 @@ router.post('/:hotelId/:tableId', createOrder);
 
 // for hotel owner update to update order on customer's order on request
 router.put('/:orderId', protect, validateOwnership, updateOrder);
+
+//for update order by owner
+router.put('/owner/:orderId', protect, validateOwnership, updateOrderByOwner);
 
 // for updating order status
 router.patch('/:orderId/:status', protect, validateOwnership, updateStatus );

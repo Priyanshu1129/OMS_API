@@ -39,7 +39,7 @@ export const onQRScanService = async ({ tableId, hotelId }) => {
 
 export const addNewOrderService = async (orderData, session) => {
     try {
-        const { customerName, tableId, hotelId, dishes, note } = orderData;
+        const { customerName, tableId, hotelId, dishes, note, status } = orderData;
 
         let customer = await Customer.findOne({ tableId }).session(session);
 
@@ -155,7 +155,7 @@ export const getOrderDetailsService = async (orderId) => {
     try {
         const order = await Order.findById(orderId)
             .populate('customerId', '_id name')
-            .populate('dishes.dishId', '_id name price')
+            .populate('dishes.dishId')
             .populate('tableId', '_id number')
             .populate('hotelId', '_id name');
 
@@ -174,7 +174,7 @@ export const getAllOrderService = async () => {
   try {
     const orders = await Order.find({})
       .populate('customerId', '_id name')
-      .populate('dishes.dishId', '_id name price')
+      .populate('dishes.dishId')
       .populate('tableId', '_id sequence')
       .populate('hotelId', '_id name');
 
