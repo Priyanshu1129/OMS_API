@@ -30,9 +30,9 @@ export const getAllOffers = catchAsyncError(async (req, res, next) => {
 
 export const createOffer = catchAsyncError(async (req, res, next, session) => {
     const { hotelId } = req.user
-    const { title, value, type, discountType, appliedOn, startDate , endDate } = req.body;
+    const { name, value, type, discountType, appliedOn, startDate , endDate } = req.body;
 
-    if (!hotelId || !title || !value || !type || !discountType ||
+    if (!hotelId || !name || !value || !type || !discountType ||
         (type == "specific" && (!appliedOn || appliedOn.length == 0))) {
         throw new ClientError("Please provide required details to create offer");
     }
@@ -51,9 +51,9 @@ export const updateOffer = catchAsyncError(async (req, res, next, session) => {
         throw new ClientError("Please provide offer id to update offer!");
     }
 
-    const { title, value, type, discountType, appliedOn, startDate, endDate , appliedAbove} = req.body;
+    const { name, value, type, discountType, appliedOn, startDate, endDate , appliedAbove} = req.body;
     if (
-        !title &&
+        !name &&
         !value &&
         !discountType &&
         !startDate &&
@@ -87,7 +87,8 @@ export const deleteOffer = catchAsyncError(async (req, res, next, session) => {
 
     res.status(201).json({
         status: "success",
-        message: "Offer deleted successfully"
+        message: "Offer deleted successfully",
+        data: { offer }
     })
 }, true)
 

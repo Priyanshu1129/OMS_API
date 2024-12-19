@@ -8,7 +8,7 @@ const orderSchema = new mongoose.Schema({
     quantity: { type: Number, required: true },
     note: { type: String }
   }],
-  status: { type: String, enum: ['pending', 'preparing', 'completed', 'cancelled'], default: 'pending' },
+  status: { type: String, enum: ['draft','pending', 'preparing', 'completed', 'cancelled'], default: 'draft' },
   tableId: { type: mongoose.Schema.Types.ObjectId, ref: 'Table', required: true },
   hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel', required: true },
   note: { type: String }

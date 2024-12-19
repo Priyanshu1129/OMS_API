@@ -20,7 +20,7 @@ const initializeAblyRest = () => {
 export const orderPublishService = async (order) => {
   try {
     const ablyRest = initializeAblyRest();
-    const channel = ablyRest.channels.get(`hotel-${order.hotelId}`);
+    const channel = ablyRest.channels.get(`hotel-${order.hotelId._id.toString()}`);
 
     const sanitizedOrder = {
       orderId: order._id,

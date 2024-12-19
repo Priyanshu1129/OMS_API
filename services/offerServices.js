@@ -3,7 +3,7 @@ import { Dish } from "../models/dishModel.js";
 import { ClientError } from "../utils/errorHandler.js";
 
 export const createOfferService = async (offerData, session) => {
-    const { hotelId, title, value, type, discountType, appliedOn, disable, startDate, endDate, appliedAbove } = offerData;
+    const { hotelId, name, value, type, discountType, appliedOn, disable, startDate, endDate, appliedAbove } = offerData;
 
     let dishDetails = null;
 
@@ -17,9 +17,9 @@ export const createOfferService = async (offerData, session) => {
     }
 
     if (type === "specific") {
-        if (appliedAbove) {
-            throw new ClientError("Applied above condition will not work for specific type of offer!");
-        }
+        // if (appliedAbove) {
+        //     throw new ClientError("Applied above condition will not work for specific type of offer!");
+        // }
 
         // Fetch dishes belonging to the given hotel and matching the provided IDs
         dishDetails = await Dish.find({ _id: { $in: appliedOn }, hotelId }).session(session);
@@ -58,7 +58,7 @@ export const createOfferService = async (offerData, session) => {
 };
 
 export const updateOfferService = async (offerId, updatedData, session) => {
-    const { title, value, type, discountType, appliedAbove, startDate, endDate } = updatedData;
+    const { name, value, type, discountType, appliedAbove, startDate, endDate } = updatedData;
     let appliedOn = updatedData.appliedOn;
 
     // Fetch the existing offer
@@ -119,7 +119,7 @@ export const updateOfferService = async (offerId, updatedData, session) => {
 
     // Construct the update object explicitly
     const updateFields = {};
-    if (title !== undefined) updateFields.title = title;
+    if (name !== undefined) updateFields.name = name;
     if (value !== undefined) updateFields.value = value;
     if (type !== undefined) updateFields.type = type;
     if (discountType !== undefined) updateFields.discountType = discountType;

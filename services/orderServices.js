@@ -75,7 +75,7 @@ export const addNewOrderService = async (orderData, session) => {
                 quantity: dish.quantity,
                 notes: dish.notes
             })),
-            status: status || 'pending',
+            status: status || 'draft',
             tableId,
             hotelId,
             note: note || '',
@@ -205,6 +205,25 @@ export const getOrderDetailsService = async (orderId) => {
     }
 
     return order;
+  } catch (error) {
+    console.error('Error in getOrderDetailsService:', error);
+    throw new ServerError(error.message);
+  }
+};
+
+export const getAllOrderService = async () => {
+  try {
+    const orders = await Order.find({})
+      .populate('customerId', '_id name')
+      .populate('dishes.dishId', '_id name price')
+      .populate('tableId', '_id sequence')
+      .populate('hotelId', '_id name');
+
+    if (!orders) {
+      throw new ClientError('Order not found');
+    }
+
+    return orders;
   } catch (error) {
     console.error('Error in getOrderDetailsService:', error);
     throw new ServerError(error.message);

@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const offerSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  name: { type: String, required: true},
   logo : { type: String },
   appliedOn: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Dish' }],
   type: { type: String, enum: ['specific', 'global'], required: true },
@@ -11,22 +11,7 @@ const offerSchema = new mongoose.Schema({
   appliedAbove: {
     type: Number,
     min: 0,
-    validate: {
-      validator: function (value) {
-        // If type is 'specific', appliedAbove must not exist
-        if (this.type === 'specific' && value != null) {
-          return false;
-        }
-        // If type is 'global', appliedAbove is allowed but not required
-        return true;
-      },
-      message: function (props) {
-        if (this.type === 'specific') {
-          return 'appliedAbove must not be provided for specific offers!';
-        }
-        return 'Invalid appliedAbove configuration!';
-      }
-    }
+   
   },
   disable: { type: Boolean, default: false },
   startDate: { type: Date, default: Date.now},

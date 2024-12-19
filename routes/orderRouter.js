@@ -6,13 +6,16 @@ import {
     deleteOrder,
     getOrderById,
     getOrderDetails,
-    publishOrder
+    publishOrder,
+    getAllOrders,
+    updateStatus
 } from '../controllers/orderController.js';
 import express from 'express';
 
 const router = express.Router();
 
 // for customer on scanning QR
+router.get('/', getAllOrders)
 router.get('/get-services/:hotelId/:tableId', onQRScan);
 router.post('/publish/:orderId', publishOrder);
 
@@ -21,6 +24,9 @@ router.post('/:hotelId/:tableId', createOrder);
 
 // for hotel owner update to update order on customer's order on request
 router.put('/:orderId', protect, validateOwnership, updateOrder);
+
+// for updating order status
+router.patch('/:orderId/:status', protect, validateOwnership, updateStatus );
 
 // for hotel owner to fetch order by id
 // router.get('/:orderId', protect, validateOwnership, getOrderById);
