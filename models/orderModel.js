@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 
 const orderSchema = new mongoose.Schema({
-  billId: { type: mongoose.Schema.Types.ObjectId, ref: 'Bill', required: true },
   customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true },
   dishes: [{
     dishId: { type: mongoose.Schema.Types.ObjectId, ref: 'Dish', required: true },

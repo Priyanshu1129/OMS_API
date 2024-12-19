@@ -45,7 +45,7 @@ export const getOrderById = catchAsyncError(async (req, res, next) => {
   const orderDetails = await Order.findById(orderId);
 
   //populate order details
-  await orderDetails.populate("billId customerId tableId hotelId");
+  await orderDetails.populate("customerId tableId hotelId");
 
   //populate dishes array details
   await orderDetails.populate("dishes.dishId");

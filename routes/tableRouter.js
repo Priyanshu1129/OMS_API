@@ -1,6 +1,6 @@
 import { attachHotelId, protect, superAdminOnly, validateOwnership } from "../middlewares/authMiddleware.js";
 import express from 'express';
-import { getTableById, getTables, createTable, updateTable, deleteTable, occupyTable, freeTable, getOrdersByTable } from '../controllers/tableController.js';
+import { getTableById, getTables, createTable, updateTable, deleteTable, occupyTable, freeTable, getOrdersByTable, generateTableBill } from '../controllers/tableController.js';
 
 
 const router = express.Router();
@@ -21,6 +21,8 @@ router.delete('/:id', protect, deleteTable);
 // //free table
 // router.put('/table-free/:id', protect,freeTable);
 
+// to generate table's bill
+router.post('/:id', protect, validateOwnership, generateTableBill);
 
 // for hotel owner list orders by table id
 router.get('/get-customer-orders/:tableId', protect, validateOwnership, getOrdersByTable);
