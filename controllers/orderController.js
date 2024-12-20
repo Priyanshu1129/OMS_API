@@ -116,7 +116,7 @@ export const updateOrderByOwner = catchAsyncError(
 export const updateOrder = catchAsyncError(async (req, res, next, session) => {
   const { orderId } = req.params;
   const { dishes, status, note } = req.body;
-  if (!orderId || (!dishes && !status && !note)) {
+  if (!orderId || (!dishes && !status && !note)){
     throw new ClientError("Please provide sufficient data to update order");
   }
 
