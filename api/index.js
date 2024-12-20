@@ -64,7 +64,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/v1/uploads', utilsRouter);
 app.use('/api/v1/auth', authRouter);
-app.use('/api/v1/devkey', devKeyRouter);
+app.use('/api/v1/devkeys', devKeyRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/hotels', hotelRouter);
 app.use('/api/v1/tables', tableRouter);

@@ -3,6 +3,7 @@ import Customer from "../models/customerModel.js";
 import { Category, Dish } from "../models/dishModel.js";
 import Table from "../models/tableModel.js"
 import { ClientError, ServerError } from "../utils/errorHandler.js";
+import mongoose from "mongoose";
 
 export const onQRScanService = async ({ tableId, hotelId }) => {
 
@@ -39,10 +40,11 @@ export const onQRScanService = async ({ tableId, hotelId }) => {
 
 export const addNewOrderService = async (orderData, session) => {
     try {
+        console.log("Order data----------", orderData)
         const { customerName, tableId, hotelId, dishes, note, status } = orderData;
 
         let customer = await Customer.findOne({ tableId }).session(session);
-
+        console.log("this is hotel id in add new order for customer ",hotelId)
         if (!customer) {
             customer = new Customer({
                 hotelId,
@@ -51,11 +53,11 @@ export const addNewOrderService = async (orderData, session) => {
             });
             await customer.save({ session });
         }
-
+        console.log("Dishes in neworder ", dishes)
         const newOrder = new Order({
             customerId: customer._id,
             dishes: dishes.map(dish => ({
-                dishId: dish._id,
+                dishId: new mongoose.Types.ObjectId(dish.dishId),
                 quantity: dish.quantity,
                 notes: dish.notes
             })),
@@ -64,7 +66,8 @@ export const addNewOrderService = async (orderData, session) => {
             hotelId,
             note: note || '',
         });
-
+        
+        console.log("new order ", newOrder)
         await newOrder.save({ session });
         return newOrder;
 
@@ -164,6 +167,25 @@ export const getOrderDetailsService = async (orderId) => {
         }
 
     return order;
+  } catch (error) {
+    console.error('Error in getOrderDetailsService:', error);
+    throw new ServerError(error.message);
+  }
+};
+
+export const getTableOrdersService = async (tableId) => {
+    try {
+        const orders = await Order.find({tableId : tableId})
+            .populate('customerId', '_id name')
+            .populate('dishes.dishId')
+            .populate('tableId', '_id number')
+            .populate('hotelId', '_id name');
+
+        if (!orders) {
+            throw new ClientError('Order not found');
+        }
+
+    return orders;
   } catch (error) {
     console.error('Error in getOrderDetailsService:', error);
     throw new ServerError(error.message);

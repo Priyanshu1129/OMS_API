@@ -22,7 +22,7 @@ router.delete('/:id', protect, deleteTable);
 // router.put('/table-free/:id', protect,freeTable);
 
 // to generate table's bill
-router.post('/:id', protect, validateOwnership, generateTableBill);
+router.get('/bill/:tableId', protect, validateOwnership, generateTableBill);
 
 // for hotel owner list orders by table id
 router.get('/get-customer-orders/:tableId', protect, validateOwnership, getOrdersByTable);

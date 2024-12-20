@@ -5,6 +5,7 @@ import {
   deleteOrderService,
   getOrderDetailsService,
   getAllOrderService,
+  getTableOrdersService,
 } from "../services/orderServices.js";
 import { ClientError, ServerError } from "../utils/errorHandler.js";
 import { onQRScanService } from "../services/orderServices.js";
@@ -66,16 +67,26 @@ export const createOrder = catchAsyncError(async (req, res, next, session) => {
   if (!hotelId || !tableId || !dishes || dishes.length <= 0) {
     throw new ClientError("Please provide sufficient data to create order");
   }
-
+  
+  console.log("hotel Id in createorder controller ", hotelId)
   const newOrder = await addNewOrderService(
     { ...req.body, tableId, hotelId },
     session
   );
 
+  const populatedOrder = await Order.findById(newOrder._id)
+    .populate("customerId", "_id name")
+    .populate("dishes.dishId")
+    .populate("tableId", "_id sequence")
+    .populate("hotelId", "_id name")
+    .session(session);
+
+    console.log("populated Order", populatedOrder)
+
   res.status(201).json({
-    success: true,
+    status: "success",
     message: "New order created successfully",
-    data: { orderId: newOrder._id },
+    data: { order: populatedOrder },
   });
 }, true);
 
@@ -174,6 +185,22 @@ export const getOrderDetails = catchAsyncError(async (req, res) => {
     success: true,
     message: "Order details fetched successfully",
     data: { order: orderDetails },
+  });
+});
+
+export const getTableOrders = catchAsyncError(async (req, res) => {
+  const { tableId } = req.params;
+
+  if (!tableId) {
+    throw new ClientError("Please provide order ID");
+  }
+
+  const orderDetails = await getTableOrdersService(tableId);
+
+  res.status(200).json({
+    status: "success",
+    message: "Table Order details fetched successfully",
+    data: { orders: orderDetails },
   });
 });
 

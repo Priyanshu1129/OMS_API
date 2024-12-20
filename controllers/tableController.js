@@ -95,12 +95,12 @@ export const getOrdersByTable = catchAsyncError(async (req, res, next) => {
 })
 
 export const generateTableBill = catchAsyncError(async (req, res, next, session) => {
-    const { id } = req.params;
-    if (!id) {
+    const { tableId } = req.params;
+    if (!tableId) {
         throw new ClientError("Please provide table id to generate bill!");
     }
-    const bill = await generateTableBillService(id, session);
-
+    const bill = await generateTableBillService(tableId, session);
+    
     res.status(201).json({
         status: "success",
         message: "Bill generated successfully",

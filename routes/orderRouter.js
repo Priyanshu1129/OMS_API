@@ -9,7 +9,8 @@ import {
     publishOrder,
     getAllOrders,
     updateStatus,
-    updateOrderByOwner
+    updateOrderByOwner,
+    getTableOrders
 } from '../controllers/orderController.js';
 import express from 'express';
 
@@ -19,6 +20,8 @@ const router = express.Router();
 router.get('/', getAllOrders)
 router.get('/get-services/:hotelId/:tableId', onQRScan);
 
+// Table orders
+router.get('/table/:tableId', getTableOrders)
 
 router.post('/publish/:orderId', publishOrder);
 
@@ -43,6 +46,8 @@ router.get('/:orderId', getOrderById);
 router.delete('/:orderId', protect, validateOwnership, deleteOrder);
 
 router.get('/details/:orderId', getOrderDetails);
+
+
 
 
 export default router;

@@ -141,26 +141,30 @@ export const getOrdersByTableService = async (tableId) => {
 export const generateTableBillService = async (tableId, session) => {
     // Start Transaction
     const orders = await Order.find({ tableId }).session(session);
+    console.log("tableOrders : ", orders, tableId);
     if (!orders || orders.length === 0) {
         throw new ClientError('No orders are available to generate bill for the table');
     }
 
     const customerId = orders[0].customerId;
     const customer = await Customer.findById(customerId).session(session);
-
+    console.log("customer : ", customer)
     let bill = await Bill.create(
-        {
+        [
+          {
             tableId,
             hotelId: customer.hotelId,
             customerName: customer.name,
-            status: "unpaid",
             totalAmount: 0,
             totalDiscount: 0,
             finalAmount: 0,
             orderedItems: [],
-        },
+          },
+        ],
         { session }
-    );
+      );
+      console.log("bill : ", bill)
+      bill = bill[0];
 
     let allOrderedDishes = [];
     let allOrderedDishesIds = [];
@@ -203,10 +207,15 @@ export const generateTableBillService = async (tableId, session) => {
     }
 
     await bill.save({ session });
+    const populateBill = await Bill.findById(bill._id)
+        .populate("orderedItems.dishId") // Populate Dish references with specific fields
+        .populate("hotelId", "name address") // Populate Hotel references with specific fields
+        .populate("tableId", "number sequence")
+        .session(session)
 
     // Delete Customer and Orders
     await Customer.findByIdAndDelete(customerId).session(session);
     await Order.deleteMany({ tableId }).session(session);
 
-    return bill;
+    return populateBill;
 };
