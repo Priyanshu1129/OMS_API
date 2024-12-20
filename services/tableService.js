@@ -137,14 +137,41 @@ export const getOrdersByTableService = async (tableId) => {
     return orders;
 };
 
+//  orderedItems: [{
+//     dishId: { type: mongoose.Schema.Types.ObjectId, ref: 'Dish' },
+//     quantity: { type: Number, required: true }
+//   }],
 
 export const generateTableBillService = async (tableId, session) => {
     // Start Transaction
-    const orders = await Order.find({ tableId }).session(session);
+    const orders = await Order.find({ tableId }).session(session).populate('dishes.dishId');
     console.log("tableOrders : ", orders, tableId);
     if (!orders || orders.length === 0) {
         throw new ClientError('No orders are available to generate bill for the table');
     }
+
+    const orderItems = [];
+    orders.forEach((order)=>{
+        //  order.dishes.forEach((itm)=>orderItems.push(itm));
+        orderItems = [...orderItems,...order.dishes];
+    });
+
+    const groupedOrdersItems = [];
+    orderItems.forEach((item)=>{
+       const alreadyExists = groupedOrdersItems.findIndex((orderItm)=>orderItm.dishId._id == item.dishId._id);
+       if(alreadyExists >= 0){
+          groupedOrdersItems[alreadyExists].quantity += item.quantity;
+       }else{
+          groupedOrdersItems.push(item);
+       }
+    })
+    
+    const formattedGroupedItems = groupedOrdersItems.map((item)=>{
+        return {
+            dishId: item.dishId._id,
+            quantity: item.quantity
+        }
+    })
 
     const customerId = orders[0].customerId;
     const customer = await Customer.findById(customerId).session(session);
@@ -158,7 +185,7 @@ export const generateTableBillService = async (tableId, session) => {
             totalAmount: 0,
             totalDiscount: 0,
             finalAmount: 0,
-            orderedItems: [],
+            orderItems : formattedGroupedItems,
           },
         ],
         { session }
@@ -214,8 +241,8 @@ export const generateTableBillService = async (tableId, session) => {
         .session(session)
 
     // Delete Customer and Orders
-    await Customer.findByIdAndDelete(customerId).session(session);
-    await Order.deleteMany({ tableId }).session(session);
+    // await Customer.findByIdAndDelete(customerId).session(session);
+    // await Order.deleteMany({ tableId }).session(session);
 
     return populateBill;
 };
