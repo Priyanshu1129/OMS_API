@@ -246,3 +246,107 @@ export const generateTableBillService = async (tableId, session) => {
 
     return populateBill;
 };
+export const testingFunction = async (tableId, session) => {
+    // Start Transaction
+    const orders = await Order.find({ tableId }).session(session).populate('dishes.dishId');
+    console.log("tableOrders : ", orders, tableId);
+    if (!orders || orders.length === 0) {
+        throw new ClientError('No orders are available to generate bill for the table');
+    }
+
+    const orderItems = [];
+    orders.forEach((order)=>{
+        //  order.dishes.forEach((itm)=>orderItems.push(itm));
+        orderItems = [...orderItems,...order.dishes];
+    });
+
+    const groupedOrdersItems = [];
+    orderItems.forEach((item)=>{
+       const alreadyExists = groupedOrdersItems.findIndex((orderItm)=>orderItm.dishId._id == item.dishId._id);
+       if(alreadyExists >= 0){
+          groupedOrdersItems[alreadyExists].quantity += item.quantity;
+       }else{
+          groupedOrdersItems.push(item);
+       }
+    })
+    
+    const formattedGroupedItems = groupedOrdersItems.map((item)=>{
+        return {
+            dishId: item.dishId._id,
+            quantity: item.quantity
+        }
+    })
+
+    const customerId = orders[0].customerId;
+    const customer = await Customer.findById(customerId).session(session);
+    console.log("customer : ", customer)
+    let bill = await Bill.create(
+        [
+          {
+            tableId,
+            hotelId: customer.hotelId,
+            customerName: customer.name,
+            totalAmount: 0,
+            totalDiscount: 0,
+            finalAmount: 0,
+            orderItems : formattedGroupedItems,
+          },
+        ],
+        { session }
+      );
+      console.log("bill : ", bill)
+      bill = bill[0];
+
+    let allOrderedDishes = [];
+    let allOrderedDishesIds = [];
+
+    orders.forEach((order) => {
+        order.dishes.forEach((dish) => {
+            if (!allOrderedDishesIds.includes(dish.dishId)) {
+                allOrderedDishesIds.push(dish.dishId);
+            }
+            let existingDish = allOrderedDishes.find((d) => d.dishId === dish.dishId);
+            if (!existingDish) {
+                allOrderedDishes.push({ dishId: dish.dishId, quantity: dish.quantity });
+            } else {
+                existingDish.quantity += dish.quantity;
+            }
+        });
+    });
+
+    bill.orderedItems = allOrderedDishes;
+    const dishesInfo = await Dish.find({ _id: { $in: allOrderedDishesIds } })
+        .populate('offer')
+        .session(session);
+
+    if (!dishesInfo || dishesInfo.length === 0) {
+        throw new ServerError("Dishes not found while generating bill!");
+    }
+
+    allOrderedDishes.forEach((item) => {
+        const dish = dishesInfo.find((d) => String(d._id) === String(item.dishId));
+        if (dish) {
+            bill.totalAmount += dish.price * item.quantity;
+            bill.totalDiscount += calculateDiscount(dish, item.quantity);
+        }
+    });
+
+    bill.finalAmount = bill.totalAmount - bill.totalDiscount;
+
+    if (bill.orderedItems.length === 0) {
+        throw new ServerError('Unable to generate bill!');
+    }
+
+    await bill.save({ session });
+    const populateBill = await Bill.findById(bill._id)
+        .populate("orderedItems.dishId") // Populate Dish references with specific fields
+        .populate("hotelId", "name address") // Populate Hotel references with specific fields
+        .populate("tableId", "number sequence")
+        .session(session)
+
+    // Delete Customer and Orders
+    // await Customer.findByIdAndDelete(customerId).session(session);
+    // await Order.deleteMany({ tableId }).session(session);
+
+    return populateBill;
+};
