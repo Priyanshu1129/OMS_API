@@ -8,16 +8,15 @@ export const getUserProfileService = async (userId) => {
         if (!userId) {
             throw new ClientError('ValidationError', 'User ID is required');
         }
-        const hotelOwner = await HotelOwner.findById(userId).select('-password');
+        const hotelOwner = await HotelOwner.findById(userId)
+                            .select('-password')
+                            .populate('hotelId', '_id name');
         const superAdmin = await SuperAdmin.findById(userId).select('-password');
         if (!hotelOwner && !superAdmin) {
             throw new ClientError('NotFoundError', 'User not found');
         }
 
-        if(hotelOwner){
-            hotelOwner.populate('hotelId', '_id name');
-        }
-        
+
         return hotelOwner || superAdmin;
     } catch (error) {
         throw new ServerError('Error while fetching user profile');
