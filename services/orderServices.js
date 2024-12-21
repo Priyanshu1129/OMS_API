@@ -39,28 +39,22 @@ export const onQRScanService = async ({ tableId, hotelId }) => {
 }
 
 export const addNewOrderService = async (orderData, session) => {
-    const { customerName, tableId, hotelId, dishes, note, status } = orderData;
+    try {
+        console.log("Order data----------", orderData)
+        const { customerName, tableId, hotelId, dishes, note, status } = orderData;
 
-    // Find or create customer in a single operation using findOneAndUpdate
-    const customer = await Customer.findOneAndUpdate(
-        { tableId },
-        {
-            $setOnInsert: {
+        let customer = await Customer.findOne({ tableId }).session(session);
+        console.log("this is hotel id in add new order for customer ",hotelId)
+        if (!customer) {
+            customer = new Customer({
                 hotelId,
                 tableId,
                 name: customerName,
-            }
-        },
-        { 
-            upsert: true, 
-            new: true,
-            session 
+            });
+            await customer.save({ session });
         }
-    );
-
-    // Create and populate order in a single operation
-    const order = await Order.create(
-        [{
+        console.log("Dishes in neworder ", dishes)
+        const newOrder = new Order({
             customerId: customer._id,
             dishes: dishes.map(dish => ({
                 dishId: new mongoose.Types.ObjectId(dish.dishId),
@@ -71,23 +65,16 @@ export const addNewOrderService = async (orderData, session) => {
             tableId,
             hotelId,
             note: note || '',
-        }],
-        { session }
-    );
+        });
+        
+        console.log("new order ", newOrder)
+        await newOrder.save({ session });
+        return newOrder;
 
-    // Populate the order with all necessary references
-    const populatedOrder = await Order.findById(order[0]._id)
-        .session(session)
-        .populate('customerId', '_id name')
-        .populate('dishes.dishId')
-        .populate('tableId', '_id sequence')
-        .populate('hotelId', '_id name');
-
-    if (!populatedOrder) {
-        throw new ServerError("Error while creating order");
+    } catch (error) {
+        console.error('Error in addNewOrderService:', error);
+        throw new ServerError(error.message);
     }
-
-    return populatedOrder;
 };
 
 // only for hotel owner
