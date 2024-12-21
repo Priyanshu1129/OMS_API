@@ -18,7 +18,7 @@ const router = express.Router();
 
 // for customer on scanning QR
 router.get('/', getAllOrders)
-router.get('/get-services/:hotelId/:tableId', onQRScan);
+router.get('/qr-scan/:hotelId/:tableId', onQRScan);
 
 // Table orders
 router.get('/table/:tableId', getTableOrders)
@@ -35,7 +35,7 @@ router.put('/:orderId', protect, validateOwnership, updateOrder);
 router.put('/owner/:orderId', protect, validateOwnership, updateOrderByOwner);
 
 // for updating order status
-router.patch('/:orderId/:status', protect, validateOwnership, updateStatus );
+router.patch('/:orderId/:status', protect, validateOwnership, updateStatus);
 
 // for hotel owner to fetch order by id
 
