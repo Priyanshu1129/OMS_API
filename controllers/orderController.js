@@ -62,33 +62,21 @@ export const getOrderById = catchAsyncError(async (req, res, next) => {
 
 export const createOrder = catchAsyncError(async (req, res, next, session) => {
   const { tableId, hotelId } = req.params;
-  const { customerName, dishes, status, note } = req.body;
+  const { customerName, dishes } = req.body;
 
   if (!hotelId || !tableId || !dishes || dishes.length <= 0) {
     throw new ClientError("Please provide sufficient data to create order");
   }
-  
-  console.log("hotel Id in createorder controller ", hotelId)
+
   const newOrder = await addNewOrderService(
     { ...req.body, tableId, hotelId },
     session
   );
 
-  const populatedOrder = await Order.findById(newOrder._id)
-    .populate([
-      { path: "customerId", select: "_id name" },
-      { path: "dishes.dishId" },
-      { path: "tableId", select: "_id sequence" },
-      { path: "hotelId", select: "_id name" }
-    ])
-    .session(session);
-
-    console.log("populated Order", populatedOrder)
-
-  return res.status(201).json({
+  res.status(201).json({
     status: "success",
     message: "New order created successfully",
-    data: { order: populatedOrder },
+    data: { order: newOrder },
   });
 }, true);
 

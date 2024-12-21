@@ -39,22 +39,28 @@ export const onQRScanService = async ({ tableId, hotelId }) => {
 }
 
 export const addNewOrderService = async (orderData, session) => {
-    try {
-        console.log("Order data----------", orderData)
-        const { customerName, tableId, hotelId, dishes, note, status } = orderData;
+    const { customerName, tableId, hotelId, dishes, note, status } = orderData;
 
-        let customer = await Customer.findOne({ tableId }).session(session);
-        console.log("this is hotel id in add new order for customer ",hotelId)
-        if (!customer) {
-            customer = new Customer({
+    // Find or create customer in a single operation using findOneAndUpdate
+    const customer = await Customer.findOneAndUpdate(
+        { tableId },
+        {
+            $setOnInsert: {
                 hotelId,
                 tableId,
                 name: customerName,
-            });
-            await customer.save({ session });
+            }
+        },
+        { 
+            upsert: true, 
+            new: true,
+            session 
         }
-        console.log("Dishes in neworder ", dishes)
-        const newOrder = new Order({
+    );
+
+    // Create and populate order in a single operation
+    const order = await Order.create(
+        [{
             customerId: customer._id,
             dishes: dishes.map(dish => ({
                 dishId: new mongoose.Types.ObjectId(dish.dishId),
@@ -65,16 +71,23 @@ export const addNewOrderService = async (orderData, session) => {
             tableId,
             hotelId,
             note: note || '',
-        });
-        
-        console.log("new order ", newOrder)
-        await newOrder.save({ session });
-        return newOrder;
+        }],
+        { session }
+    );
 
-    } catch (error) {
-        console.error('Error in addNewOrderService:', error);
-        throw new ServerError(error.message);
+    // Populate the order with all necessary references
+    const populatedOrder = await Order.findById(order[0]._id)
+        .session(session)
+        .populate('customerId', '_id name')
+        .populate('dishes.dishId')
+        .populate('tableId', '_id sequence')
+        .populate('hotelId', '_id name');
+
+    if (!populatedOrder) {
+        throw new ServerError("Error while creating order");
     }
+
+    return populatedOrder;
 };
 
 // only for hotel owner
