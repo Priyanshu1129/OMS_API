@@ -79,8 +79,7 @@ export const createOrder = catchAsyncError(async (req, res, next, session) => {
     .populate("dishes.dishId")
     .populate("tableId", "_id sequence")
     .populate("hotelId", "_id name")
-    .session(session);
-
+    .session(session)
     console.log("populated Order", populatedOrder)
 
   res.status(201).json({
