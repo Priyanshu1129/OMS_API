@@ -41,7 +41,11 @@ export const updateBillService = async (billData, session) => {
         // Step 3: If the status is 'paid' or 'payLater', delete associated orders and customers
         if (status === 'paid' || status === 'payLater') {
             // Delete all orders related to this tableId
-            await Table.findByIdAndUpdate(tableId, { status: "free" })
+            await Table.findByIdAndUpdate(
+                tableId,
+                { status: "free" },
+                { new: true, session }
+            );
             await Order.deleteMany({ tableId: bill.tableId }).session(session); // Delete all orders for the tableId
 
             // Delete the customer associated with this tableId
