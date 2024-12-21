@@ -14,6 +14,10 @@ export const getUserProfileService = async (userId) => {
             throw new ClientError('NotFoundError', 'User not found');
         }
 
+        if(hotelOwner){
+            hotelOwner.populate('hotelId', '_id name');
+        }
+        
         return hotelOwner || superAdmin;
     } catch (error) {
         throw new ServerError('Error while fetching user profile');
