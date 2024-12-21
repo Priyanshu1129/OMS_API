@@ -1,6 +1,8 @@
 import { getTableByIdService, getTablesService, createTableService, deleteTableService, updateTableService, getOrdersByTableService, generateTableBillService } from '../services/tableService.js';
 import { ClientError, ServerError } from '../utils/errorHandler.js'; // Import the custom error classes
 import { catchAsyncError } from '../middlewares/catchAsyncError.js';
+import Order from '../models/orderModel.js';
+import Customer from '../models/customerModel.js';
 
 export const getTableById = catchAsyncError(async (req, res) => {
     const tableId = req.params.id;
@@ -51,23 +53,6 @@ export const deleteTable = catchAsyncError(async (req, res) => {
     });
 });
 
-export const occupyTable = catchAsyncError(async (req, res) => {
-    const tableId = req.params.id;
-    await occupyTableService(req.user, tableId);
-    res.status(200).json({
-        status: "success",
-        message: 'Table occupied successfully',
-    });
-});
-
-export const freeTable = catchAsyncError(async (req, res) => {
-    const tableId = req.params.id;
-    // await freeTableService(req.user, tableId);
-    res.status(200).json({
-        status: "success",
-        message: 'Table freed successfully',
-    });
-});
 
 // export const getAllTablesOfHotel = catchAsyncError(async (req, res) => {
 //     const tables = await getAllTablesOfHotelService(req.user);
@@ -81,6 +66,7 @@ export const freeTable = catchAsyncError(async (req, res) => {
 export const getOrdersByTable = catchAsyncError(async (req, res, next) => {
     const { tableId } = req.params;
     console.log('req, to get orders of table')
+
     if (!tableId) {
         throw new ClientError("Please provide table id to get orders");
     }
@@ -94,13 +80,14 @@ export const getOrdersByTable = catchAsyncError(async (req, res, next) => {
     })
 })
 
+
 export const generateTableBill = catchAsyncError(async (req, res, next, session) => {
     const { tableId } = req.params;
     if (!tableId) {
         throw new ClientError("Please provide table id to generate bill!");
     }
     const bill = await generateTableBillService(tableId, session);
-    
+
     res.status(201).json({
         status: "success",
         message: "Bill generated successfully",
@@ -108,3 +95,36 @@ export const generateTableBill = catchAsyncError(async (req, res, next, session)
     })
 
 }, true)
+
+
+export const deleteTableOrders = catchAsyncError(async (req, res, next, session) => {
+    const { tableId } = req.params;
+    if (!tableId) {
+        throw new ClientError("Please provide table id to delete orders of a table!");
+    }
+    const deletedOrders = await Order.deleteMany({ tableId })
+    res.status(201).json({
+        status: "success",
+        message: "Orders deleted successfully",
+        data: { deletedOrders }
+    })
+})
+
+export const getCustomerDetails = catchAsyncError(async (req, res, next) => {
+    const { tableId } = req.params;
+    if (!tableId) {
+        throw new ClientError("Please provide table id to get customer details!");
+    }
+    const customer = await Customer.findOne({ tableId });
+
+    await Customer.deleteMany();
+    await Order.deleteMany();
+    // const customer = await Customer.find();
+    // const orders = await Order.find();
+
+    res.status(201).json({
+        status: "success",
+        message: "Customer fetched successfully",
+        data: { customer }
+    })
+})

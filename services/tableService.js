@@ -140,17 +140,22 @@ export const freeTableService = async (user, tableId) => {
 // }
 
 export const getOrdersByTableService = async (tableId) => {
-    // Step 1: Query the orders based on tableId
-    const orders = await Order.find({ tableId }).populate({
-        "path": "dishes.dishId",
-        "select": "-createdAt -updatedAt -quantity -hotelId "
-    }); // Optionally populate dishes with dish details
-    if (!orders || orders.length === 0) {
-        throw new ClientError("No orders available for this table.");
-    }
+    try {
+        const orders = await Order.find({ tableId: tableId })
+            .populate('customerId', '_id name')
+            .populate('dishes.dishId')
+            .populate('tableId', '_id number')
+            .populate('hotelId', '_id name');
 
-    // Step 2: Return the list of orders
-    return orders;
+        if (!orders) {
+            throw new ClientError('No orders are available');
+        }
+
+        return orders;
+    } catch (error) {
+        console.error('Error in getOrderDetailsService:', error);
+        throw new ServerError(error.message);
+    }
 };
 
 export const generateTableBillService = async (tableId, session) => {
@@ -161,6 +166,7 @@ export const generateTableBillService = async (tableId, session) => {
             populate: { path: 'offer' }, // Populate the offer field inside the dish
         });
 
+    console.log('orders to generate bill', orders);
 
     if (!orders || orders.length === 0) {
         console.error(`No orders found for table: ${tableId}`);
@@ -168,6 +174,9 @@ export const generateTableBillService = async (tableId, session) => {
     }
 
     orders = orders.filter((order) => order.status != 'draft');
+
+    console.log('orders are not in draft', orders)
+
     if (orders.length === 0) {
         console.error(`All the orders are in draft stage for table: ${tableId}`);
         throw new ClientError('All orders are in draft!');
@@ -259,22 +268,22 @@ export const testingFunction = async (tableId, session) => {
     }
 
     const orderItems = [];
-    orders.forEach((order)=>{
+    orders.forEach((order) => {
         //  order.dishes.forEach((itm)=>orderItems.push(itm));
-        orderItems = [...orderItems,...order.dishes];
+        orderItems = [...orderItems, ...order.dishes];
     });
 
     const groupedOrdersItems = [];
-    orderItems.forEach((item)=>{
-       const alreadyExists = groupedOrdersItems.findIndex((orderItm)=>orderItm.dishId._id == item.dishId._id);
-       if(alreadyExists >= 0){
-          groupedOrdersItems[alreadyExists].quantity += item.quantity;
-       }else{
-          groupedOrdersItems.push(item);
-       }
+    orderItems.forEach((item) => {
+        const alreadyExists = groupedOrdersItems.findIndex((orderItm) => orderItm.dishId._id == item.dishId._id);
+        if (alreadyExists >= 0) {
+            groupedOrdersItems[alreadyExists].quantity += item.quantity;
+        } else {
+            groupedOrdersItems.push(item);
+        }
     })
-    
-    const formattedGroupedItems = groupedOrdersItems.map((item)=>{
+
+    const formattedGroupedItems = groupedOrdersItems.map((item) => {
         return {
             dishId: item.dishId._id,
             quantity: item.quantity
@@ -286,20 +295,20 @@ export const testingFunction = async (tableId, session) => {
     console.log("customer : ", customer)
     let bill = await Bill.create(
         [
-          {
-            tableId,
-            hotelId: customer.hotelId,
-            customerName: customer.name,
-            totalAmount: 0,
-            totalDiscount: 0,
-            finalAmount: 0,
-            orderItems : formattedGroupedItems,
-          },
+            {
+                tableId,
+                hotelId: customer.hotelId,
+                customerName: customer.name,
+                totalAmount: 0,
+                totalDiscount: 0,
+                finalAmount: 0,
+                orderItems: formattedGroupedItems,
+            },
         ],
         { session }
-      );
-      console.log("bill : ", bill)
-      bill = bill[0];
+    );
+    console.log("bill : ", bill)
+    bill = bill[0];
 
     let allOrderedDishes = [];
     let allOrderedDishesIds = [];

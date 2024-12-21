@@ -5,13 +5,15 @@ import Table from "../models/tableModel.js"
 import { ClientError, ServerError } from "../utils/errorHandler.js";
 import mongoose from "mongoose";
 
-export const onQRScanService = async ({ tableId, hotelId }) => {
+export const onQRScanService = async ({ tableId }) => {
 
-    const table = await Table.findById(tableId).select('sequence status')
+    const table = await Table.findById(tableId)
 
     if (!table) {
         throw new ClientError('Table not found!');
     }
+
+    const hotelId = table.hotelId;
 
     const customer = await Customer.findOne({ tableId, hotelId });
 
@@ -24,10 +26,9 @@ export const onQRScanService = async ({ tableId, hotelId }) => {
     const dishes = await Dish.find({ hotelId });
     const categories = await Category.find({ hotelId });
 
-
     const data = {
         table: table,
-        customerName: customer?.name || null,
+        customerName: customer,
         existingOrders: orders,
         menu: {
             categories,
@@ -41,11 +42,17 @@ export const onQRScanService = async ({ tableId, hotelId }) => {
 export const addNewOrderService = async (orderData, session) => {
     try {
         console.log("Order data----------", orderData)
-        const { customerName, tableId, hotelId, dishes, note, status } = orderData;
+        const { customerName, tableId, dishes, note, status } = orderData;
+        const table = await Table.findById(tableId)
+        if (!table) {
+            throw new ClientError("Table not found!")
+        }
+        const hotelId = table.hotelId;
 
-        let customer = await Customer.findOne({ tableId }).session(session);
-        console.log("this is hotel id in add new order for customer ",hotelId)
+        let customer = await Customer.findOne({ tableId, hotelId }).session(session);
+
         if (!customer) {
+            await Table.findByIdAndUpdate(tableId, { status: "occupied" })
             customer = new Customer({
                 hotelId,
                 tableId,
@@ -66,7 +73,7 @@ export const addNewOrderService = async (orderData, session) => {
             hotelId,
             note: note || '',
         });
-        
+
         console.log("new order ", newOrder)
         await newOrder.save({ session });
         return newOrder;
@@ -74,62 +81,6 @@ export const addNewOrderService = async (orderData, session) => {
     } catch (error) {
         console.error('Error in addNewOrderService:', error);
         throw new ServerError(error.message);
-    }
-};
-
-// only for hotel owner
-export const updateOrderService = async (orderData, session) => {
-    try {
-        const { orderId, status, note } = orderData;
-        let dishes = orderData.dishes;
-
-        const order = await Order.findById(orderId).session(session);
-
-        if (!order) {
-            throw new ClientError("Order not found");
-        }
-
-        dishes = dishes?.filter((item) => item.quantity >= 0);
-        if (dishes && dishes.length > 0) {
-            dishes.forEach(newDish => {
-                const existingDish = order.dishes.find(dish => dish.dishId.toString() === newDish._id.toString());
-
-                if (existingDish) {
-                    // If the dish exists, update the quantity
-                    existingDish.quantity = Number(newDish.quantity);
-
-                    // Ensure quantity does not go below zero
-                    if (existingDish.quantity <= 0) {
-                        order.dishes = order.dishes.filter(dish => dish.dishId.toString() !== newDish._id.toString());
-                    }
-                } else if (Number(newDish.quantity) > 0) {
-                    // If the dish doesn't exist, add it only if quantity is positive
-                    order.dishes.push({
-                        dishId: newDish._id,
-                        quantity: Number(newDish.quantity),
-                        note: newDish.note || ''
-                    });
-                }
-            });
-        }
-
-        // Update status if provided
-        if (status) {
-            order.status = status;
-        }
-
-        // Update note if provided
-        if (note) {
-            order.note = note;
-        }
-
-        // Save the updated order
-        await order.save({ session });
-
-        return order;
-    } catch (error) {
-        console.log('error occurred while updating order!')
-        throw error; // Replace with your error handling logic
     }
 };
 
@@ -163,50 +114,32 @@ export const getOrderDetailsService = async (orderId) => {
             .populate('hotelId', '_id name');
 
         if (!order) {
-            throw new ClientError('Order not found');
+            throw new ClientError('Order not found!');
         }
 
-    return order;
-  } catch (error) {
-    console.error('Error in getOrderDetailsService:', error);
-    throw new ServerError(error.message);
-  }
+        return order;
+    } catch (error) {
+        console.error('Error in getOrderDetailsService:', error);
+        throw new ServerError(error.message);
+    }
 };
 
-export const getTableOrdersService = async (tableId) => {
+
+export const getAllOrderService = async () => {
     try {
-        const orders = await Order.find({tableId : tableId})
+        const orders = await Order.find({})
             .populate('customerId', '_id name')
             .populate('dishes.dishId')
-            .populate('tableId', '_id number')
+            .populate('tableId', '_id sequence')
             .populate('hotelId', '_id name');
 
         if (!orders) {
             throw new ClientError('Order not found');
         }
 
-    return orders;
-  } catch (error) {
-    console.error('Error in getOrderDetailsService:', error);
-    throw new ServerError(error.message);
-  }
-};
-
-export const getAllOrderService = async () => {
-  try {
-    const orders = await Order.find({})
-      .populate('customerId', '_id name')
-      .populate('dishes.dishId')
-      .populate('tableId', '_id sequence')
-      .populate('hotelId', '_id name');
-
-    if (!orders) {
-      throw new ClientError('Order not found');
+        return orders;
+    } catch (error) {
+        console.error('Error in getOrderDetailsService:', error);
+        throw new ServerError(error.message);
     }
-
-    return orders;
-  } catch (error) {
-    console.error('Error in getOrderDetailsService:', error);
-    throw new ServerError(error.message);
-  }
 };
