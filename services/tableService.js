@@ -169,14 +169,14 @@ export const generateTableBillService = async (tableId, session) => {
 
     orders = orders.filter((order) => order.status != 'draft');
     if (orders.length === 0) {
-        console.error(`All the orders are in draft for table: ${tableId}`);
+        console.error(`All the orders are in draft stage for table: ${tableId}`);
         throw new ClientError('All orders are in draft!');
     }
 
     const inCompleteOrders = orders.filter((order) => order.status == 'pending' || order.status == 'preparing');
     if (inCompleteOrders && inCompleteOrders.length > 0) {
-        console.error(`Please complete the pending or preparing orders for table: ${tableId}`);
-        throw new ClientError('Please complete the pending or preparing orders!');
+        console.error(`Please complete the pending or preparing stage orders for table: ${tableId}`);
+        throw new ClientError('Please complete the pending or preparing stage orders!');
     }
 
     const allOrderItems = [];
