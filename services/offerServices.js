@@ -58,7 +58,7 @@ export const createOfferService = async (offerData, session) => {
 };
 
 export const updateOfferService = async (offerId, updatedData, session) => {
-    const { name, value, type, discountType, appliedAbove, startDate, endDate } = updatedData;
+    const { name, value, type, discountType, appliedAbove, startDate, endDate, logo  } = updatedData;
     let appliedOn = updatedData.appliedOn;
 
     // Fetch the existing offer
@@ -125,6 +125,7 @@ export const updateOfferService = async (offerId, updatedData, session) => {
     if (discountType !== undefined) updateFields.discountType = discountType;
     if (startDate !== undefined) updateFields.startDate = startDate;
     if (endDate !== undefined) updateFields.endDate = endDate;
+    if(logo) updateFields.logo = logo
     if (type === "specific") {
         updateFields.appliedOn = appliedOn;
     } else if (type === "global") {
