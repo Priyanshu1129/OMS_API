@@ -53,7 +53,7 @@ export const addNewOrderService = async (orderData, session) => {
             });
             await customer.save({ session });
         }
-        console.log("Dishes in neworder ", dishes)
+        console.log("Dishes in new order ", dishes)
         const newOrder = new Order({
             customerId: customer._id,
             dishes: dishes.map(dish => ({
@@ -210,5 +210,3 @@ export const getAllOrderService = async () => {
     throw new ServerError(error.message);
   }
 };
-
-

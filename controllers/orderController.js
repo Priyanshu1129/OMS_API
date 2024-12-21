@@ -11,7 +11,6 @@ import { ClientError, ServerError } from "../utils/errorHandler.js";
 import { onQRScanService } from "../services/orderServices.js";
 import Order from "../models/orderModel.js";
 import { orderPublishService } from "../services/ablyService.js";
-import orderModel from "../models/orderModel.js";
 
 export const onQRScan = catchAsyncError(async (req, res, next) => {
   const { hotelId, tableId } = req.params;
@@ -67,7 +66,7 @@ export const createOrder = catchAsyncError(async (req, res, next, session) => {
   if (!hotelId || !tableId || !dishes || dishes.length <= 0) {
     throw new ClientError("Please provide sufficient data to create order");
   }
-  
+
   console.log("hotel Id in createorder controller ", hotelId)
   const newOrder = await addNewOrderService(
     { ...req.body, tableId, hotelId },
@@ -79,10 +78,11 @@ export const createOrder = catchAsyncError(async (req, res, next, session) => {
     .populate("dishes.dishId")
     .populate("tableId", "_id sequence")
     .populate("hotelId", "_id name")
-    .session(session)
-    console.log("populated Order", populatedOrder)
+    .session(session);
 
-  res.status(201).json({
+  console.log("populated Order", populatedOrder)
+
+  return res.status(201).json({
     status: "success",
     message: "New order created successfully",
     data: { order: populatedOrder },
@@ -115,7 +115,7 @@ export const updateOrderByOwner = catchAsyncError(
 export const updateOrder = catchAsyncError(async (req, res, next, session) => {
   const { orderId } = req.params;
   const { dishes, status, note } = req.body;
-  if (!orderId || (!dishes && !status && !note)){
+  if (!orderId || (!dishes && !status && !note)) {
     throw new ClientError("Please provide sufficient data to update order");
   }
 
