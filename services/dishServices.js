@@ -49,9 +49,9 @@ export const getAllDishesService = async (hotelId) => {
         }
         return dishes;
     } catch (error) {
-            console.log("get all dish err : ", error)
-            throw new ServerError('Failed to fetch dishes');
-        
+        console.log("get all dish err : ", error)
+        throw new ServerError('Failed to fetch dishes');
+
     }
 }
 
@@ -59,15 +59,15 @@ export const updateDishService = async (dishId, dishData) => {
     try {
         console.log("dish data : ", dishData)
         const dish = await Dish.findByIdAndUpdate(dishId, dishData, { new: true, runValidators: true }).populate("ingredients");
-        
+
         if (!dish) {
             throw new ClientError('Dish not found');
         }
         return dish;
     }
     catch (error) {
-            console.log("update dish err : ", error)
-            throw new ServerError('Failed to update dish');
+        console.log("update dish err : ", error)
+        throw new ServerError('Failed to update dish');
     }
 
 }
@@ -123,14 +123,14 @@ export const removeOfferFromDishService = async (dishId, session) => {
         const updatedDish = await Dish.findByIdAndUpdate(
             dishId,
             { $unset: { offer: "" } },
-            {new : true}
+            { new: true }
         );
 
         // Remove the dishId from the offer's appliedOn array
         await Offer.findByIdAndUpdate(
             offerId,
             { $pull: { appliedOn: dishId } },
-         
+
         );
 
         return updatedDish;

@@ -166,7 +166,7 @@ export const generateTableBillService = async (tableId, session) => {
             populate: { path: 'offer' }, // Populate the offer field inside the dish
         });
 
-    console.log('orders to generate bill', orders);
+    console.log('orders the orders of a table', orders);
 
     if (!orders || orders.length === 0) {
         console.error(`No orders found for table: ${tableId}`);
@@ -175,24 +175,25 @@ export const generateTableBillService = async (tableId, session) => {
 
     orders = orders.filter((order) => order.status != 'draft');
 
-    console.log('orders are not in draft', orders)
-
     if (orders.length === 0) {
         console.error(`All the orders are in draft stage for table: ${tableId}`);
         throw new ClientError('All orders are in draft!');
     }
 
     const inCompleteOrders = orders.filter((order) => order.status == 'pending' || order.status == 'preparing');
+
+    console.log("inComplete orders", inCompleteOrders)
     if (inCompleteOrders && inCompleteOrders.length > 0) {
         console.error(`Please complete the pending or preparing stage orders for table: ${tableId}`);
         throw new ClientError('Please complete the pending or preparing stage orders!');
     }
-
+    console.log('all the complete orders', orders[0].dishes);
     const allOrderItems = [];
     orders.forEach((order) => {
         allOrderItems.push(...order.dishes);
     });
 
+    console.log('complete orders not grouped', allOrderItems, allOrderItems.length);
     const groupedOrdersItems = [];
     allOrderItems.forEach((item) => {
         if (item?.dishId) {
@@ -204,7 +205,7 @@ export const generateTableBillService = async (tableId, session) => {
             }
         }
     })
-
+    console.log('complete orders grouped', groupedOrdersItems, groupedOrdersItems.length);
     const formattedGroupedItems = groupedOrdersItems.map((item) => {
         if (item) {
             return {
@@ -213,6 +214,8 @@ export const generateTableBillService = async (tableId, session) => {
             }
         }
     })
+
+    console.log("formatted orders", formattedGroupedItems);
 
     const customerId = orders[0].customerId;
     const customer = await Customer.findById(customerId).session(session);
@@ -232,6 +235,8 @@ export const generateTableBillService = async (tableId, session) => {
     );
     bill = bill[0];
 
+    console.log("bill-initialized", bill);
+
     // Fetch all dish details before calculating totals
     const dishIds = formattedGroupedItems.map(item => item.dishId);
     const dishes = await Dish.find({ _id: { $in: dishIds } }).populate('offer');
@@ -244,10 +249,9 @@ export const generateTableBillService = async (tableId, session) => {
         }
     });
 
-
-
     bill.finalAmount = bill.totalAmount - bill.totalDiscount;
 
+    console.log('final bill', bill);
 
     if (bill.orderedItems.length === 0) {
         throw new ServerError('Unable to generate bill!');

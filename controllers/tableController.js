@@ -117,8 +117,8 @@ export const getCustomerDetails = catchAsyncError(async (req, res, next) => {
     }
     const customer = await Customer.findOne({ tableId });
 
-    await Customer.deleteMany();
-    await Order.deleteMany();
+    // await Customer.deleteMany();
+    // await Order.deleteMany();
     // const customer = await Customer.find();
     // const orders = await Order.find();
 

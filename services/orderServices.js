@@ -52,19 +52,23 @@ export const addNewOrderService = async (orderData, session) => {
         let customer = await Customer.findOne({ tableId, hotelId }).session(session);
 
         if (!customer) {
-            await Table.findByIdAndUpdate(tableId, { status: "occupied" })
             customer = new Customer({
                 hotelId,
                 tableId,
                 name: customerName,
             });
             await customer.save({ session });
+            await Table.findByIdAndUpdate(
+                tableId,
+                { status: "occupied" },
+                { new: true, session }
+            );
         }
         console.log("Dishes in new order ", dishes)
         const newOrder = new Order({
             customerId: customer._id,
             dishes: dishes.map(dish => ({
-                dishId: new mongoose.Types.ObjectId(dish.dishId),
+                dishId: new mongoose.Types.ObjectId(dish._id),
                 quantity: dish.quantity,
                 notes: dish.notes
             })),
