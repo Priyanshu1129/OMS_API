@@ -9,13 +9,17 @@ export const getUserProfileService = async (userId) => {
             throw new ClientError('ValidationError', 'User ID is required');
         }
         const hotelOwner = await HotelOwner.findById(userId)
-                            .select('-password')
-                            .populate('hotelId', '_id name');
+                            .select('-password');
+        const hotel = hotelOwner ? await Hotel.findById(hotelOwner.hotelId) : null;
+        
+        if (hotelOwner) {
+            hotelOwner._doc.hotelName = hotel ? hotel.name : null;
+        }
+        
         const superAdmin = await SuperAdmin.findById(userId).select('-password');
         if (!hotelOwner && !superAdmin) {
             throw new ClientError('NotFoundError', 'User not found');
         }
-
 
         return hotelOwner || superAdmin;
     } catch (error) {
