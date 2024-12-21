@@ -223,5 +223,3 @@ export const getAllOrderService = async () => {
     throw new ServerError(error.message);
   }
 };
-
-
