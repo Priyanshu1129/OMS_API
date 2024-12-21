@@ -83,7 +83,7 @@ export const createOrder = catchAsyncError(async (req, res, next, session) => {
 
     console.log("populated Order", populatedOrder)
 
-  res.status(201).json({
+  return res.status(201).json({
     status: "success",
     message: "New order created successfully",
     data: { order: populatedOrder },
