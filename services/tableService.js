@@ -218,10 +218,15 @@ export const generateTableBillService = async (tableId, session) => {
     );
     bill = bill[0];
 
+    // Fetch all dish details before calculating totals
+    const dishIds = formattedGroupedItems.map(item => item.dishId);
+    const dishes = await Dish.find({ _id: { $in: dishIds } }).populate('offer');
+
     formattedGroupedItems.forEach((item) => {
-        if (item.dishId) {
-            bill.totalAmount += item.dishId.price * item.quantity;
-            bill.totalDiscount += calculateDiscount(item.dishId, item.quantity);
+        const dish = dishes.find(d => d._id.toString() === item.dishId.toString());
+        if (dish) {
+            bill.totalAmount += dish.price * item.quantity;
+            bill.totalDiscount += calculateDiscount(dish, item.quantity);
         }
     });
 
@@ -232,6 +237,13 @@ export const generateTableBillService = async (tableId, session) => {
 
     if (bill.orderedItems.length === 0) {
         throw new ServerError('Unable to generate bill!');
+    }
+
+    if (!bill.totalAmount || isNaN(bill.totalAmount)) {
+        bill.totalAmount = 0;
+    }
+    if (!bill.totalDiscount || isNaN(bill.totalDiscount)) {
+        bill.totalDiscount = 0;
     }
 
     await bill.save({ session });
