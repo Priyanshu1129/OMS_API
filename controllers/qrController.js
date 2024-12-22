@@ -31,10 +31,15 @@ export const printQr = catchAsyncError(async (req, res, next) => {
     // const qrCodeData = await getQrService(tableId, hotelId);
     // const pdfBuffer = await generatePdfService(qrCodeData.imageUrl, tableId, tableNumber, hotelName);
 
-    const qrCodeImage = await createQrService(tableId, hotelId);
-    const pdfBuffer = await generatePdfService(qrCodeImage.imageUrl, tableId, tableNumber, hotelName);
+    //2nd code ----
+    // const qrCodeImage = await createQrService(tableId, hotelId);
+    // const pdfBuffer = await generatePdfService(qrCodeImage.imageUrl, tableId, tableNumber, hotelName);
 
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=table-${tableId}-qr.pdf`);
-    res.end(pdfBuffer);
+    // res.setHeader('Content-Type', 'application/pdf');
+    // res.setHeader('Content-Disposition', `attachment; filename=table-${tableId}-qr.pdf`);
+    // res.end(pdfBuffer);
+
+    //3rd code ----
+    const qrCodeImage = await createQrService(tableId, hotelId);
+    res.status(200).json({message:"QR Code Generated", qrCodeImage , tableNumber , hotelName , tableId,hotelId });
 });
