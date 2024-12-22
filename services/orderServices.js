@@ -68,7 +68,7 @@ export const addNewOrderService = async (orderData, session) => {
         const newOrder = new Order({
             customerId: customer._id,
             dishes: dishes.map(dish => ({
-                dishId: new mongoose.Types.ObjectId(dish._id),
+                dishId: new mongoose.Types.ObjectId(dish.dishId),
                 quantity: dish.quantity,
                 notes: dish.notes
             })),

@@ -50,7 +50,7 @@ export const createOrder = catchAsyncError(async (req, res, next, session) => {
 
   const populatedOrder = await Order.findById(newOrder._id)
     .populate("customerId", "_id name")
-    .populate("dishes.dishId", "_id name price")
+    .populate("dishes.dishId")
     .populate("tableId", "_id sequence")
     .populate("hotelId", "_id name")
     .session(session);
