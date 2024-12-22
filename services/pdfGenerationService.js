@@ -23,7 +23,7 @@ export const generatePdfService = async (qrCode, tableId,tableNumber, hotelName)
         return pdfBuffer;
     } catch (error) {
         console.error('Failed to generate PDF:', error);
-        throw new Error('Failed to generate PDF');
+        throw error;
     }
 };
 
