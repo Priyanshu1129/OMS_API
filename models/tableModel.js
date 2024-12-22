@@ -6,7 +6,8 @@ const tableSchema = new mongoose.Schema({
   capacity: { type: Number, required: true },
   status: { type: String, enum: ['occupied', 'free'], default: 'free' }, 
   hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel', required: true },
-  QRId: { type: mongoose.Schema.Types.ObjectId, ref: 'QR' } 
+  QRId: { type: mongoose.Schema.Types.ObjectId, ref: 'QR' },
+  customer : {type: mongoose.Schema.Types.ObjectId , ref : 'Customer', default : null } 
 }, { timestamps: true });
 
 export default mongoose.model('Table', tableSchema);

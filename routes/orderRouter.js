@@ -14,7 +14,7 @@ import express from 'express';
 const router = express.Router();
 
 // for customer on scanning QR
-router.get('/', getAllOrders)
+router.get('/', protect, attachHotelId, getAllOrders)
 
 router.get('/qr-scan/:tableId', onQRScan);
 
@@ -34,6 +34,7 @@ router.get('/details/:orderId', getOrderDetails);
 
 // for hotel owner delete customer order on request
 router.delete('/:orderId', protect, validateOwnership, deleteOrder);
+
 
 
 export default router;

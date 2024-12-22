@@ -5,6 +5,7 @@ import Table from "../models/tableModel.js"
 import { ClientError, ServerError } from "../utils/errorHandler.js";
 import mongoose from "mongoose";
 
+
 export const onQRScanService = async ({ tableId }) => {
 
     const table = await Table.findById(tableId)
@@ -50,17 +51,19 @@ export const addNewOrderService = async (orderData, session) => {
         const hotelId = table.hotelId;
 
         let customer = await Customer.findOne({ tableId, hotelId }).session(session);
-
+        let newCustomer = null;
         if (!customer) {
+
             customer = new Customer({
                 hotelId,
                 tableId,
                 name: customerName,
             });
+            newCustomer = customer;
             await customer.save({ session });
             await Table.findByIdAndUpdate(
                 tableId,
-                { status: "occupied" },
+                { status: "occupied", customer : customer._id },
                 { new: true, session }
             );
         }
@@ -80,7 +83,7 @@ export const addNewOrderService = async (orderData, session) => {
 
         console.log("new order ", newOrder)
         await newOrder.save({ session });
-        return newOrder;
+        return {newOrder, newCustomer};
 
     } catch (error) {
         console.error('Error in addNewOrderService:', error);
@@ -129,9 +132,9 @@ export const getOrderDetailsService = async (orderId) => {
 };
 
 
-export const getAllOrderService = async () => {
+export const getAllOrderService = async (hotelId) => {
     try {
-        const orders = await Order.find({})
+        const orders = await Order.find({hotelId : hotelId})
             .populate('customerId', '_id name')
             .populate('dishes.dishId')
             .populate('tableId', '_id sequence')
