@@ -36,7 +36,7 @@ const calculateDiscount = (dish, quantity) => {
 
 export const getTableByIdService = async (tableId) => {
     try {
-
+        console.log("Table Id : ", tableId);
         const table = await Table.findById(tableId).populate('hotelId', 'name');
         if (!table) {
             throw new ClientError('Table not found', 404);
@@ -77,9 +77,10 @@ export const createTableService = async (user, tableData) => {
     }
 }
 
-export const updateTableService = async (user, tableId, tableData) => {
+export const updateTableService = async (tableId, tableData) => {
     try {
-        const table = await getTableByIdService(user, tableId);
+        console.log("tableId in updateTable service ", tableId)
+        const table = await getTableByIdService(tableId);
         Object.assign(table, tableData);
         await table.save();
         return table;
@@ -89,14 +90,17 @@ export const updateTableService = async (user, tableId, tableData) => {
     }
 }
 
-export const deleteTableService = async (user, tableId) => {
+export const deleteTableService = async (tableId) => {
     try {
-        const table = await getTableByIdService(user, tableId);
-        await table.remove();
+        const table = await getTableByIdService(tableId);
+        if(table.status != "free") throw new ServerError('Table is Occupied')
+        const tableToReturn = table;
+        await Table.findByIdAndDelete(tableId)
+        return tableToReturn
     } catch (error) {
         if (error instanceof ClientError) { throw error; }
         else
-            throw new ServerError('Error while deleting table');
+            throw new ServerError('Error while deleting table (Table is Occupied)');
     }
 }
 

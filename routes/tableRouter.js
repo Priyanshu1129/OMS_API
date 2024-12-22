@@ -11,7 +11,7 @@ router.get('/', protect, attachHotelId, getTables);
 
 router.post('/', protect, createTable);
 
-router.put('/:id', protect, updateTable);
+router.put('/:tableId', protect, updateTable);
 
 router.delete('/:id', protect, deleteTable);
 

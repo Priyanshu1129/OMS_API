@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const tableSchema = new mongoose.Schema({
-  sequence: { type: Number, required: true }, 
+  sequence: { type: Number, required: true}, 
   position: { type: String }, 
   capacity: { type: Number, required: true },
   status: { type: String, enum: ['occupied', 'free'], default: 'free' }, 

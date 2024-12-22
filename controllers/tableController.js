@@ -34,9 +34,9 @@ export const createTable = catchAsyncError(async (req, res) => {
 });
 
 export const updateTable = catchAsyncError(async (req, res) => {
-    const tableId = req.params.id;
+    const tableId = req.params.tableId;
     const tableData = req.body;
-    const table = await updateTableService(req.user, tableId, tableData);
+    const table = await updateTableService(tableId, tableData);
     res.status(200).json({
         status: "success",
         message: 'Table updated successfully',
@@ -46,10 +46,14 @@ export const updateTable = catchAsyncError(async (req, res) => {
 
 export const deleteTable = catchAsyncError(async (req, res) => {
     const tableId = req.params.id;
-    await deleteTableService(req.user, tableId);
+    const table = await deleteTableService(tableId);
+    console.log("deteled table ---", table)
     res.status(200).json({
         status: "success",
         message: 'Table deleted successfully',
+        data : {
+            table : table
+        }
     });
 });
 
