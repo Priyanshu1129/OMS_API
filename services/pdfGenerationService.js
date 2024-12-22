@@ -9,10 +9,11 @@ export const generatePdfService = async (qrCode, tableId, tableNumber, hotelName
         if (isProduction) {
             // Production environment (Vercel)
             browser = await puppeteer.launch({
-                args: chromium.args,
+                args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
                 defaultViewport: chromium.defaultViewport,
                 executablePath: await chromium.executablePath(),
-                headless: "new"
+                headless: chromium.headless,
+                ignoreHTTPSErrors: true
             });
         } else {
             // Local development environment
@@ -24,7 +25,7 @@ export const generatePdfService = async (qrCode, tableId, tableNumber, hotelName
 
         const page = await browser.newPage();
         const htmlContent = generateHtmlContent(qrCode, tableId, tableNumber, hotelName);
-        await page.setContent(htmlContent, { waitUntil: "load" });
+        await page.setContent(htmlContent, { waitUntil: "networkidle0" });
 
         const pdfBuffer = await page.pdf({
             format: "A5",
