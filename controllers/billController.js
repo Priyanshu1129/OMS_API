@@ -27,9 +27,10 @@ export const getBill = catchAsyncError(async (req, res, next) => {
 });
 
 export const updateBill = catchAsyncError(async (req, res, next, session) => {
-  const { tableId, billId } = req.params;
+  const { billId } = req.params;
   const { customerName, status, totalAmount, totalDiscount, finalAmount } =
     req.body;
+
   if (
     !billId ||
     (!customerName && !status && !totalAmount && !totalDiscount && !finalAmount)

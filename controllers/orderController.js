@@ -1,11 +1,9 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import {
   addNewOrderService,
-  updateOrderService,
   deleteOrderService,
   getOrderDetailsService,
   getAllOrderService,
-  getTableOrdersService,
 } from "../services/orderServices.js";
 import { ClientError, ServerError } from "../utils/errorHandler.js";
 import { onQRScanService } from "../services/orderServices.js";
@@ -13,13 +11,13 @@ import Order from "../models/orderModel.js";
 import { orderPublishService } from "../services/ablyService.js";
 
 export const onQRScan = catchAsyncError(async (req, res, next) => {
-  const { hotelId, tableId } = req.params;
+  const { tableId } = req.params;
 
-  if (!tableId || !hotelId) {
-    throw new ClientError("Please provide table Id and hotel Id");
+  if (!tableId) {
+    throw new ClientError("Please provide table Id!");
   }
 
-  const data = await onQRScanService({ hotelId, tableId });
+  const data = await onQRScanService({ tableId });
 
   res.status(200).json({
     success: true,
@@ -37,45 +35,22 @@ export const getAllOrders = catchAsyncError(async (req, res, next) => {
   });
 });
 
-export const getOrderById = catchAsyncError(async (req, res, next) => {
-  const { orderId } = req.params;
-  if (!orderId) {
-    throw new ClientError("Please provide order id to get order");
-  }
-  const orderDetails = await Order.findById(orderId);
-
-  //populate order details
-  await orderDetails.populate("customerId tableId hotelId");
-
-  //populate dishes array details
-  await orderDetails.populate("dishes.dishId");
-
-  if (!orderDetails) throw new ClientError("Order not available");
-
-  res.status(201).json({
-    success: true,
-    message: "Order fetched successfully",
-    data: { orderDetails },
-  });
-});
-
 export const createOrder = catchAsyncError(async (req, res, next, session) => {
-  const { tableId, hotelId } = req.params;
+  const { tableId } = req.params;
   const { customerName, dishes, status, note } = req.body;
 
-  if (!hotelId || !tableId || !dishes || dishes.length <= 0) {
+  if (!tableId || !dishes || dishes.length <= 0) {
     throw new ClientError("Please provide sufficient data to create order");
   }
 
-  console.log("hotel Id in createorder controller ", hotelId)
   const newOrder = await addNewOrderService(
-    { ...req.body, tableId, hotelId },
+    { ...req.body, tableId },
     session
   );
 
   const populatedOrder = await Order.findById(newOrder._id)
     .populate("customerId", "_id name")
-    .populate("dishes.dishId")
+    .populate("dishes.dishId", "_id name price")
     .populate("tableId", "_id sequence")
     .populate("hotelId", "_id name")
     .session(session);
@@ -111,25 +86,6 @@ export const updateOrderByOwner = catchAsyncError(
     });
   }
 );
-
-export const updateOrder = catchAsyncError(async (req, res, next, session) => {
-  const { orderId } = req.params;
-  const { dishes, status, note } = req.body;
-  if (!orderId || (!dishes && !status && !note)) {
-    throw new ClientError("Please provide sufficient data to update order");
-  }
-
-  const updatedOrder = await updateOrderService(
-    { orderId, ...req.body },
-    session
-  );
-
-  res.status(201).json({
-    success: true,
-    message: "Order updated successfully",
-    data: { updatedOrder },
-  });
-}, true);
 
 export const updateStatus = catchAsyncError(async (req, res, next, session) => {
   const { orderId, status } = req.params;
@@ -184,22 +140,6 @@ export const getOrderDetails = catchAsyncError(async (req, res) => {
     success: true,
     message: "Order details fetched successfully",
     data: { order: orderDetails },
-  });
-});
-
-export const getTableOrders = catchAsyncError(async (req, res) => {
-  const { tableId } = req.params;
-
-  if (!tableId) {
-    throw new ClientError("Please provide order ID");
-  }
-
-  const orderDetails = await getTableOrdersService(tableId);
-
-  res.status(200).json({
-    status: "success",
-    message: "Table Order details fetched successfully",
-    data: { orders: orderDetails },
   });
 });
 

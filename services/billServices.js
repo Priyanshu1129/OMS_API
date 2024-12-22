@@ -1,18 +1,21 @@
 import Bill from "../models/billModel.js"
 import Order from "../models/orderModel.js"; // Import Order model
 import Customer from "../models/customerModel.js"; // Import Customer model
+import Table from "../models/tableModel.js"
 import { ClientError, ServerError } from "../utils/errorHandler.js";
 
 
 export const updateBillService = async (billData, session) => {
     try {
-        const { billId, tableId, customerName, status, totalAmount, totalDiscount, finalAmount } = billData;
+        const { billId, customerName, status, totalAmount, totalDiscount, finalAmount } = billData;
+
 
         // Step 1: Find the existing bill by billId
         const bill = await Bill.findById(billId).session(session); // Use session for transactions
         if (!bill) {
             throw new ServerError("Bill not found.");
         }
+        const tableId = bill.tableId
 
         // Step 2: Update the fields in the bill (except orderedItems)
         if (customerName) {
@@ -38,6 +41,11 @@ export const updateBillService = async (billData, session) => {
         // Step 3: If the status is 'paid' or 'payLater', delete associated orders and customers
         if (status === 'paid' || status === 'payLater') {
             // Delete all orders related to this tableId
+            await Table.findByIdAndUpdate(
+                tableId,
+                { status: "free" },
+                { new: true, session }
+            );
             await Order.deleteMany({ tableId: bill.tableId }).session(session); // Delete all orders for the tableId
 
             // Delete the customer associated with this tableId
