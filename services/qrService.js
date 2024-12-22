@@ -3,12 +3,13 @@ import qrModel from "../models/qrModel.js";
 import { ClientError } from "../utils/errorHandler.js";
 import { configDotenv } from "dotenv";
 
-const frontendUrl = process.env.FRONTEND_URL;
+// const frontendUrl = process.env.FRONTEND_URL;
+const frontendUrl = "https://oms-customer-two.vercel.app/";
 
 export const createQrService = async (tableId, hotelId) => {
     try {
         // Set the width and height for the QR code to make it larger
-        const qrString = frontendUrl+'/order/'+tableId;
+        const qrString = frontendUrl+'dashboard/user/'+hotelId+'/'+tableId;
         console.log(qrString);
         const qrCodeImage = await QRCode.toDataURL(qrString, {
             width: 300, // Increase width (default is 200)
@@ -20,14 +21,16 @@ export const createQrService = async (tableId, hotelId) => {
             }
         });
 
-        const qrCode = await qrModel.create({ 
-            imageUrl: qrCodeImage, 
-            code: tableId, 
-            tableId, 
-            hotelId 
-        });
+        // removing db code
 
-        return qrCode;
+        // const qrCode = await qrModel.create({ 
+        //     imageUrl: qrCodeImage, 
+        //     code: tableId, 
+        //     tableId, 
+        //     hotelId 
+        // });
+
+        return {imageUrl:qrCodeImage};
     } catch (error) {
         throw new ClientError(error.message, 400);
     }
@@ -35,11 +38,12 @@ export const createQrService = async (tableId, hotelId) => {
 
 export const getQrService = async (tableId,hotelId) => {
     try {
-        const qrCode = await qrModel.findOne({ tableId });
+        // const qrCode = await qrModel.findOne({ tableId });
   
-        if (!qrCode) {
-           return createQrService(tableId, hotelId);
-        }
+        // if (!qrCode) {
+        //    return createQrService(tableId, hotelId);
+        // }
+        const qrCode = await createQrService(tableId, hotelId);        
         return qrCode;
     } catch (error) {
         throw new ClientError(error.message, 400);
