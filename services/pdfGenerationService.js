@@ -1,21 +1,33 @@
 import puppeteer from "puppeteer";
-import { launchBrowser } from "../utils/puppeteerHelper.js";
+import chromium from "@sparticuz/chromium";
 
-export const generatePdfService = async (qrCode, tableId,tableNumber, hotelName) => {
+export const generatePdfService = async (qrCode, tableId, tableNumber, hotelName) => {
     try {
-        const browser = await puppeteer.launch();
+        let browser;
+        const isProduction = process.env.NODE_ENV === 'production';
+
+        if (isProduction) {
+            // Production environment (Vercel)
+            browser = await puppeteer.launch({
+                args: chromium.args,
+                defaultViewport: chromium.defaultViewport,
+                executablePath: await chromium.executablePath(),
+                headless: "new"
+            });
+        } else {
+            // Local development environment
+            browser = await puppeteer.launch({
+                headless: "new",
+                args: ['--no-sandbox']
+            });
+        }
+
         const page = await browser.newPage();
-
-        const htmlContent = generateHtmlContent(qrCode, tableId,tableNumber, hotelName);
-
-        // Set the content of the page
+        const htmlContent = generateHtmlContent(qrCode, tableId, tableNumber, hotelName);
         await page.setContent(htmlContent, { waitUntil: "load" });
 
-        // Generate PDF buffer with dimensions matching QR code standards
         const pdfBuffer = await page.pdf({
-            format: "A5", // A5 format
-            // width: "210mm", // Set width equivalent to standard size
-            // height: "297mm", // Set height equivalent to standard size
+            format: "A5",
             printBackground: true,
         });
 

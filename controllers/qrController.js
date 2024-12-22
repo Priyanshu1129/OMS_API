@@ -28,8 +28,11 @@ export const printQr = catchAsyncError(async (req, res, next) => {
 
     const hotelName = hotel.name;
 
-    const qrCodeData = await getQrService(tableId, hotelId);
-    const pdfBuffer = await generatePdfService(qrCodeData.imageUrl, tableId, tableNumber, hotelName);
+    // const qrCodeData = await getQrService(tableId, hotelId);
+    // const pdfBuffer = await generatePdfService(qrCodeData.imageUrl, tableId, tableNumber, hotelName);
+
+    const qrCodeImage = await createQrService(tableId, hotelId);
+    const pdfBuffer = await generatePdfService(qrCodeImage.imageUrl, tableId, tableNumber, hotelName);
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=table-${tableId}-qr.pdf`);
