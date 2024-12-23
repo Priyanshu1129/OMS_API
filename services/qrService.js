@@ -9,7 +9,7 @@ const frontendUrl = "https://oms-customer-two.vercel.app/";
 export const createQrService = async (tableId, hotelId) => {
     try {
         // Set the width and height for the QR code to make it larger
-        const qrString = frontendUrl+'dashboard/user/'+hotelId+'/'+tableId;
+        const qrString = frontendUrl+'user/'+hotelId+'/'+tableId;
         console.log(qrString);
         const qrCodeImage = await QRCode.toDataURL(qrString, {
             width: 300, // Increase width (default is 200)
