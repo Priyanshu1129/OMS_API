@@ -1,6 +1,6 @@
 import { attachHotelId, protect, superAdminOnly, validateOwnership } from "../middlewares/authMiddleware.js";
 import express from 'express';
-import { getTableById, getTables, createTable, updateTable, deleteTable, getOrdersByTable, generateTableBill, deleteTableOrders, getCustomerDetails } from '../controllers/tableController.js';
+import { getTableById, getTables, createTable, updateTable, deleteTable, getOrdersByTable, generateTableBill, getCustomerDetails } from '../controllers/tableController.js';
 
 
 const router = express.Router();
