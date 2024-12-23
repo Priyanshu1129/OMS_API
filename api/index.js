@@ -27,6 +27,7 @@ dotenv.config();
 const corsOptions = {
     origin: [
         "https://orm-frontend-eight.vercel.app",
+        "https://oms-customer-two.vercel.app",
         "http://localhost:3000",
         "http://localhost:3001"
     ],
