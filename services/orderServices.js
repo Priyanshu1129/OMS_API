@@ -94,23 +94,33 @@ export const addNewOrderService = async (orderData, session) => {
 // only for hotel owner
 export const deleteOrderService = async (orderId, session) => {
     try {
-
-        // Step 1: Find the order by ID
         const order = await Order.findById(orderId).session(session);
 
         if (!order) {
             throw new ClientError("Order not found");
         }
 
-        // Step 3: Delete the order
+        const tableId = order.tableId;
         await Order.findByIdAndDelete(orderId, { session });
 
-        return order;
+        const remainingOrders = await Order.find({ tableId }).session(session);
 
+        if (!remainingOrders || remainingOrders.length === 0) {
+            await Table.findByIdAndUpdate(
+                tableId,
+                { status: "free" },
+                { new: true, session }
+            );
+
+            await Customer.deleteOne({ tableId }).session(session);
+        }
+
+        return order;
     } catch (error) {
-        throw new ServerError(error.message); // Replace with your error handling logic
+        throw new ServerError(error.message || "An error occurred while deleting the order");
     }
 };
+
 
 export const getOrderDetailsService = async (orderId) => {
     try {
