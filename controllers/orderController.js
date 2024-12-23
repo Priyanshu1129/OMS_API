@@ -27,7 +27,7 @@ export const onQRScan = catchAsyncError(async (req, res, next) => {
 });
 
 export const getAllOrders = catchAsyncError(async (req, res, next) => {
-  const orders = await getAllOrderService();
+  const orders = await getAllOrderService(req.user.hotelId);
   res.status(200).json({
     status: "success",
     message: "Orders fetched successfully",
@@ -37,16 +37,17 @@ export const getAllOrders = catchAsyncError(async (req, res, next) => {
 
 export const createOrder = catchAsyncError(async (req, res, next, session) => {
   const { tableId } = req.params;
-  const { customerName, dishes, status, note } = req.body;
+  const { customerName, dishes, status, notes } = req.body;
 
   if (!tableId || !dishes || dishes.length <= 0) {
     throw new ClientError("Please provide sufficient data to create order");
   }
 
-  const newOrder = await addNewOrderService(
+  const newOrderData = await addNewOrderService(
     { ...req.body, tableId },
     session
   );
+  const {newOrder, newCustomer} = newOrderData
 
   const populatedOrder = await Order.findById(newOrder._id)
     .populate("customerId", "_id name")
@@ -60,7 +61,7 @@ export const createOrder = catchAsyncError(async (req, res, next, session) => {
   return res.status(201).json({
     status: "success",
     message: "New order created successfully",
-    data: { order: populatedOrder },
+    data: { order: populatedOrder, customer : newCustomer },
   });
 }, true);
 

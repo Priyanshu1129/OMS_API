@@ -43,7 +43,7 @@ export const updateBillService = async (billData, session) => {
             // Delete all orders related to this tableId
             await Table.findByIdAndUpdate(
                 tableId,
-                { status: "free" },
+                { status: "free", customer : null },
                 { new: true, session }
             );
             await Order.deleteMany({ tableId: bill.tableId }).session(session); // Delete all orders for the tableId
