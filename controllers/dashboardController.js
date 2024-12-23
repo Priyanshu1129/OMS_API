@@ -1,5 +1,5 @@
-import { catchAsyncError } from "../middlewares/catchAsyncError";
-import Bill from "../models/billModel";
+import { catchAsyncError } from "../middlewares/catchAsyncError.js";
+import Bill from "../models/billModel.js";
 
 const getOrderedItemsOfThisMonth = (currentMonthBills) => {
     const dishQuantities = currentMonthBills.reduce((acc, bill) => {
@@ -7,7 +7,7 @@ const getOrderedItemsOfThisMonth = (currentMonthBills) => {
             const dish = item.dishId;
             if (!acc[dish._id]) {
                 acc[dish._id] = {
-                    dishDetails: dish,
+                    dishName: dish.name,
                     totalQuantity: 0,
                     totalRevenue: 0
                 };
@@ -20,7 +20,8 @@ const getOrderedItemsOfThisMonth = (currentMonthBills) => {
 
     // Convert the accumulated data into an array of objects for sorting
     const dishQuantityArray = Object.entries(dishQuantities).map(([dishId, data]) => ({
-        dishDetails: data.dishDetails,  // The full dish object
+        id: dishId,
+        name: data.dishName,  // The full dish object
         totalQuantity: data.totalQuantity,
         totalRevenue: data.totalRevenue
     }));
@@ -88,7 +89,7 @@ export const getDashboardStats = catchAsyncError(async (req, res, next) => {
         data: {
             revenue: { today: todayRevenue, monthly: totalMonthlyRevenue },
             customers: { today: totalBillsToday, monthly: totalBillsThisMonth },
-            totalCustomersByDate: totalBillsByDate,
+            customersByDate: totalBillsByDate,
             revenueByDate,
             thisMonthDishes,
         }
