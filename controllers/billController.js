@@ -34,12 +34,12 @@ export const updateBill = catchAsyncError(async (req, res, next, session) => {
     throw new ClientError("Please provide sufficient data to update bill");
   }
 
-  const updatedBill = await updateBillService({ billId, ...req.body }, session);
+  const bill = await updateBillService({ billId, ...req.body }, session);
 
   res.status(201).json({
     success: true,
     message: "Bill updated successfully",
-    data: { updatedBill },
+    data: { bill },
   });
 }, true);
 
@@ -49,11 +49,11 @@ export const billPaid = catchAsyncError(async (req, res, next, session) => {
     throw new ClientError("Invalid input: billId is required.");
   }
 
-  const bill = billPayService(billId);
-  
+  const data = billPayService(billId);
+
   res.status(201).json({
     success: true,
     message: "Bill Payment Successfully",
-    data: { bill }
+    data
   })
 })

@@ -81,6 +81,9 @@ export const updateTableService = async (tableId, tableData) => {
     try {
         console.log("tableId in updateTable service ", tableId)
         const table = await getTableByIdService(tableId);
+        if (table.status != 'free') {
+            throw new ServerError('Table is Occupied')
+        }
         Object.assign(table, tableData);
         await table.save();
         return table;
@@ -93,7 +96,7 @@ export const updateTableService = async (tableId, tableData) => {
 export const deleteTableService = async (tableId) => {
     try {
         const table = await getTableByIdService(tableId);
-        if(table.status != "free") throw new ServerError('Table is Occupied')
+        if (table.status != "free") throw new ServerError('Table is Occupied')
         const tableToReturn = table;
         await Table.findByIdAndDelete(tableId)
         return tableToReturn
@@ -101,36 +104,6 @@ export const deleteTableService = async (tableId) => {
         if (error instanceof ClientError) { throw error; }
         else
             throw new ServerError('Error while deleting table (Table is Occupied)');
-    }
-}
-
-export const occupyTableService = async (user, tableId) => {
-    try {
-        const table = await getTableByIdService(user, tableId);
-        if (table.status === 'occupied') {
-            throw new ClientError('Table is already occupied', 400);
-        }
-        table.status = 'occupied';
-        await table.save();
-    } catch (error) {
-        if (error instanceof ClientError) { throw error; }
-        else
-            throw new ServerError('Error while occupying table');
-    }
-}
-
-export const freeTableService = async (user, tableId) => {
-    try {
-        const table = await getTableByIdService(user, tableId);
-        if (table.status === 'free') {
-            throw new ClientError('Table is already free', 400);
-        }
-        table.status = 'free';
-        await table.save();
-    } catch (error) {
-        if (error instanceof ClientError) { throw error; }
-        else
-            throw new ServerError('Error while freeing table');
     }
 }
 
@@ -279,6 +252,7 @@ export const generateTableBillService = async (tableId, session) => {
 
     return populateBill;
 };
+
 export const testingFunction = async (tableId, session) => {
     // Start Transaction
     const orders = await Order.find({ tableId }).session(session).populate('dishes.dishId');

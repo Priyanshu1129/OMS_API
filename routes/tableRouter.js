@@ -20,10 +20,7 @@ router.delete('/:id', protect, deleteTable);
 router.get('/bill/:tableId', protect, validateOwnership, generateTableBill);
 
 // for hotel owner list orders by table id
-router.get('/table/:tableId', protect, validateOwnership, getOrdersByTable);
-
-// To delete all the orders of table 
-router.delete('/delete-orders/:tableId', protect, validateOwnership, deleteTableOrders)
+router.get('/table/:tableId', protect, validateOwnership, getOrdersByTable); 
 
 // get table customer details
 router.get('/get-customer/:tableId', protect, validateOwnership, getCustomerDetails)

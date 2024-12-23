@@ -52,14 +52,15 @@ export const billPayService = async (billId, session) => {
         await bill.save({ session });
 
         // Delete all orders related to this tableId
-        await Table.findByIdAndUpdate(
+        const updatedTable = await Table.findByIdAndUpdate(
             tableId,
             { status: "free", customer: null },
             { new: true, session }
         );
         await Order.deleteMany({ tableId }).session(session); // Delete all orders for the tableId
         await Customer.deleteOne({ tableId }).session(session); // Delete customer for the tableId
-        return bill;
+        return { bill, table: updatedTable };
+
     } catch (error) {
         throw error;
     }

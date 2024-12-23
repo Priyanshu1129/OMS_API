@@ -47,7 +47,7 @@ export const createOrder = catchAsyncError(async (req, res, next, session) => {
     { ...req.body, tableId },
     session
   );
-  const {newOrder, newCustomer} = newOrderData
+  const { newOrder, newCustomer, table } = newOrderData
 
   const populatedOrder = await Order.findById(newOrder._id)
     .populate("customerId", "_id name")
@@ -61,7 +61,7 @@ export const createOrder = catchAsyncError(async (req, res, next, session) => {
   return res.status(201).json({
     status: "success",
     message: "New order created successfully",
-    data: { order: populatedOrder, customer : newCustomer },
+    data: { order: populatedOrder, customer: newCustomer, table },
   });
 }, true);
 
@@ -119,12 +119,12 @@ export const deleteOrder = catchAsyncError(async (req, res, next, session) => {
     throw new ClientError("Please provide sufficient data to delete order");
   }
 
-  const deletedOrder = await deleteOrderService(orderId, session);
+  const data = await deleteOrderService(orderId, session);
 
   res.status(201).json({
     status: "success",
     message: "Order deleted successfully",
-    data: { order : deletedOrder  },
+    data
   });
 }, true);
 
