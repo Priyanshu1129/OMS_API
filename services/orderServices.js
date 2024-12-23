@@ -108,7 +108,7 @@ export const deleteOrderService = async (orderId, session) => {
         if (!remainingOrders || remainingOrders.length === 0) {
             await Table.findByIdAndUpdate(
                 tableId,
-                { status: "free" },
+                { status: "free", customer : null },
                 { new: true, session }
             );
 
