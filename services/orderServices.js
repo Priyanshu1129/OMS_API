@@ -127,9 +127,10 @@ export const getOrderDetailsService = async (orderId) => {
         const order = await Order.findById(orderId)
             .populate('customerId', '_id name')
             .populate('dishes.dishId')
-            .populate('tableId', '_id number')
+            .populate('tableId', '_id sequence capacity')
             .populate('hotelId', '_id name');
-
+                
+        console.log("order", order)
         if (!order) {
             throw new ClientError('Order not found!');
         }
