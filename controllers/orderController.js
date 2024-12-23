@@ -20,7 +20,7 @@ export const onQRScan = catchAsyncError(async (req, res, next) => {
   const data = await onQRScanService({ tableId });
 
   res.status(200).json({
-    success: true,
+    status: 'success',
     message: "Details fetched successfully",
     data,
   });
@@ -122,9 +122,9 @@ export const deleteOrder = catchAsyncError(async (req, res, next, session) => {
   const deletedOrder = await deleteOrderService(orderId, session);
 
   res.status(201).json({
-    success: true,
+    status: "success",
     message: "Order deleted successfully",
-    data: { deletedOrder },
+    data: { order : deletedOrder  },
   });
 }, true);
 
@@ -138,7 +138,7 @@ export const getOrderDetails = catchAsyncError(async (req, res) => {
   const orderDetails = await getOrderDetailsService(orderId);
 
   res.status(200).json({
-    success: true,
+    status: "success",
     message: "Order details fetched successfully",
     data: { order: orderDetails },
   });
