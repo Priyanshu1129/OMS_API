@@ -101,18 +101,6 @@ export const generateTableBill = catchAsyncError(async (req, res, next, session)
 }, true)
 
 
-export const deleteTableOrders = catchAsyncError(async (req, res, next, session) => {
-    const { tableId } = req.params;
-    if (!tableId) {
-        throw new ClientError("Please provide table id to delete orders of a table!");
-    }
-    const deletedOrders = await Order.deleteMany({ tableId })
-    res.status(201).json({
-        status: "success",
-        message: "Orders deleted successfully",
-        data: { deletedOrders }
-    })
-})
 
 export const getCustomerDetails = catchAsyncError(async (req, res, next) => {
     const { tableId } = req.params;
@@ -120,11 +108,6 @@ export const getCustomerDetails = catchAsyncError(async (req, res, next) => {
         throw new ClientError("Please provide table id to get customer details!");
     }
     const customer = await Customer.findOne({ tableId });
-
-    // await Customer.deleteMany();
-    // await Order.deleteMany();
-    // const customer = await Customer.find();
-    // const orders = await Order.find();
 
     res.status(201).json({
         status: "success",

@@ -52,8 +52,8 @@ export const addNewOrderService = async (orderData, session) => {
 
         let customer = await Customer.findOne({ tableId, hotelId }).session(session);
         let newCustomer = null;
+        let updatedTable = null;
         if (!customer) {
-
             customer = new Customer({
                 hotelId,
                 tableId,
@@ -61,9 +61,9 @@ export const addNewOrderService = async (orderData, session) => {
             });
             newCustomer = customer;
             await customer.save({ session });
-            await Table.findByIdAndUpdate(
+            updatedTable = await Table.findByIdAndUpdate(
                 tableId,
-                { status: "occupied", customer : customer._id },
+                { status: "occupied", customer: customer._id },
                 { new: true, session }
             );
         }
@@ -83,7 +83,7 @@ export const addNewOrderService = async (orderData, session) => {
 
         console.log("new order ", newOrder)
         await newOrder.save({ session });
-        return {newOrder, newCustomer};
+        return { newOrder, newCustomer, table: updatedTable };
 
     } catch (error) {
         console.error('Error in addNewOrderService:', error);
@@ -105,8 +105,9 @@ export const deleteOrderService = async (orderId, session) => {
 
         const remainingOrders = await Order.find({ tableId }).session(session);
 
+        let updatedTable = null;
         if (!remainingOrders || remainingOrders.length === 0) {
-            await Table.findByIdAndUpdate(
+            updatedTable = await Table.findByIdAndUpdate(
                 tableId,
                 { status: "free", customer : null },
                 { new: true, session }
@@ -114,7 +115,7 @@ export const deleteOrderService = async (orderId, session) => {
             await Customer.deleteOne({ tableId }).session(session);
         }
 
-        return order;
+        return { order, table: updatedTable };
     } catch (error) {
         throw new ServerError(error.message || "An error occurred while deleting the order");
     }
@@ -126,9 +127,10 @@ export const getOrderDetailsService = async (orderId) => {
         const order = await Order.findById(orderId)
             .populate('customerId', '_id name')
             .populate('dishes.dishId')
-            .populate('tableId', '_id number')
+            .populate('tableId', '_id sequence capacity position')
             .populate('hotelId', '_id name');
 
+        console.log("order", order)
         if (!order) {
             throw new ClientError('Order not found!');
         }
@@ -140,10 +142,9 @@ export const getOrderDetailsService = async (orderId) => {
     }
 };
 
-
 export const getAllOrderService = async (hotelId) => {
     try {
-        const orders = await Order.find({hotelId : hotelId})
+        const orders = await Order.find({ hotelId: hotelId })
             .populate('customerId', '_id name')
             .populate('dishes.dishId')
             .populate('tableId', '_id sequence')

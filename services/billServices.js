@@ -7,52 +7,31 @@ import { ClientError, ServerError } from "../utils/errorHandler.js";
 
 export const updateBillService = async (billData, session) => {
     try {
-        const { billId, customerName, status, totalAmount, totalDiscount, finalAmount } = billData;
-
-
+        const { billId, customerName, customDiscount } = billData;
         // Step 1: Find the existing bill by billId
         const bill = await Bill.findById(billId).session(session); // Use session for transactions
         if (!bill) {
             throw new ServerError("Bill not found.");
         }
-        const tableId = bill.tableId
-
         // Step 2: Update the fields in the bill (except orderedItems)
         if (customerName) {
-            bill.customerName = customerName; // Update customer name
+            bill.customerName = customerName.trim(); // Update customer name
         }
-        if (totalAmount !== undefined) {
-            bill.totalAmount = totalAmount; // Update totalAmount
-        }
-        if (totalDiscount !== undefined) {
-            bill.totalDiscount = totalDiscount; // Update totalDiscount
-        }
-        if (finalAmount !== undefined) {
-            bill.finalAmount = finalAmount; // Update finalAmount
+        if (customDiscount !== undefined) {
+            if (typeof customDiscount !== 'number' && typeof customDiscount !== 'string') {
+                throw new Error("Invalid input: customDiscount must be a number or a numeric string.");
+            }
+            const parsedDiscount = typeof customDiscount === 'string' ? Number(customDiscount) : customDiscount;
+
+            if (isNaN(parsedDiscount)) {
+                throw new Error("Invalid input: customDiscount must be a valid number.");
+            }
+
+            bill.customDiscount = parsedDiscount; // Update customDiscount
+            bill.finalAmount = bill.totalAmount - bill.totalDiscount - parsedDiscount;
         }
 
-        if (status) {
-            bill.status = status; // Update status to 'paid' or 'payLater' or other valid values
-        }
-
-        // Save the updated bill
         await bill.save({ session });
-
-        // Step 3: If the status is 'paid' or 'payLater', delete associated orders and customers
-        if (status === 'paid' || status === 'payLater') {
-            // Delete all orders related to this tableId
-            await Table.findByIdAndUpdate(
-                tableId,
-                { status: "free", customer : null },
-                { new: true, session }
-            );
-            await Order.deleteMany({ tableId: bill.tableId }).session(session); // Delete all orders for the tableId
-
-            // Delete the customer associated with this tableId
-            await Customer.deleteOne({ tableId: bill.tableId }).session(session); // Delete customer for the tableId
-        }
-
-        // Return the updated bill
         return bill;
 
     } catch (error) {
@@ -61,3 +40,28 @@ export const updateBillService = async (billData, session) => {
     }
 };
 
+export const billPayService = async (billId, session) => {
+    try {
+        // Step 1: Find the existing bill by billId
+        const bill = await Bill.findById(billId).session(session); // Use session for transactions
+        if (!bill) {
+            throw new ServerError("Bill not found.");
+        }
+        const tableId = bill.tableId
+        bill.status = "paid";
+        await bill.save({ session });
+
+        // Delete all orders related to this tableId
+        const updatedTable = await Table.findByIdAndUpdate(
+            tableId,
+            { status: "free", customer: null },
+            { new: true, session }
+        );
+        await Order.deleteMany({ tableId }).session(session); // Delete all orders for the tableId
+        await Customer.deleteOne({ tableId }).session(session); // Delete customer for the tableId
+        return { bill, table: updatedTable };
+
+    } catch (error) {
+        throw error;
+    }
+}

@@ -20,6 +20,7 @@ import offerRouter from "../routes/offerRouter.js";
 import imageUploadService from '../services/imageUploadService.js';
 import utilsRouter from '../routes/utilsRouter.js';
 import customerRouter from '../routes/customerRouter.js';
+import dashboardRouter from "../routes/dashboardRouter.js"
 
 const app = express();
 dotenv.config();
@@ -27,6 +28,7 @@ dotenv.config();
 const corsOptions = {
     origin: [
         "https://orm-frontend-eight.vercel.app",
+        "https://oms-customer-three.vercel.app/",
         "https://oms-customer-two.vercel.app",
         "http://localhost:3000",
         "http://localhost:3001"
@@ -65,6 +67,7 @@ app.get('/', (req, res) => {
     res.json({ message: 'Welcome to the Hotel Order Management System' });
 });
 
+app.use('/api/v1/dashboard', dashboardRouter);
 app.use('/api/v1/customers', customerRouter);
 app.use('/api/v1/uploads', utilsRouter);
 app.use('/api/v1/auth', authRouter);
