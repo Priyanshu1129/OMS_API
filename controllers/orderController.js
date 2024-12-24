@@ -130,13 +130,13 @@ export const deleteOrder = catchAsyncError(async (req, res, next, session) => {
 
 export const getOrderDetails = catchAsyncError(async (req, res) => {
   const { orderId } = req.params;
-
+  console.log("get order details called : ", orderId);
   if (!orderId) {
     throw new ClientError("Please provide order ID");
   }
 
   const orderDetails = await getOrderDetailsService(orderId);
-
+  console.log("returning order -----", orderDetails)
   res.status(200).json({
     status: "success",
     message: "Order details fetched successfully",

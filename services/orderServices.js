@@ -111,7 +111,6 @@ export const deleteOrderService = async (orderId, session) => {
                 { status: "free", customer : null },
                 { new: true, session }
             );
-
             await Customer.deleteOne({ tableId }).session(session);
         }
 
