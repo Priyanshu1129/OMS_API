@@ -4,7 +4,7 @@ import { ClientError } from "../utils/errorHandler.js";
 import { configDotenv } from "dotenv";
 
 // const frontendUrl = process.env.FRONTEND_URL;
-const frontendUrl = "https://oms-customer-two.vercel.app/";
+const frontendUrl = "https://oms-customer-three.vercel.app/"
 
 export const createQrService = async (tableId, hotelId) => {
     try {
