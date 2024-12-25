@@ -75,9 +75,11 @@ export const billPayService = async (billId, session) => {
       { status: "free", customer: null },
       { new: true, session }
     );
-    await Order.deleteMany({ tableId }).session(session); // Delete all orders for the tableId
+    const orders = await Order.deleteMany({ tableId }).session(session); // Delete all orders for the tableId
+    const orderIds = orders.map((order) => order._id);
+    
     await Customer.deleteOne({ tableId }).session(session); // Delete customer for the tableId
-    return { bill, table: updatedTable };
+    return { bill, table: updatedTable, orders: orderIds };
   } catch (error) {
     throw error;
   }
