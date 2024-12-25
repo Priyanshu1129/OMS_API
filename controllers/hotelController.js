@@ -24,15 +24,15 @@ export const getHotelById = catchAsyncError(async (req, res) => {
 // Update hotel (SuperAdmin can update any hotel, HotelOwner can update only their own)
 export const updateHotel = catchAsyncError(async (req, res) => {
   const hotelId = req.user.role === ROLES.HOTEL_OWNER ? req.user.hotelId : req.params.hotelId;
-  const { name, location, logo, description } = req.body;
+  const { name, location, logo, description, phone, email } = req.body;
 
   // Call the service to update the hotel
-  const updatedHotel = await updateHotelService(req.user, hotelId, { name, location, logo, description });
+  const updatedHotel = await updateHotelService(req.user, hotelId, { name, location, logo, description, phone, email });
 
   res.status(200).json({
     status : "success",
     message: 'Hotel updated successfully',
-    data: { hotel: updatedHotel, }
+    data: { hotel: updatedHotel }
   });
 });
 
