@@ -8,6 +8,7 @@ const billSchema = new mongoose.Schema({
   }],
   totalAmount: { type: Number, required: true },
   totalDiscount: { type: Number, default: 0 },
+  customDiscount : {type : Number, default: 0},
   status: { type: String, enum: ['paid', 'unpaid', 'payLater'], default: 'unpaid' },
   finalAmount: { type: Number, required: true }, // After discount
   hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel', required: true },
