@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const billSchema = new mongoose.Schema({
+  customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
   customerName: { type: String, required: true },
   orderedItems: [{
     dishId: { type: mongoose.Schema.Types.ObjectId, ref: 'Dish' },

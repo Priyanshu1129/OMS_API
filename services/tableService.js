@@ -196,21 +196,25 @@ export const generateTableBillService = async (tableId, session) => {
 
     const customerId = orders[0].customerId;
     const customer = await Customer.findById(customerId).session(session);
-    let bill = await Bill.create(
-        [
-            {
-                tableId,
-                hotelId: customer.hotelId,
-                customerName: customer.name,
-                totalAmount: 0,
-                totalDiscount: 0,
-                finalAmount: 0,
-                orderedItems: formattedGroupedItems,
-            },
-        ],
-        { session }
-    );
-    bill = bill[0];
+    let bill = await Bill.findOne({ customerId, tableId }).session(session)
+    if (!bill) {
+        const createdBills = await Bill.create(
+            [
+                {
+                    customerId,
+                    tableId,
+                    hotelId: customer.hotelId,
+                    customerName: customer.name,
+                    totalAmount: 0,
+                    totalDiscount: 0,
+                    finalAmount: 0,
+                    orderedItems: [],
+                },
+            ],
+            { session }
+        );
+        bill = createdBills[0];
+    }
 
     console.log("bill-initialized", bill);
 
@@ -218,16 +222,20 @@ export const generateTableBillService = async (tableId, session) => {
     const dishIds = formattedGroupedItems.map(item => item.dishId);
     const dishes = await Dish.find({ _id: { $in: dishIds } }).populate('offer');
 
+    let totalAmount = 0;
+    let totalDiscount = 0;
     formattedGroupedItems.forEach((item) => {
         const dish = dishes.find(d => d._id.toString() === item.dishId.toString());
         if (dish) {
-            bill.totalAmount += dish.price * item.quantity;
-            bill.totalDiscount += calculateDiscount(dish, item.quantity);
+            totalAmount += dish.price * item.quantity;
+            totalDiscount += calculateDiscount(dish, item.quantity);
         }
     });
 
+    bill.totalAmount = totalAmount;
+    bill.totalDiscount = totalDiscount;
+    bill.orderedItems = formattedGroupedItems;
     bill.finalAmount = bill.totalAmount - bill.totalDiscount;
-
     console.log('final bill', bill);
 
     if (bill.orderedItems.length === 0) {
