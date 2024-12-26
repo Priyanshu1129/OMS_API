@@ -52,6 +52,8 @@ export const updateHotelService = async (user, hotelId, updateData) => {
     hotel.location = updateData.location || hotel.location;
     hotel.logo = updateData.logo || hotel.logo;
     hotel.description = updateData.description || hotel.description;
+    hotel.phone = updateData.phone || hotel.phone;
+    hotel.description = updateData.email || hotel.email;
 
     // Save the updated hotel
     await hotel.save();

@@ -1,4 +1,5 @@
 import { catchAsyncError } from '../middlewares/catchAsyncError.js';
+import { HotelOwner } from '../models/userModel.js';
 import {
   getUserProfileService,
   approveHotelOwnerService,
@@ -8,6 +9,7 @@ import {
   membershipExtenderService,
   deleteHotelOwnerService,
 } from '../services/userServices.js';
+import { ClientError } from '../utils/errorHandler.js';
 
 export const getUserProfile = catchAsyncError(async (req, res) => {
   const userId = req.user?.id;
@@ -19,6 +21,20 @@ export const getUserProfile = catchAsyncError(async (req, res) => {
     data: { user },
   });
 });
+
+export const updateOwner = catchAsyncError(async (req, res)=> {
+  const ownerId = req.user?.id;
+  const {name , logo ,  gender, phone} = req.body
+  const owner = await HotelOwner.findById(userId);
+  if(!owner) { throw new ClientError("Owner not found")}
+  const updatedOwner = HotelOwner.findByIdAndUpdate(ownerId, {name, logo, gender, phone});
+    return res.send({
+      status : 'success',
+      message : 'owner updated successfully',
+      data : {owner :  updatedOwner} 
+    })
+
+})
 
 export const approveHotelOwner = catchAsyncError(async (req, res,next,session) => {
   const { ownerId } = req.params;
