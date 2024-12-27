@@ -46,7 +46,7 @@ export const getTableByIdService = async (tableId) => {
         // if (user.role === ROLES.TABLE_OWNER && table.ownerId.toString() !== user.id) {
         // throw new ClientError('Access denied. You can only view your own table.', 403);
         // }
-        table.populate('hotelId', 'name');
+        // table.populate('hotelId', 'name');
         return table;
     } catch (error) {
         if (error instanceof ClientError) throw error;
@@ -58,7 +58,7 @@ export const getTablesService = async (user) => {
     try {
         // const tables = user.role === ROLES.TABLE_OWNER ? await Table.find({ ownerId: user.id }) : await Table.find();
         console.log(user);
-        const tables = await Table.find({ hotelId: user.hotelId }).populate('hotelId', 'name');
+        const tables = await Table.find({ hotelId: user.hotelId }).populate('hotelId', 'name').populate('customer');
 
         return tables;
     } catch (error) {

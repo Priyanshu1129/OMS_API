@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 // Base schema for all users
 const userBaseSchema = new mongoose.Schema({
   logo : { type: String }, 
-  gender : { type : String, enum:['M', 'F', 'O']},  
+  gender : { type : String, enum:['M', 'F', 'O'], default : 'M'},  
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   phone : {type : String, require: true},
