@@ -52,9 +52,12 @@ export const addNewOrderService = async (orderData, session) => {
         const hotelId = table.hotelId;
 
         let customer = await Customer.findOne({ tableId, hotelId }).session(session);
+        console.log("customer")
         let newCustomer = null;
         let updatedTable = null;
+        let isFirstOrder = false;
         if (!customer) {
+            console.log("customer not available")
             customer = new Customer({
                 hotelId,
                 tableId,
@@ -67,6 +70,7 @@ export const addNewOrderService = async (orderData, session) => {
                 { status: "occupied", customer: customer._id },
                 { new: true, session }
             );
+            isFirstOrder = true;
         }
         console.log("Dishes in new order ", dishes)
         const newOrder = new Order({
@@ -80,6 +84,7 @@ export const addNewOrderService = async (orderData, session) => {
             tableId,
             hotelId,
             note: note || '',
+            isFirstOrder : isFirstOrder
         });
 
         console.log("new order ", newOrder)
