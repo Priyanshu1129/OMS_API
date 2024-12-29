@@ -35,8 +35,9 @@ const getOrderedItemsOfThisMonth = (currentMonthBills) => {
 export const getDashboardStats = catchAsyncError(async (req, res, next) => {
     const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     const endOfMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);
-
+    const hotelId = req.user.hotelId;
     const currentMonthBills = await Bill.find({
+        hotelId,
         createdAt: {
             $gte: startOfMonth,
             $lt: endOfMonth
