@@ -8,6 +8,7 @@ import { ROLES } from '../utils/constant.js';
 
 
 export const getHotelById = catchAsyncError(async (req, res) => {
+  console.log("getHotelById called")
   const hotelId = req.user.role === ROLES.HOTEL_OWNER ? req.user.hotelId : req.params.hotelId;
 
   // Call the service to get hotel details

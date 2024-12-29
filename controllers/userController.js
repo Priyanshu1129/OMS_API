@@ -24,10 +24,11 @@ export const getUserProfile = catchAsyncError(async (req, res) => {
 
 export const updateOwner = catchAsyncError(async (req, res)=> {
   const ownerId = req.user?.id;
-  const {name , logo ,  gender, phone} = req.body
-  const owner = await HotelOwner.findById(userId);
+  const {name , email , logo , gender, phone} = req.body
+  const owner = await HotelOwner.findById(ownerId);
+  console.log("owner-------------", owner)
   if(!owner) { throw new ClientError("Owner not found")}
-  const updatedOwner = HotelOwner.findByIdAndUpdate(ownerId, {name, logo, gender, phone});
+  const updatedOwner = await HotelOwner.findByIdAndUpdate(ownerId, {name, logo, gender, phone, email});
     return res.send({
       status : 'success',
       message : 'owner updated successfully',
