@@ -4,6 +4,7 @@ import {
   deleteOrderService,
   getOrderDetailsService,
   getAllOrderService,
+  updateOrderStatusService,
 } from "../services/orderServices.js";
 import { ClientError, ServerError } from "../utils/errorHandler.js";
 import { onQRScanService } from "../services/orderServices.js";
@@ -20,7 +21,7 @@ export const onQRScan = catchAsyncError(async (req, res, next) => {
   const data = await onQRScanService({ tableId });
 
   res.status(200).json({
-    status: 'success',
+    status: "success",
     message: "Details fetched successfully",
     data,
   });
@@ -47,7 +48,7 @@ export const createOrder = catchAsyncError(async (req, res, next, session) => {
     { ...req.body, tableId },
     session
   );
-  const { newOrder, newCustomer, table } = newOrderData
+  const { newOrder, newCustomer, table } = newOrderData;
 
   const populatedOrder = await Order.findById(newOrder._id)
     .populate("customerId", "_id name")
@@ -56,7 +57,7 @@ export const createOrder = catchAsyncError(async (req, res, next, session) => {
     .populate("hotelId", "_id name")
     .session(session);
 
-  console.log("populated Order", populatedOrder)
+  console.log("populated Order", populatedOrder);
 
   return res.status(201).json({
     status: "success",
@@ -95,21 +96,12 @@ export const updateStatus = catchAsyncError(async (req, res, next, session) => {
       "Please provide sufficient data (orderID and status) to update order status"
     );
   }
-
-  const updatedOrder = await Order.findByIdAndUpdate(
-    orderId,
-    { status: status },
-    { new: true }
-  )
-    .populate("customerId", "_id name")
-    .populate("dishes.dishId", "_id name price")
-    .populate("tableId", "_id number sequence")
-    .populate("hotelId", "_id name");
-
+  const data = await updateOrderStatusService(orderId, status, session);
+  console.log("data-update-status", data);
   res.status(201).json({
     status: "success",
     message: "Order status updated successfully",
-    data: { order: updatedOrder },
+    data,
   });
 }, true);
 
@@ -124,7 +116,7 @@ export const deleteOrder = catchAsyncError(async (req, res, next, session) => {
   res.status(201).json({
     status: "success",
     message: "Order deleted successfully",
-    data
+    data,
   });
 }, true);
 
@@ -136,7 +128,7 @@ export const getOrderDetails = catchAsyncError(async (req, res) => {
   }
 
   const orderDetails = await getOrderDetailsService(orderId);
-  console.log("returning order -----", orderDetails)
+  console.log("returning order -----", orderDetails);
   res.status(200).json({
     status: "success",
     message: "Order details fetched successfully",
