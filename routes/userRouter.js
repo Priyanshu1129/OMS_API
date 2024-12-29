@@ -6,7 +6,8 @@ import {
   getUnApprovedOwners,
   getApprovedOwners,
   membershipExtender,
-  deleteHotelOwner
+  deleteHotelOwner,
+  updateOwner
 } from '../controllers/userController.js';
 import { protect, superAdminOnly } from '../middlewares/authMiddleware.js';
 
@@ -14,6 +15,8 @@ const router = express.Router();
 
 // Protected routes
 router.get('/profile', protect, getUserProfile);
+
+router.patch('/owner/:ownerId', protect, updateOwner);
 
 // SuperAdmin-only routes
 router.patch('/approve-hotel-owner/:ownerId', protect, superAdminOnly, approveHotelOwner);

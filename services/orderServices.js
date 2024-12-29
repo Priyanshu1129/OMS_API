@@ -4,6 +4,7 @@ import { Category, Dish } from "../models/dishModel.js";
 import Table from "../models/tableModel.js"
 import { ClientError, ServerError } from "../utils/errorHandler.js";
 import mongoose from "mongoose";
+import Bill from "../models/billModel.js";
 
 
 export const onQRScanService = async ({ tableId }) => {
@@ -109,10 +110,15 @@ export const deleteOrderService = async (orderId, session) => {
         if (!remainingOrders || remainingOrders.length === 0) {
             updatedTable = await Table.findByIdAndUpdate(
                 tableId,
-                { status: "free", customer : null },
+                { status: "free", customer: null },
                 { new: true, session }
             );
-            await Customer.deleteOne({ tableId }).session(session);
+            const customer = await Customer.findOne({ tableId }).session(session);
+            if (customer) {
+                await customer.deleteOne({ session });
+                const bill = await Bill.findOne({ tableId, customerId: customer._id }).session(session);
+                if (bill) await bill.deleteOne({ session });
+            }
         }
 
         return { order, table: updatedTable };

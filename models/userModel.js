@@ -3,8 +3,11 @@ import bcrypt from 'bcryptjs';
 
 // Base schema for all users
 const userBaseSchema = new mongoose.Schema({
+  logo : { type: String }, 
+  gender : { type : String, enum:['M', 'F', 'O'], default : 'M'},  
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
+  phone : {type : String, require: true},
   password: { type: String, required: true },
   role: { type: String, required: true },  // Role field remains the same
   hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel' },

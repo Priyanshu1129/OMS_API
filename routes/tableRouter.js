@@ -5,6 +5,11 @@ import { getTableById, getTables, createTable, updateTable, deleteTable, getOrde
 
 const router = express.Router();
 
+<<<<<<< HEAD
+=======
+router.get('/:id', protect, getTableById);
+
+>>>>>>> 8274f71185ae61b7c6f50b040da2f96ec9284500
 router.get('/', protect, attachHotelId, getTables);
 router.post('/', protect, createTable);
 router.get('/bill/:tableId', protect, validateOwnership, generateTableBill);

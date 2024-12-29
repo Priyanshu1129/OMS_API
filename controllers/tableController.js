@@ -5,8 +5,11 @@ import Order from '../models/orderModel.js';
 import Customer from '../models/customerModel.js';
 
 export const getTableById = catchAsyncError(async (req, res) => {
+    console.log("get table ")
     const tableId = req.params.id;
+    console.log("tabeId ::: ", tableId)
     const table = await getTableByIdService(tableId);
+    console.log("table :::", table)
     res.status(200).json({
         status: "success",
         message: 'Table fetched successfully',
