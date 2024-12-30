@@ -52,40 +52,41 @@ export const addNewOrderService = async (orderData, session) => {
     }
     const hotelId = table.hotelId;
 
-    let customer = await Customer.findOne({ tableId, hotelId }).session(
-      session
-    );
-    let newCustomer = null;
-    let updatedTable = null;
-    if (!customer) {
-      customer = new Customer({
-        hotelId,
-        tableId,
-        name: customerName,
-      });
-      newCustomer = customer;
-      await customer.save({ session });
-    }
-    if (status && status !== "draft") {
-      updatedTable = await Table.findByIdAndUpdate(
-        tableId,
-        { status: "occupied", customer: customer._id },
-        { new: true, session }
-      );
-    }
-    console.log("Dishes in new order ", dishes);
-    const newOrder = new Order({
-      customerId: customer._id,
-      dishes: dishes.map((dish) => ({
-        dishId: new mongoose.Types.ObjectId(dish.dishId),
-        quantity: dish.quantity,
-        notes: dish.notes,
-      })),
-      status: status || "draft",
-      tableId,
-      hotelId,
-      note: note || "",
-    });
+        let customer = await Customer.findOne({ tableId, hotelId }).session(session);
+        console.log("customer")
+        let newCustomer = null;
+        let updatedTable = null;
+        let isFirstOrder = false;
+        if (!customer) {
+            console.log("customer not available")
+            customer = new Customer({
+                hotelId,
+                tableId,
+                name: customerName,
+            });
+            newCustomer = customer;
+            await customer.save({ session });
+            updatedTable = await Table.findByIdAndUpdate(
+                tableId,
+                { status: "occupied", customer: customer._id },
+                { new: true, session }
+            );
+            isFirstOrder = true;
+        }
+        console.log("Dishes in new order ", dishes)
+        const newOrder = new Order({
+            customerId: customer._id,
+            dishes: dishes.map(dish => ({
+                dishId: new mongoose.Types.ObjectId(dish.dishId),
+                quantity: dish.quantity,
+                notes: dish.notes
+            })),
+            status: status || 'draft',
+            tableId,
+            hotelId,
+            note: note || '',
+            isFirstOrder : isFirstOrder
+        });
 
     console.log("new order ", newOrder);
     await newOrder.save({ session });
