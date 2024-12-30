@@ -12,7 +12,6 @@ const orderSchema = new mongoose.Schema({
   hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel', required: true },
   note: { type: String },
   isFirstOrder : {type : Boolean, default : false},   //to update table while receiving published order
-  isLastOrder : {type : Boolean, default : false} // to update table status while deleting order
 }, { timestamps: true });
 
 export default mongoose.model('Order', orderSchema);
