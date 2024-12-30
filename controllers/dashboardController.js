@@ -48,6 +48,7 @@ export const getDashboardStats = catchAsyncError(async (req, res, next) => {
   const hotelId = req.user.hotelId;
   const currentMonthBills = await Bill.find({
     hotelId,
+    status: "paid",
     createdAt: {
       $gte: startOfMonth,
       $lt: endOfMonth,
