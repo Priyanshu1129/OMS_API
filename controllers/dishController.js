@@ -74,11 +74,12 @@ export const deleteDish = catchAsyncError(async (req, res) => {
     const dishId = req.params.dishId;
 
     // Call the service to delete the dish
-    await deleteDishService(dishId);
+    const dish = await deleteDishService(dishId);
 
     res.status(200).json({
         status: "success",
         message: "Dish deleted successfully",
+        data: { dish },
     });
 });
 

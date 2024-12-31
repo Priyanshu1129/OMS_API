@@ -47,7 +47,10 @@ export const getDishByIdService = async (dishId) => {
 
 export const getAllDishesService = async (hotelId) => {
     try {
-        const dishes = await Dish.find({ hotelId }).populate("ingredients category offer");
+        // const dishes = await Dish.find({ hotelId }).populate("ingredients category offer");
+        
+        const dishes = await Dish.find({ hotelId, isDeleted: false }).populate("ingredients category offer");
+
         if (!dishes || dishes.length === 0) {
             throw new ClientError("No dishes available!", "Not found");
         }
@@ -81,10 +84,12 @@ export const updateDishService = async (dishId, dishData) => {
 
 export const deleteDishService = async (dishId) => {
     try {
-        const dish = await Dish.findByIdAndDelete(dishId);
+        //find the dish by id and set isDeleted to true
+        const dish = await Dish.findByIdAndUpdate(dishId, { isDeleted: true }, { new: true });
         if (!dish) {
             throw new ClientError('Dish not found');
         }
+        return dish;
     } catch (error) {
         if (error instanceof ClientError) {
             throw new ClientError(error.message);
