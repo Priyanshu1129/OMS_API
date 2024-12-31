@@ -1,6 +1,6 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import { ClientError } from "../utils/errorHandler.js";
-import { billPayService, updateBillService } from "../services/billServices.js";
+import { billPayService, updateBillService , sendBillToMailService } from "../services/billServices.js";
 import Bill from "../models/billModel.js";
 
 export const getAllBills = catchAsyncError(async (req, res, next) => {
@@ -100,4 +100,19 @@ export const billPaid = catchAsyncError(async (req, res, next, session) => {
     message: "Bill Payment Successfully",
     data : data
   })
+})
+
+export const sendBillToMail = catchAsyncError(async (req, res, next, session) => {
+  const {billId} = req.params;
+  if (!billId) {
+    throw new ClientError("Invalid input: billId is required.");
+  }
+  const mailId = req.body.mailId;
+  const data = await sendBillToMailService(billId, mailId);
+
+  res.status(201).json({
+    status: 'success',
+    message: "Bill sent to mail Successfully",
+    data : data
+  });
 })

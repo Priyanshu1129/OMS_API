@@ -3,6 +3,7 @@ import Order from "../models/orderModel.js"; // Import Order model
 import Customer from "../models/customerModel.js"; // Import Customer model
 import Table from "../models/tableModel.js";
 import { ClientError, ServerError } from "../utils/errorHandler.js";
+import sendEmail from "../utils/sendEmail.js";
 
 export const updateBillService = async (billData, session) => {
   try {
@@ -89,3 +90,31 @@ export const billPayService = async (billId, session) => {
     throw error;
   }
 };
+
+export const sendBillToMailService = async (billId, mailId) =>{
+  try {
+    
+    const bill = await Bill.findById(billId);
+    if (!bill) {
+      throw new ServerError("Bill not found.");
+    }
+    
+    const billHTML = `
+      <h1>Bill Details</h1>
+      <h2>Hotel: ${bill.hotelId.name}</h2>
+      <h3>Address: ${bill.hotelId.address}</h3>
+      <h3>Table Number: ${bill.tableId.number}</h3>
+      <h3>Table Sequence: ${bill.tableId.sequence}</h3>
+      <h3>Customer Name: ${bill.customerName}</h3>
+      <h3>Bill Amount: ${bill.totalAmount}</h3>
+      <h3>Discount: ${bill.totalDiscount}</h3>
+      <h3>Custom Discount: ${bill.customDiscount}</h3>
+      <h3>Final Amount: ${bill.finalAmount}</h3>
+    `;
+    await sendEmail(mailId, "Bill Details", billHTML);
+    return "Bill sent to mail successfully."; 
+  }
+  catch (error) {
+    throw error;
+  }
+}
