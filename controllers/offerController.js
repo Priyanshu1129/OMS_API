@@ -30,7 +30,7 @@ export const getAllOffers = catchAsyncError(async (req, res, next) => {
 
 export const createOffer = catchAsyncError(async (req, res, next, session) => {
     const { hotelId } = req.user
-    const { name, value, type, discountType, appliedOn, startDate , endDate } = req.body;
+    const { name, value, type, description, discountType, appliedOn, startDate , endDate } = req.body;
 
     if (!hotelId || !name || !value || !type || !discountType ||
         (type == "specific" && (!appliedOn || appliedOn.length == 0))) {
@@ -51,7 +51,7 @@ export const updateOffer = catchAsyncError(async (req, res, next, session) => {
         throw new ClientError("Please provide offer id to update offer!");
     }
 
-    const { name, value, type, discountType, appliedOn, startDate, endDate , appliedAbove} = req.body;
+    const { name, value, type, discountType, appliedOn, startDate, endDate , appliedAbove, description} = req.body;
     if (
         !name &&
         !value &&

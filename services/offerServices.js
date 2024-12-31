@@ -3,7 +3,7 @@ import { Dish } from "../models/dishModel.js";
 import { ClientError } from "../utils/errorHandler.js";
 
 export const createOfferService = async (offerData, session) => {
-    const { hotelId, name, value, type, discountType, appliedOn, disable, startDate, endDate, appliedAbove } = offerData;
+    const { hotelId, name, value, type, discountType, description, appliedOn, disable, startDate, endDate, appliedAbove } = offerData;
 
     let dishDetails = null;
 
@@ -58,7 +58,7 @@ export const createOfferService = async (offerData, session) => {
 };
 
 export const updateOfferService = async (offerId, updatedData, session) => {
-    const { name, value, type, discountType, appliedAbove, startDate, endDate, logo  } = updatedData;
+    const { name, value, type, discountType, disable, description, appliedAbove, startDate, endDate, logo  } = updatedData;
     let appliedOn = updatedData.appliedOn;
 
     // Fetch the existing offer
@@ -83,7 +83,7 @@ export const updateOfferService = async (offerId, updatedData, session) => {
     // Validate `appliedAbove` for specific type
     if ((type && type === "specific") || (!type && existingOffer.type === "specific")) {
         if (appliedAbove) {
-            throw new ClientError('Applied above condition will not work for specific type of offer!');
+            //throw new ClientError('Applied above condition will not work for specific type of offer!');
         }
     }
 
@@ -122,6 +122,8 @@ export const updateOfferService = async (offerId, updatedData, session) => {
     if (name !== undefined) updateFields.name = name;
     if (value !== undefined) updateFields.value = value;
     if (type !== undefined) updateFields.type = type;
+    if (disable !== undefined) updateFields.disable = disable;
+    if (description !== undefined) updateFields.description = description;
     if (discountType !== undefined) updateFields.discountType = discountType;
     if (startDate !== undefined) updateFields.startDate = startDate;
     if (endDate !== undefined) updateFields.endDate = endDate;
@@ -141,7 +143,7 @@ export const updateOfferService = async (offerId, updatedData, session) => {
         offerId,
         updateFields,
         { new: true, session }
-    );
+    ).populate('appliedOn');
 
     return updatedOffer;
 };
