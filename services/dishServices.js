@@ -103,7 +103,8 @@ export const getDishesByCategoryService = async (hotelId, categoryId) => {
     try {
         const dishes = await Dish.find({
             hotelId,
-            categories: categoryId
+            categories: categoryId,
+            isDeleted: false,
         });
 
         if (!dishes || dishes.length === 0) {
