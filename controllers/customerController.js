@@ -4,6 +4,7 @@ import offerModel from "../models/offerModel.js";
 import orderModel from "../models/orderModel.js";
 import tableModel from "../models/tableModel.js";
 import { getAllCategoriesService } from "../services/categoryServices.js";
+import { ServerError } from "../utils/errorHandler.js";
 
 export const getHotelDishes = catchAsyncError(async (req, res) => {
   const hotelId = req.params.hotelId;
@@ -30,6 +31,7 @@ export const getHotelCategories = catchAsyncError(async (req, res) => {
 export const getHotelTable = catchAsyncError(async (req, res) => {
   const tableId = req.params.tableId;
   const table = await tableModel.findById(tableId).populate("customer");
+  if(!table) throw new ServerError('table not found')
   return res.send({
     status: "success",
     message: "Customer Table fetched successfully",

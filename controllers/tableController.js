@@ -9,6 +9,7 @@ export const getTableById = catchAsyncError(async (req, res) => {
     const tableId = req.params.id;
     console.log("tabeId ::: ", tableId)
     const table = await getTableByIdService(tableId);
+    if (!table) {throw new ClientError("table not found")}
     console.log("table :::", table)
     res.status(200).json({
         status: "success",

@@ -42,12 +42,13 @@ export const getDashboardStats = catchAsyncError(async (req, res, next) => {
   );
   const endOfMonth = new Date(
     new Date().getFullYear(),
-    new Date().getMonth() + 1
+    new Date().getMonth() + 1,
+    1
   );
   const hotelId = req.user.hotelId;
-
   const currentMonthBills = await Bill.find({
     hotelId,
+    status: "paid",
     createdAt: {
       $gte: startOfMonth,
       $lt: endOfMonth,

@@ -13,7 +13,11 @@ export const createDishService = async (dishData) => {
         if (!dishData.name || !dishData.price) {
             throw new ClientError("Dish name and price are required!");
         }
+        if(!dishData.category || dishData.category == null || dishData.category == "" ){
+            throw new ClientError("Category is required to create dish!");
+        }
         console.log('dish-data-2', dishData, typeof dishData.price)
+
         const dish = await Dish.create({ ...dishData, hotelId });
 
         return dish;
@@ -58,6 +62,9 @@ export const getAllDishesService = async (hotelId) => {
 export const updateDishService = async (dishId, dishData) => {
     try {
         console.log("dish data : ", dishData)
+        if(!dishData.category || dishData.category == null || dishData.category == "" ){
+            throw new ServerError("Category is required to create dish!");
+        }
         const dish = await Dish.findByIdAndUpdate(dishId, dishData, { new: true, runValidators: true }).populate("ingredients category offer");
 
         if (!dish) {
@@ -67,7 +74,7 @@ export const updateDishService = async (dishId, dishData) => {
     }
     catch (error) {
         console.log("update dish err : ", error)
-        throw new ServerError('Failed to update dish');
+        throw new ServerError(error.message || 'Failed to update dish');
     }
 
 }

@@ -79,7 +79,7 @@ export const billPayService = async (billId, session) => {
     );
     const orders = await Order.find({ tableId }).session(session);
 
-    const orderIds = orders.map(order => order._id);
+    const orderIds = orders.map((order) => order._id);
 
     await Order.deleteMany({ tableId }).session(session); // Delete all orders for the tableId
     // console.log("orderIds : ", orderIds);
