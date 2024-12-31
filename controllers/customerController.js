@@ -8,7 +8,7 @@ import { ServerError } from "../utils/errorHandler.js";
 
 export const getHotelDishes = catchAsyncError(async (req, res) => {
   const hotelId = req.params.hotelId;
-  const dishes = await Dish.find({ hotelId: hotelId }).populate(
+  const dishes = await Dish.find({ hotelId: hotelId , isDeleted : false}).populate(
     "ingredients category offer"
   );
   return res.send({
