@@ -14,10 +14,6 @@ router.get('/get-customer/:tableId', protect, validateOwnership, getCustomerDeta
 
 
 router.get('/:id', protect, getTableById);
-<<<<<<< HEAD
-// router.get('/:id', protect, validateOwnership, getTableById);
-=======
->>>>>>> 51c2a6f965969afa38448b72d52b3c1697651945
 router.put('/:tableId', protect, updateTable);
 
 router.delete('/:id', protect, deleteTable);
