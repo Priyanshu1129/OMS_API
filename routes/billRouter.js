@@ -9,7 +9,7 @@ router.get('/', protect, attachHotelId, getAllBills);
 
 router.patch('/paid/:billId', protect, validateOwnership, billPaid);
 
-router.post('/send-bill/:billId', protect, validateOwnership, sendBillToMail);
+router.post('/send-bill/:billId/:email', protect, validateOwnership, sendBillToMail);
 
 router.get('/:billId', protect, validateOwnership, getBill);
 

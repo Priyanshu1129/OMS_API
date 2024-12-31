@@ -103,12 +103,12 @@ export const billPaid = catchAsyncError(async (req, res, next, session) => {
 })
 
 export const sendBillToMail = catchAsyncError(async (req, res, next, session) => {
-  const {billId} = req.params;
+  const {billId, email} = req.params;
   if (!billId) {
     throw new ClientError("Invalid input: billId is required.");
   }
 
-  const mailId = req.body.email;
+  const mailId = email
 
   console.log("mailId : ", mailId);
   
