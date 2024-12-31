@@ -48,7 +48,7 @@ export const getDishByIdService = async (dishId) => {
 export const getAllDishesService = async (hotelId) => {
     try {
         // const dishes = await Dish.find({ hotelId }).populate("ingredients category offer");
-        
+
         const dishes = await Dish.find({ hotelId, isDeleted: false }).populate("ingredients category offer");
 
         if (!dishes || dishes.length === 0) {
