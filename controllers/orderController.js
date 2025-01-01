@@ -112,7 +112,7 @@ export const deleteOrder = catchAsyncError(async (req, res, next, session) => {
   }
 
   const data = await deleteOrderService(orderId, session);
-
+  
   res.status(201).json({
     status: "success",
     message: "Order deleted successfully",
