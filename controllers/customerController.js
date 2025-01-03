@@ -87,6 +87,7 @@ export const deleteDraftOrders = catchAsyncError(
         "you can not delete this order, please contact to staff"
       );
     const data = await deleteOrderService(orderId, session);
+    await deleteOrderService(order);
 
     res.status(201).json({
       status: "success",

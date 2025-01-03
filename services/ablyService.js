@@ -5,6 +5,7 @@ import { Dish } from "../models/dishModel.js";
 import Table from "../models/tableModel.js";
 import Hotel from "../models/hotelModel.js";
 import { ServerError } from "../utils/errorHandler.js";
+import { deleteOrderService } from "./orderServices.js";
 
 const initializeAblyRest = () => {
   try {
@@ -45,6 +46,22 @@ export const orderPublishService = async (order) => {
     throw new ServerError(`Failed to publish order via REST: ${error.message}`);
   }
 };
+
+export const deleteOrderService = async (order) => {
+  try {
+    const channel = ablyRest.channels.get(`hotel-${order.hotelId._id.toString()}`);
+    await channel.publish({
+      name: 'delete-order',
+      data: {
+        orderId: order._id,
+      }
+    });
+
+  }catch (error) {
+    console.error('Error deleting order:', error.message);
+    throw new ServerError(`Failed to delete order via REST: ${error.message}`);
+  }
+}
 
 export const populateOrder = async (order) => {
   try {
@@ -96,5 +113,3 @@ export const populateOrder = async (order) => {
     throw new ServerError(`Failed to populate order: ${error.message}`);
   }
 };
-
-export default initializeAblyRest;
