@@ -5,7 +5,7 @@ import { Dish } from "../models/dishModel.js";
 import Table from "../models/tableModel.js";
 import Hotel from "../models/hotelModel.js";
 import { ServerError } from "../utils/errorHandler.js";
-import { deleteOrderService } from "./orderServices.js";
+
 
 const initializeAblyRest = () => {
   try {
@@ -47,7 +47,7 @@ export const orderPublishService = async (order) => {
   }
 };
 
-export const deleteOrderService = async (order) => {
+export const deleteOrderPublishService = async (order) => {
   try {
     const channel = ablyRest.channels.get(`hotel-${order.hotelId._id.toString()}`);
     await channel.publish({
@@ -113,3 +113,6 @@ export const populateOrder = async (order) => {
     throw new ServerError(`Failed to populate order: ${error.message}`);
   }
 };
+
+
+export default initializeAblyRest;

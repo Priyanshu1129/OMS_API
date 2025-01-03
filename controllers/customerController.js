@@ -3,6 +3,7 @@ import { Dish } from "../models/dishModel.js";
 import offerModel from "../models/offerModel.js";
 import orderModel from "../models/orderModel.js";
 import tableModel from "../models/tableModel.js";
+import { deleteOrderPublishService } from "../services/ablyService.js";
 import { getAllCategoriesService } from "../services/categoryServices.js";
 import { deleteOrderService } from "../services/orderServices.js";
 import { ServerError } from "../utils/errorHandler.js";
@@ -87,7 +88,7 @@ export const deleteDraftOrders = catchAsyncError(
         "you can not delete this order, please contact to staff"
       );
     const data = await deleteOrderService(orderId, session);
-    await deleteOrderService(order);
+    await deleteOrderPublishService(order);
 
     res.status(201).json({
       status: "success",
