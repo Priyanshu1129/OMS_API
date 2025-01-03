@@ -49,6 +49,7 @@ export const orderPublishService = async (order) => {
 
 export const deleteOrderPublishService = async (order) => {
   try {
+    const ablyRest = initializeAblyRest();
     const channel = ablyRest.channels.get(`hotel-${order.hotelId._id.toString()}`);
     await channel.publish({
       name: 'delete-order',
