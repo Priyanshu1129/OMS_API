@@ -93,7 +93,6 @@ export const billPayService = async (billId, session) => {
 
 
 export const sendBillToMailService = async (billId, mailId) => {
-  try {
     if (!billId || !mailId) {
       throw new ServerError("Bill ID and mail ID are required.");
     }
@@ -101,6 +100,8 @@ export const sendBillToMailService = async (billId, mailId) => {
       .populate("orderedItems.dishId", "name price")
       .populate("hotelId", "name address")
       .populate("tableId", "number sequence");
+    
+    if(billDetails.status != 'paid') throw new ClientError("Bill is not paid yet!");
 
     if (!billDetails) {
       throw new ServerError("Bill not found.");
@@ -113,12 +114,6 @@ export const sendBillToMailService = async (billId, mailId) => {
     await sendEmail(mailId, "Bill Details", billHTML);
 
     return { message: "Bill sent to mail successfully.", billDetails };
-  } catch (error) {
-    console.error("Error sending bill to mail:", error);
-    throw error instanceof ServerError
-      ? error
-      : new ServerError("An error occurred while sending the bill.");
-  }
 };
 
 

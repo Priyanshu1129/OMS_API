@@ -68,17 +68,12 @@ export const getTablesService = async (user) => {
 }
 
 export const createTableService = async (user, tableData) => {
-    try {
         const table = new Table({ ...tableData, hotelId: user.hotelId });
         await table.save();
         return table;
-    } catch (error) {
-        throw new ServerError('Error while creating table');
-    }
 }
 
 export const updateTableService = async (tableId, tableData) => {
-    try {
         console.log("tableId in updateTable service ", tableId)
         const table = await getTableByIdService(tableId);
         if (table.status != 'free') {
@@ -87,10 +82,6 @@ export const updateTableService = async (tableId, tableData) => {
         Object.assign(table, tableData);
         await table.save();
         return table;
-    } catch (error) {
-        if (error instanceof ClientError) { throw error; }
-        else throw new ServerError('Error while updating table');
-    }
 }
 
 export const deleteTableService = async (tableId) => {

@@ -10,4 +10,5 @@ const tableSchema = new mongoose.Schema({
   customer : {type: mongoose.Schema.Types.ObjectId , ref : 'Customer', default : null } 
 }, { timestamps: true });
 
+tableSchema.index({ sequence: 1, hotelId: 1 }, { unique: true });
 export default mongoose.model('Table', tableSchema);
