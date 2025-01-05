@@ -4,10 +4,53 @@ import Customer from "../models/customerModel.js"; // Import Customer model
 import Table from "../models/tableModel.js";
 import { ClientError, ServerError } from "../utils/errorHandler.js";
 import sendEmail from "../utils/sendEmail.js";
+import Offer from "../models/offerModel.js";
+
+const checkGlobalOffer = async (globalOfferId, billAmount, session) => {
+  try {
+    // Find the offer by its ID
+    const offer = await Offer.findById(globalOfferId).session(session);
+
+    if (!offer) {
+      throw new ClientError("Offer not found");
+    }
+
+    const currentDate = new Date(); // Get the current date and time
+    // Check if the offer is valid based on its type, status, and dates
+    if (offer.type !== "global") {
+      throw new ClientError("Offer is not global");
+    }
+
+    if (billAmount < offer.appliedAbove) {
+      throw new ClientError(
+        `Offer is not applicable on amount less than ${offer.appliedAbove}!`
+      );
+    }
+
+    if (offer.disable) {
+      throw new ClientError("Offer is disabled");
+    }
+
+    // Check if the offer has started
+    if (offer.startDate && currentDate < new Date(offer.startDate)) {
+      throw new ClientError("Offer has not started yet");
+    }
+
+    // Check if the offer has expired
+    if (offer.endDate && currentDate > new Date(offer.endDate)) {
+      throw new ClientError("Offer has expired");
+    }
+
+    return offer;
+  } catch (error) {
+    throw error;
+  }
+};
 
 export const updateBillService = async (billData, session) => {
   try {
-    const { billId, customerName, customDiscount } = billData;
+    const { billId, customerName, customDiscount, customerEmail, globalOffer } =
+      billData;
     // Step 1: Find the existing bill by billId
     const bill = await Bill.findById(billId)
       .populate("orderedItems.dishId")
@@ -42,9 +85,44 @@ export const updateBillService = async (billData, session) => {
       }
 
       bill.customDiscount = parsedDiscount; // Update customDiscount
-      bill.finalAmount = bill.totalAmount - bill.totalDiscount - parsedDiscount;
+      bill.totalDiscount += parsedDiscount;
+      bill.finalAmount = bill.totalAmount - bill.totalDiscount;
     }
 
+    if (customerEmail) {
+      bill.customerEmail = customerEmail;
+    }
+
+    if (globalOffer) {
+      if (bill.globalOffer != globalOffer) {
+        const offer = await checkGlobalOffer(
+          globalOffer,
+          bill.totalAmount,
+          session
+        );
+        if (!offer) throw new ServerError("Offer not found");
+        if (bill.globalOffer) {
+          const oldOffer = await Offer.findById(bill.globalOffer).session(
+            session
+          );
+          if (!oldOffer) throw new ServerError("Old Offer not found");
+          if (oldOffer.discountType === "amount") {
+            bill.totalDiscount -= oldOffer.value;
+          } else if (oldOffer.discountType === "percent") {
+            const discountAmount = (oldOffer.value / 100) * bill.totalAmount;
+            bill.totalDiscount -= discountAmount;
+          }
+        }
+        if (offer.discountType === "amount") {
+          bill.totalDiscount += offer.value;
+        } else if (offer.discountType === "percent") {
+          const discountAmount = (offer.value / 100) * bill.totalAmount;
+          bill.totalDiscount += discountAmount;
+        }
+        bill.finalAmount = bill.totalAmount - bill.totalDiscount;
+        bill.globalOffer = globalOffer;
+      }
+    }
     await bill.save({ session });
 
     return bill;
@@ -54,7 +132,7 @@ export const updateBillService = async (billData, session) => {
   }
 };
 
-export const billPayService = async (billId, session) => {
+export const billPayService = async (billId, data, session) => {
   try {
     // Step 1: Find the existing bill by billId
     const bill = await Bill.findById(billId)
@@ -69,6 +147,8 @@ export const billPayService = async (billId, session) => {
     const tableId = bill.tableId;
     bill.status = "paid";
     bill.customerId = null;
+    bill.globalOffer = null;
+    if (data?.customerEmail) bill.customerEmail = data.customerEmail;
     await bill.save({ session });
 
     // Delete all orders related to this tableId
@@ -91,7 +171,6 @@ export const billPayService = async (billId, session) => {
   }
 };
 
-
 export const sendBillToMailService = async (billId, mailId) => {
     if (!billId || !mailId) {
       throw new ServerError("Bill ID and mail ID are required.");
@@ -112,10 +191,10 @@ export const sendBillToMailService = async (billId, mailId) => {
     const billHTML = generateBillHTML(billDetails, orderedItemsRows);
 
     await sendEmail(mailId, "Bill Details", billHTML);
-
+    billDetails.customerEmail = mailId;
+    billDetails.save();
     return { message: "Bill sent to mail successfully.", billDetails };
 };
-
 
 // Function to generate the ordered items table rows
 const generateOrderedItemsRows = (orderedItems) => {
@@ -132,21 +211,20 @@ const generateOrderedItemsRows = (orderedItems) => {
     .join("");
 };
 
-
 // Function to generate the complete bill HTML
 const generateBillHTML = (billDetails, orderedItemsRows) => {
-    const {
-        _id: id,
-        customerName,
-        tableId,
-        hotelId,
-        totalAmount,
-        totalDiscount,
-        customDiscount,
-        finalAmount,
-      } = billDetails;
-    
-      return `
+  const {
+    _id: id,
+    customerName,
+    tableId,
+    hotelId,
+    totalAmount,
+    totalDiscount,
+    customDiscount,
+    finalAmount,
+  } = billDetails;
+
+  return `
         <html>
         <head>
           <style>
@@ -251,10 +329,7 @@ const generateBillHTML = (billDetails, orderedItemsRows) => {
   `;
 };
 
-
-
-
-// //modern one -- does not work properly on mobiles par desktops pe achha dikh rha tha :( 
+// //modern one -- does not work properly on mobiles par desktops pe achha dikh rha tha :(
 // const generateBillHTML = (billDetails, orderedItemsRows) => {
 //   const {
 //     _id: id,
