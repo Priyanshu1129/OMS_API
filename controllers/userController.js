@@ -43,7 +43,7 @@ export const approveHotelOwner = catchAsyncError(async (req, res,next,session) =
 
   res.status(200).json({
     status : "success",
-    message: 'Hotel owner approved successfully',
+    message: `Hotel owner ${updatedHotelOwner.isApproved ? "approved" : "rejected"  } successfully`,
     data: { hotelOwner: updatedHotelOwner}
   });
 }, true);
