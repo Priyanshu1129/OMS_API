@@ -70,13 +70,11 @@ export const getTablesService = async (user) => {
 };
 
 export const createTableService = async (user, tableData) => {
-  try {
+
     const table = new Table({ ...tableData, hotelId: user.hotelId });
     await table.save();
     return table;
-  } catch (error) {
-    throw new ServerError("Error while creating table");
-  }
+  
 };
 
 export const updateTableService = async (tableId, tableData) => {

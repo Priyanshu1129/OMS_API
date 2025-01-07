@@ -10,7 +10,7 @@ const orderSchema = new mongoose.Schema({
   status: { type: String, enum: ['draft','pending', 'preparing', 'completed', 'cancelled'], default: 'draft' },
   tableId: { type: mongoose.Schema.Types.ObjectId, ref: 'Table', required: true },
   hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel', required: true },
-  note: { type: String },
+  note: { type: String, default : "" },
   isFirstOrder : {type : Boolean, default : false},   //to update table while receiving published order
 }, { timestamps: true });
 
