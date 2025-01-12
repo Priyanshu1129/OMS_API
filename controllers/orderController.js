@@ -40,7 +40,7 @@ export const createOrder = catchAsyncError(async (req, res, next, session) => {
   const { tableId } = req.params;
   const { customerName, dishes, status, note } = req.body;
 
-  if (!tableId || !dishes || dishes.length <= 0) {
+  if (!tableId || !dishes || dishes.length == 0 || dishes.length <= 0) {
     throw new ClientError("Please provide sufficient data to create order");
   }
 

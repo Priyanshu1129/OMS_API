@@ -43,59 +43,79 @@ export const onQRScanService = async ({ tableId }) => {
 };
 
 export const addNewOrderService = async (orderData, session) => {
-  try {
-    console.log("Order data----------", orderData);
-    const { customerName, tableId, dishes, note, status } = orderData;
-    const table = await Table.findById(tableId);
-    if (!table) {
+  console.log("Order data----------", orderData);
+  const { customerName, tableId, dishes, note, status } = orderData;
+
+  // Validate table existence
+  const table = await Table.findById(tableId);
+  if (!table) {
       throw new ClientError("Table not found!");
-    }
-    const hotelId = table.hotelId;
-
-        let customer = await Customer.findOne({ tableId, hotelId }).session(session);
-        console.log("customer")
-        let newCustomer = null;
-        let updatedTable = null;
-        let isFirstOrder = false;
-        if (!customer) {
-            console.log("customer not available")
-            customer = new Customer({
-                hotelId,
-                tableId,
-                name: customerName,
-            });
-            newCustomer = customer;
-            await customer.save({ session });
-            updatedTable = await Table.findByIdAndUpdate(
-                tableId,
-                { status: "occupied", customer: customer._id },
-                { new: true, session }
-            );
-            isFirstOrder = true;
-        }
-        console.log("Dishes in new order ", dishes)
-        const newOrder = new Order({
-            customerId: customer._id,
-            dishes: dishes.map(dish => ({
-                dishId: new mongoose.Types.ObjectId(dish.dishId),
-                quantity: dish.quantity,
-                notes: dish.notes
-            })),
-            status: status || 'draft',
-            tableId,
-            hotelId,
-            note: note || '',
-            isFirstOrder : isFirstOrder
-        });
-
-    console.log("new order ", newOrder);
-    await newOrder.save({ session });
-    return { newOrder, newCustomer, table: updatedTable };
-  } catch (error) {
-    console.error("Error in addNewOrderService:", error);
-    throw new ServerError(error.message);
   }
+  const hotelId = table.hotelId;
+
+  let customer = await Customer.findOne({ tableId, hotelId }).session(session);
+  let newCustomer = null;
+  let updatedTable = null;
+  let isFirstOrder = false;
+
+  if (!customer) {
+      console.log("Customer not available");
+      customer = new Customer({
+          hotelId,
+          tableId,
+          name: customerName,
+      });
+      newCustomer = customer;
+      await customer.save({ session });
+      updatedTable = await Table.findByIdAndUpdate(
+          tableId,
+          { status: "occupied", customer: customer._id },
+          { new: true, session }
+      );
+      isFirstOrder = true;
+  }
+
+  // Validate dishes for "outOfStock" status
+  console.log("Dishes in new order ", dishes);
+
+  const dishIds = dishes.map(dish => dish.dishId); // Extract dish IDs from the input
+  const foundDishes = await Dish.find({ _id: { $in: dishIds }, hotelId }); // Find dishes by IDs and hotelId
+
+  // Check if all dishes exist
+  const missingDishIds = dishIds.filter(
+      id => !foundDishes.some(dish => dish._id.toString() === id)
+  );
+  if (missingDishIds.length > 0) {
+      throw new ServerError("NotFound",`The following dishes were not found: ${missingDishIds.join(", ")}`);
+  }
+
+  // Check for out-of-stock dishes
+  const outOfStockDishes = foundDishes.filter(dish => dish.outOfStock);
+  if (outOfStockDishes.length > 0) {
+      const outOfStockNames = outOfStockDishes.map(dish => dish.name).join(", ");
+      throw new ServerError("NotFound",`The following dishes are out of stock: ${outOfStockNames}`);
+  }
+
+  const newOrder = new Order({
+      customerId: customer._id,
+      dishes: dishes.map(dish => ({
+          dishId: new mongoose.Types.ObjectId(dish.dishId),
+          quantity: dish.quantity,
+          notes: dish.notes,
+      })),
+      status: status || "draft",
+      tableId,
+      hotelId,
+      note: note || "",
+      isFirstOrder: isFirstOrder,
+  });
+
+  console.log("New order ", newOrder);
+  await newOrder.save({ session });
+
+  return { newOrder, newCustomer, table: updatedTable };
 };
+
 
 // only for hotel owner
 export const deleteOrderService = async (orderId, session) => {
