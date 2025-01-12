@@ -85,15 +85,21 @@ export const addNewOrderService = async (orderData, session) => {
   const missingDishIds = dishIds.filter(
       id => !foundDishes.some(dish => dish._id.toString() === id)
   );
+  foundDishes.forEach((dish)=>{
+    if(dish.isDeleted == true) missingDishIds.push(dish?._id?.toString())
+  })
+
+  // here you can see in out dish model there is a field idDeleted if it is true then even it will be considered as missing dish so please handle this case also
+
   if (missingDishIds.length > 0) {
-      throw new ServerError("NotFound",`The following dishes were not found: ${missingDishIds.join(", ")}`);
+      throw new ServerError(`The following dishes were not found: ${missingDishIds.join(", ")}`);
   }
 
   // Check for out-of-stock dishes
   const outOfStockDishes = foundDishes.filter(dish => dish.outOfStock);
   if (outOfStockDishes.length > 0) {
       const outOfStockNames = outOfStockDishes.map(dish => dish.name).join(", ");
-      throw new ServerError("NotFound",`The following dishes are out of stock: ${outOfStockNames}`);
+      throw new ServerError(`The following dishes are out of stock: ${outOfStockNames}`);
   }
 
   const newOrder = new Order({
