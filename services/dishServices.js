@@ -51,14 +51,16 @@ export const getAllDishesService = async (hotelId) => {
 
         const dishes = await Dish.find({ hotelId, isDeleted: false }).populate("ingredients category offer");
 
-        if (!dishes || dishes.length === 0) {
-            throw new ClientError("No dishes available!", "Not found");
-        }
+        // if (!dishes || dishes.length === 0) {
+        //     throw new ClientError("No dishes available!", "Not found");
+        // }
+
         return dishes;
     } catch (error) {
-        console.log("get all dish err : ", error)
+        if(error instanceof ClientError){
+            throw error;
+        }
         throw new ServerError('Failed to fetch dishes');
-
     }
 }
 

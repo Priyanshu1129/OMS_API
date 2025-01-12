@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 // Base schema for all users
 const userBaseSchema = new mongoose.Schema({
@@ -15,6 +16,8 @@ const userBaseSchema = new mongoose.Schema({
   isVerified: { type: Boolean, default: false }, // for email verification
   otpDetails: { value: { type: Number, default: null }, expiry: { type: Date, default: null } },
   membershipExpires: { type: Date, default: null },
+  passwordResetToken: { type: String, default: null },
+  passwordResetExpires: { type: Date, default: null },
 }, {
   timestamps: true,
 });
@@ -30,6 +33,47 @@ userBaseSchema.pre('save', async function (next) {
 userBaseSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
+
+// Method to generate reset token
+// userBaseSchema.methods.createPasswordResetToken = function () {
+  
+//   const resetToken = Math.floor(100000 + Math.random() * 900000);
+  
+//   this.passwordResetToken = resetToken;
+//   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;  // 10 minutes
+//   return resetToken;
+// };
+
+
+userBaseSchema.methods.createPasswordResetToken = function () {
+  // Generate a cryptographically secure token
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  // Hash the token and store it in the database
+  this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+  // Set the expiration time
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+  // Return the plain token (not hashed) for sending to the user
+  return resetToken;
+};
+
+// Method to validate reset token before resetting password
+userBaseSchema.methods.validatePasswordResetToken = function (submittedToken) {
+  if (!this.passwordResetToken || !this.passwordResetExpires) return false;
+
+  // Check if the token has expired
+  if (this.passwordResetExpires < Date.now()) return false;
+
+  // Hash the submitted token and compare it with the stored hash
+  const hashedToken = crypto.createHash('sha256').update(submittedToken).digest('hex');
+  return this.passwordResetToken === hashedToken;
+};
+
+
+
+
 
 // Base model
 const User = mongoose.model('User', userBaseSchema);

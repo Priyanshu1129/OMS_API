@@ -2,6 +2,7 @@ import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import { HotelOwner, SuperAdmin, User } from "../models/userModel.js";
 import { createUserWithRole, authenticateUser } from "../services/authServices.js";
 import sendEmail from "../utils/sendEmail.js";
+import crypto from 'crypto';
 
 
 export const signUp = catchAsyncError(async (req, res, next, session) => {
@@ -128,3 +129,73 @@ export const verifyEmail = catchAsyncError(async (req, res) => {
   }
 }
 );
+
+//reset password link sender after recieving email as input if email exists in db 
+export const forgotPassword = catchAsyncError(async (req, res) => {
+  const { email } = req.body;
+
+  // Find user by email
+  let user = await SuperAdmin.findOne({ email: email });
+  if (!user) user = await HotelOwner.findOne({ email: email });
+  if (!user) {
+    return res.status(404).json({ status: "failed", message: 'User not found.' });
+  }
+
+  // Generate a password reset token with jwt 
+  const resetToken = user.createPasswordResetToken();
+  await user.save({ validateBeforeSave: false });
+
+
+  // const frontendURL = process.env.FRONTEND_URL;
+ 
+  const frontendURL = 'https://orm-frontend-eight.vercel.app';
+  const resetURL = `${frontendURL}/reset-password/${resetToken}`;
+
+  const subject = 'Password Reset Link';
+  const description = `Click on the link below to reset your password. The link will expire in 10 minutes.\n\n${resetURL}`;
+  await sendEmail(email, subject, description);
+
+  res.status(200).json({
+    status: "success",
+    message: 'Password reset link has been sent to your email.',
+  });
+});
+
+
+//reset password after recieving token and new password as input 
+export const resetPassword = catchAsyncError(async (req, res) => {
+  const { token } = req.params; // Plain token from the URL
+  const { password } = req.body;
+
+  // Hash the incoming token to match the stored hashed token
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  // Find user by hashed token and ensure the token is not expired
+  let user = await SuperAdmin.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() }, // Ensure token is still valid
+  });
+
+  if (!user) {
+    user = await HotelOwner.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() },
+    });
+  }
+
+  if (!user) {
+    return res.status(400).json({ status: "failed", message: 'Invalid or expired token.' });
+  }
+
+  // Update user's password
+  user.password = password; // Assuming you have pre-save middleware to hash passwords
+  user.passwordResetToken = undefined; // Clear the reset token
+  user.passwordResetExpires = undefined; // Clear the expiration time
+  await user.save();
+
+  res.status(200).json({
+    status: "success",
+    message: 'Password reset successful.',
+  });
+});
+
