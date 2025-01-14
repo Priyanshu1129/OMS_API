@@ -103,6 +103,7 @@ export const protect = async (req, res, next) => {
 
       next();
     } catch (error) {
+      console.error("error",error);
       if (error.name === 'TokenExpiredError') {
         return next(new ClientError('Token has expired, please log in again', 401));
       }
@@ -114,6 +115,7 @@ export const protect = async (req, res, next) => {
       next(new ServerError('Server error during authentication', 500));
     }
   } else {
+    console.log("else error here");
     next(new ClientError('Not authorized, no token', 401));
   }
 };

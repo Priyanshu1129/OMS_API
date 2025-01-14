@@ -31,6 +31,6 @@ router.get('/hotel-owners/approved', protect, superAdminOnly, getApprovedOwners)
 router.patch('/membership-extender/:hotelOwnerId', protect, superAdminOnly, membershipExtender);
 
 //route to send email to when membership is expired 
-router.get('/send-email-membership-expired/:hotelOwnerId', protect, superAdminOnly, sendMailForMembershipExpired);
+router.get('/send-email-membership-expired/:hotelOwnerId', sendMailForMembershipExpired);
 
 export default router;

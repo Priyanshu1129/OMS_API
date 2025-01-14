@@ -2,6 +2,7 @@ import { ClientError, ServerError } from "../utils/index.js";
 import { HotelOwner, SuperAdmin } from "../models/userModel.js";
 import Hotel from "../models/hotelModel.js";
 import express from "express";
+import sendEmail from "../utils/sendEmail.js";
 
 export const getUserProfileService = async (userId) => {
   try {
