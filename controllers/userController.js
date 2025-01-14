@@ -8,6 +8,7 @@ import {
   getApprovedOwnersService,
   membershipExtenderService,
   deleteHotelOwnerService,
+  sendMailForMembershipExpiredService,
 } from '../services/userServices.js';
 import { ClientError } from '../utils/errorHandler.js';
 
@@ -116,4 +117,14 @@ export const deleteHotelOwner = catchAsyncError(async (req, res) => {
     status : "success",
     message: 'Hotel owner deleted successfully',
   });
+});
+
+export const sendMailForMembershipExpired = catchAsyncError(async (req, res) => { 
+      const { hotelOwnerId } = req.params;
+      const data = await sendMailForMembershipExpiredService(hotelOwnerId);
+      res.status(200).json({
+        status : "success",
+        message: 'Mail sent successfully',
+        data,
+      });
 });

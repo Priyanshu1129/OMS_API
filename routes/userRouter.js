@@ -7,9 +7,12 @@ import {
   getApprovedOwners,
   membershipExtender,
   deleteHotelOwner,
-  updateOwner
+  updateOwner,
+  sendMailForMembershipExpired
 } from '../controllers/userController.js';
 import { protect, superAdminOnly } from '../middlewares/authMiddleware.js';
+import sendEmail from '../utils/sendEmail.js';
+
 
 const router = express.Router();
 
@@ -26,5 +29,8 @@ router.get('/hotel-owners/pending-approval', protect, superAdminOnly, getUnAppro
 router.get('/hotel-owners/approved', protect, superAdminOnly, getApprovedOwners);
 
 router.patch('/membership-extender/:hotelOwnerId', protect, superAdminOnly, membershipExtender);
+
+//route to send email to when membership is expired 
+router.get('/send-email-membership-expired', protect, superAdminOnly, sendMailForMembershipExpired);
 
 export default router;
