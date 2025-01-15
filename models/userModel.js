@@ -71,7 +71,7 @@ userBaseSchema.methods.validatePasswordResetToken = function (submittedToken) {
   return this.passwordResetToken === hashedToken;
 };
 
-
+  
 
 
 
