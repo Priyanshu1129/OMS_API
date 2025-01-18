@@ -6,7 +6,7 @@ import tableModel from "../models/tableModel.js";
 import { deleteOrderPublishService } from "../services/ablyService.js";
 import { getAllCategoriesService } from "../services/categoryServices.js";
 import { deleteOrderService } from "../services/orderServices.js";
-import { ServerError } from "../utils/errorHandler.js";
+import { ClientError, ServerError } from "../utils/errorHandler.js";
 
 export const getHotelDishes = catchAsyncError(async (req, res) => {
   const hotelId = req.params.hotelId;
@@ -57,15 +57,21 @@ export const getHotelOffers = catchAsyncError(async (req, res) => {
 
 export const getTableOrders = catchAsyncError(async (req, res) => {
   const tableId = req.params.tableId;
+  const {customerId} = req.query;
+  if(!tableId) throw new ClientError("Required", "table id is required to get table orders");
+  const table = await tableModel.findById(tableId);
+  if(!table) throw new ClientError("NotFound", "table id is invalid");
+  
   let orders = await orderModel
     .find({ tableId: tableId })
     .populate("customerId", "_id name")
     .populate("dishes.dishId")
     .populate("tableId", "_id sequence")
     .populate("hotelId", "_id name");
-  if (!orders) {
+  if (!orders || !customerId || !table.customer || table.customer.toString() != customerId ){
     orders = [];
   }
+
   res.status(201).json({
     status: "success",
     message: "All customer Orders fetched successfully",
